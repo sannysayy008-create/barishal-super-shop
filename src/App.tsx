@@ -220,9 +220,7 @@ const sendTelegramNotification = async (messageText: string) => {
   } catch (error) {
     console.error("Telegram notification error:", error);
   }
-};
-
-export default function App() {
+}
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
   const [cart, setCart] = useState<CartItem[]>([
