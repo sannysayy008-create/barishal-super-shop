@@ -65,7 +65,7 @@ const sendTelegramNotification = async (messageText: string) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chat_id: CHAT_ID,
+        chat_id: CHAT_ID,8633414899
         text: messageText,
         parse_mode: "Markdown",
       }),
