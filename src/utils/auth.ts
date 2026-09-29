@@ -1,76 +1,36 @@
-import { User } from '../types';
+import { POST_PRICING, PostingPayment, ProductItem, User } from '../types';
 
-const USER_STORAGE_KEY = 'bss_user';
-const TOKEN_STORAGE_KEY = 'bss_token';
+const USER_KEY = 'bss_user';
+const TOKEN_KEY = 'bss_token';
+const PAYMENTS_KEY = 'bss_posting_payments';
 
 export const AuthUtils = {
-  // Save user to localStorage
-  saveUser: (user: User) => {
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  saveUser(user: User) { localStorage.setItem(USER_KEY, JSON.stringify(user)); },
+  getUser(): User | null {
+    try { const value = localStorage.getItem(USER_KEY); return value ? JSON.parse(value) as User : null; }
+    catch { return null; }
   },
-
-  // Get user from localStorage
-  getUser: (): User | null => {
-    const stored = localStorage.getItem(USER_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : null;
+  saveToken(token: string) { localStorage.setItem(TOKEN_KEY, token); },
+  getToken() { return localStorage.getItem(TOKEN_KEY); },
+  isLoggedIn() { return Boolean(this.getUser() && this.getToken()); },
+  logout() { localStorage.removeItem(USER_KEY); localStorage.removeItem(TOKEN_KEY); },
+  mockLogin(email: string): User {
+    const existing = this.getUser();
+    const user: User = existing ?? { id: `user-${Date.now()}`, name: email.split('@')[0], email, phone: '', verified: true, role: 'buyer', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    this.saveUser(user); this.saveToken(`demo-token-${Date.now()}`); return user;
   },
+};
 
-  // Save auth token
-  saveToken: (token: string) => {
-    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+export const PostingPaymentUtils = {
+  getPrice(featured: boolean) { return featured ? POST_PRICING.featured : POST_PRICING.standard; },
+  createPayment(user: User, product: ProductItem, featured: boolean, method: PostingPayment['method'] = 'bkash'): PostingPayment {
+    const payment: PostingPayment = { id: `post-payment-${Date.now()}`, productId: product.id, userId: user.id, amount: this.getPrice(featured), plan: featured ? 'featured' : 'standard', method, status: 'pending', createdAt: new Date().toISOString() };
+    const old = JSON.parse(localStorage.getItem(PAYMENTS_KEY) || '[]') as PostingPayment[];
+    localStorage.setItem(PAYMENTS_KEY, JSON.stringify([payment, ...old])); return payment;
   },
-
-  // Get auth token
-  getToken: (): string | null => {
-    return localStorage.getItem(TOKEN_STORAGE_KEY);
-  },
-
-  // Check if user is logged in
-  isLoggedIn: (): boolean => {
-    return !!localStorage.getItem(TOKEN_STORAGE_KEY) && !!localStorage.getItem(USER_STORAGE_KEY);
-  },
-
-  // Logout user
-  logout: () => {
-    localStorage.removeItem(USER_STORAGE_KEY);
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-  },
-
-  // Simulate login (for demo purposes)
-  mockLogin: (email: string, password: string): User => {
-    const user: User = {
-      id: `user-${Date.now()}`,
-      name: 'সাধারণ ব্যবহারকারী',
-      email,
-      phone: '01700000000',
-      verified: true,
-      role: 'buyer',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    AuthUtils.saveUser(user);
-    AuthUtils.saveToken(`token-${Date.now()}`);
-    
-    return user;
-  },
-
-  // Simulate register (for demo purposes)
-  mockRegister: (name: string, email: string, phone: string, password: string): User => {
-    const user: User = {
-      id: `user-${Date.now()}`,
-      name,
-      email,
-      phone,
-      verified: false,
-      role: 'buyer',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    AuthUtils.saveUser(user);
-    AuthUtils.saveToken(`token-${Date.now()}`);
-
-    return user;
+  markPaid(id: string, transactionId?: string) {
+    const payments = JSON.parse(localStorage.getItem(PAYMENTS_KEY) || '[]') as PostingPayment[];
+    const updated = payments.map(payment => payment.id === id ? { ...payment, status: 'paid' as const, transactionId } : payment);
+    localStorage.setItem(PAYMENTS_KEY, JSON.stringify(updated)); return updated.find(payment => payment.id === id) ?? null;
   },
 };
