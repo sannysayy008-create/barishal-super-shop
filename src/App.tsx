@@ -290,11 +290,16 @@ export default function App() {
     [products]
   );
 
-  // Handlersconst orderMessage = `🛒 *নতুন অর্ডার এসেছে!*
-👤 নাম: ${newOrder.customerName || 'N/A'}
-📞 ফোন: ${newOrder.phone || 'N/A'}
-📍 ঠিকানা: ${newOrder.address || 'N/A'}
-💰 মোট মূল্য: ৳${newOrder.totalAmount || 0}`;
+  // Handlersconst orderMessage = // টেলিগ্রাম নোটিফিকেশনের মেসেজ তৈরি
+const orderMessage = `🛒 *নতুন অর্ডার এসেছে!*
+👤 নাম: ${newOrder?.customerName || 'N/A'}
+📞 ফোন: ${newOrder?.phone || 'N/A'}
+📍 ঠিকানা: ${newOrder?.address || 'N/A'}
+💰 মোট মূল্য: ৳${newOrder?.totalAmount || 0}`;
+
+// চ্যাট আইডি ও টোকেন সহ সরাসরি নোটিফিকেশন পাঠানোর কল
+sendTelegramNotification(orderMessage);
+  || 0}`;
 
 sendTelegramNotification(orderMessage);
 
