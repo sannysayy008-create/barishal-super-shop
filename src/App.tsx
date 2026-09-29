@@ -15,6 +15,9 @@ import {
   LayoutGrid,
   Check,
   RotateCcw,
+  Heart,
+  LogOut,
+  Settings,
 } from 'lucide-react';
 import {
   BARISHAL_AREAS,
@@ -43,6 +46,8 @@ import { CartDrawer } from './components/CartDrawer';
 import { ChatView } from './components/ChatView';
 import { UserDashboard } from './components/UserDashboard';
 import { OfflineIndicator, QuickAppDownloadBanner } from './components/PWAInstallButton';
+import { AuthUtils } from './utils/auth';
+import { DeliveryCalculator } from './utils/deliveryCalculator';
 
 type PriceFilter = 'all' | 'under_2000' | 'under_10000' | 'under_50000' | 'above_50000';
 
@@ -56,27 +61,23 @@ const CATEGORY_ICONS: Record<CategoryId, React.ReactNode> = {
   vehicles: <Bike className="w-5 h-5" />,
 };
 
-const sendTelegramNotification = async (messageText: string) => {
-  const BOT_TOKEN = "8685426962:AAF5HuKvQd_oeT2YZVMSI4vueLaF89r5F0M";
-  const CHAT_ID = "8633414899";
-
+// Send notification via backend API (secure approach)
+const sendNotification = async (messageText: string) => {
   try {
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,8633414899
-        text: messageText,
-        parse_mode: "Markdown",
-      }),
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    await fetch(`${apiUrl}/api/notifications/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: messageText }),
     });
   } catch (error) {
-    console.error("Telegram notification error:", error);
+    console.error('Notification error:', error);
   }
 };
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
+  const [currentUser, setCurrentUser] = useState(AuthUtils.getUser());
   const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
   const [cart, setCart] = useState<CartItem[]>([
     { product: INITIAL_PRODUCTS[0], quantity: 1 },
@@ -84,6 +85,7 @@ export default function App() {
   const [orders, setOrders] = useState<OrderRecord[]>(INITIAL_ORDERS);
   const [chatThreads, setChatThreads] = useState<ChatThread[]>(INITIAL_CHATS);
   const [activeChatId, setActiveChatId] = useState<string>(INITIAL_CHATS[0].id);
+  const [wishlist, setWishlist] = useState<string[]>([]);
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,6 +99,7 @@ export default function App() {
   const [isPostAdOpen, setIsPostAdOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   // Filtered Products
   const filteredProducts = useMemo(() => {
@@ -144,163 +147,6 @@ export default function App() {
   );
 
   // Handlers
-  import React, { useMemo, useState } from 'react';
-import {
-  Search,
- 
-sendTelegramNotification(orderMessage);
-MapPin,
-  Star,
-  SlidersHorizontal,
-  ShoppingCart,
-  MessageSquare,
-  Smartphone,
-  Shirt,
-  ShoppingBasket,
-  Tv,
-  Recycle,
-  Bike,
-  LayoutGrid,
-  Check,
-  RotateCcw,
-} from 'lucide-react';
-import {
-  BARISHAL_AREAS,
-  CATEGORIES,
-  INITIAL_CHATS,
-  INITIAL_ORDERS,
-  INITIAL_PRODUCTS,
-  formatTaka,
-  toBengaliNumber,
-} from './data/mockData';
-import {
-  BarishalArea,
-  CartItem,
-  CategoryId,
-  ChatThread,
-  OrderRecord,
-  ProductItem,
-} from './types';
-import { ActiveTab, Header } from './components/Header';
-import { BottomNav } from './components/BottomNav';
-import { HeroBanner } from './components/HeroBanner';
-import { SafeImage } from './components/SafeImage';
-import { ProductDetailModal } from './components/ProductDetailModal';
-import { PostAdModal } from './components/PostAdModal';
-import { CartDrawer } from './components/CartDrawer';
-import { ChatView } from './components/ChatView';
-import { UserDashboard } from './components/UserDashboard';
-import { OfflineIndicator, QuickAppDownloadBanner } from './components/PWAInstallButton';
-
-type PriceFilter = 'all' | 'under_2000' | 'under_10000' | 'under_50000' | 'above_50000';
-
-const CATEGORY_ICONS: Record<CategoryId, React.ReactNode> = {
-  all: <LayoutGrid className="w-5 h-5" />,
-  electronics: <Tv className="w-5 h-5" />,
-  fashion: <Shirt className="w-5 h-5" />,
-  grocery: <ShoppingBasket className="w-5 h-5" />,
-  mobile: <Smartphone className="w-5 h-5" />,
-  used_items: <Recycle className="w-5 h-5" />,
-  vehicles: <Bike className="w-5 h-5" />,
-};
-const sendTelegramNotification = async (messageText: string) => {
-  const BOT_TOKEN = "8685426962:AAF5HuKvQd_oeT2YZVMSI4vueLaF89r5F0M";
-  const CHAT_ID = "8633414899";
-
-  try {
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text: messageText,
-        parse_mode: "Markdown",
-      }),
-    });
-  } catch (error) {
-    console.error("Telegram notification error:", error);
-  }
-}
-  const [activeTab, setActiveTab] = useState<ActiveTab>('home');
-  const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
-  const [cart, setCart] = useState<CartItem[]>([
-    { product: INITIAL_PRODUCTS[0], quantity: 1 },
-  ]);
-  const [orders, setOrders] = useState<OrderRecord[]>(INITIAL_ORDERS);
-  const [chatThreads, setChatThreads] = useState<ChatThread[]>(INITIAL_CHATS);
-  const [activeChatId, setActiveChatId] = useState<string>(INITIAL_CHATS[0].id);
-
-  // Search & Filter states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
-  const [selectedArea, setSelectedArea] = useState<BarishalArea>('সব এলাকা');
-  const [priceFilter, setPriceFilter] = useState<PriceFilter>('all');
-  const [listingModeFilter, setListingModeFilter] = useState<'all' | 'ecommerce' | 'classified'>('all');
-
-  // Modals & Drawers
-  const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
-  const [isPostAdOpen, setIsPostAdOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
-
-  // Filtered Products
-  const filteredProducts = useMemo(() => {
-    return products.filter((item) => {
-      if (listingModeFilter !== 'all' && item.listingType !== listingModeFilter) {
-        return false;
-      }
-      if (selectedCategory !== 'all' && item.category !== selectedCategory) {
-        return false;
-      }
-      if (selectedArea !== 'সব এলাকা' && item.area !== selectedArea) {
-        return false;
-      }
-      if (priceFilter === 'under_2000' && item.price > 2000) return false;
-      if (priceFilter === 'under_10000' && item.price > 10000) return false;
-      if (priceFilter === 'under_50000' && item.price > 50000) return false;
-      if (priceFilter === 'above_50000' && item.price <= 50000) return false;
-
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchTitle = item.title.toLowerCase().includes(q);
-        const matchDesc = item.description.toLowerCase().includes(q);
-        const matchArea = item.area.toLowerCase().includes(q);
-        const matchCat = item.categoryLabel.toLowerCase().includes(q);
-        return matchTitle || matchDesc || matchArea || matchCat;
-      }
-
-      return true;
-    });
-  }, [products, listingModeFilter, selectedCategory, selectedArea, priceFilter, searchQuery]);
-
-  const totalCartItems = useMemo(
-    () => cart.reduce((sum, item) => sum + item.quantity, 0),
-    [cart]
-  );
-
-  const unreadChatCount = useMemo(
-    () => chatThreads.reduce((sum, t) => sum + t.unreadCount, 0),
-    [chatThreads]
-  );
-
-  const userPostedAds = useMemo(
-    () => products.filter((p) => p.isUserPosted || p.listingType === 'classified'),
-    [products]
-  );
-
-  // Handlersconst orderMessage = // টেলিগ্রাম নোটিফিকেশনের মেসেজ তৈরি
-const orderMessage = `🛒 *নতুন অর্ডার এসেছে!*
-👤 নাম: ${newOrder?.customerName || 'N/A'}
-📞 ফোন: ${newOrder?.phone || 'N/A'}
-📍 ঠিকানা: ${newOrder?.address || 'N/A'}
-💰 মোট মূল্য: ৳${newOrder?.totalAmount || 0}`;
-
-// চ্যাট আইডি ও টোকেন সহ সরাসরি নোটিফিকেশন পাঠানোর কল
-sendTelegramNotification(orderMessage);
-  || 0}`;
-
-sendTelegramNotification(orderMessage);
-
   const handleAddToCart = (product: ProductItem, quantity = 1) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.product.id === product.id);
@@ -340,6 +186,10 @@ sendTelegramNotification(orderMessage);
   const handlePlaceOrder = (newOrder: OrderRecord) => {
     setOrders((prev) => [newOrder, ...prev]);
     setCart([]);
+
+    // Send notification
+    const orderMessage = `🛒 *নতুন অর্ডার!*\n👤 নাম: ${newOrder.customerName}\n📞 ফোন: ${newOrder.customerPhone}\n💰 মোট: ৳${newOrder.total}`;
+    sendNotification(orderMessage);
   };
 
   const handleAddNewAd = (newProduct: ProductItem) => {
@@ -365,6 +215,7 @@ sendTelegramNotification(orderMessage);
         productImage: product.image,
         productPrice: product.price,
         sellerName: product.seller.name,
+        sellerId: product.seller.id,
         sellerPhone: product.seller.phone,
         sellerArea: product.area,
         listingType: product.listingType,
@@ -373,7 +224,7 @@ sendTelegramNotification(orderMessage);
           {
             id: `m-${Date.now()}`,
             sender: 'seller',
-            text: `আসসালামু আলাইকুম! "${product.title}" সম্পর্কে আপনার কোনো প্রশ্ন থাকলে এখানে লিখতে পারেন।`,
+            text: `আসসালামু আলাইকুম! "${product.title}" সম্পর্কে আপনার কোনো প্রশ্ন থাকলে এখানে লিখুন।`,
             timestamp: 'এইমাত্র',
           },
         ],
@@ -407,8 +258,8 @@ sendTelegramNotification(orderMessage);
           if (t.id !== threadId) return t;
           const replyText =
             t.listingType === 'ecommerce'
-              ? `ধন্যবাদ আপনার বার্তার জন্য! পণ্যটি আমাদের ${t.sellerArea} স্টকে রেডি আছে। আপনি কার্টে যোগ করে ক্যাশ অন ডেলিভারি বা বিকাশে অর্ডার করতে পারেন।`
-              : `জি ভাই, পণ্যটি এখনো আছে। আপনি চাইলে ${t.sellerArea}, বরিশালে এসে সরাসরি দেখে কথা বলতে পারেন অথবা ${t.sellerPhone} নম্বরে কল দিতে পারেন।`;
+              ? `ধন্যবাদ আপনার বার্তার জন্য! পণ্যটি আমাদের স্টকে রেডি আছে। আপনি চাইলে আজই অর্ডার করতে পারেন।`
+              : `জি ভাই, পণ্যটি এখনো আছে। আপনি চাইলে ${t.sellerArea}-এ এসে সরাসরি দেখে কিনতে পারেন।`;
 
           return {
             ...t,
@@ -454,6 +305,26 @@ sendTelegramNotification(orderMessage);
     );
   };
 
+  const handleToggleWishlist = (productId: string) => {
+    setWishlist((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleLogin = (email: string, password: string) => {
+    const user = AuthUtils.mockLogin(email, password);
+    setCurrentUser(user);
+    setIsLoginOpen(false);
+  };
+
+  const handleLogout = () => {
+    AuthUtils.logout();
+    setCurrentUser(null);
+    setActiveTab('home');
+  };
+
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
@@ -467,7 +338,7 @@ sendTelegramNotification(orderMessage);
       {/* 1-Click Customer App Download Bar */}
       <QuickAppDownloadBanner />
 
-      {/* Top Navigation Header (3-Zone Contract) */}
+      {/* Top Navigation Header */}
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -477,19 +348,21 @@ sendTelegramNotification(orderMessage);
         unreadChatCount={unreadChatCount}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenPostAd={() => setIsPostAdOpen(true)}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Container */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
         {activeTab === 'home' && (
           <>
-            {/* Section 1: Hero Promotional Banner Slider */}
+            {/* Hero Promotional Banner Slider */}
             <HeroBanner
               onSelectCategory={(cat) => setSelectedCategory(cat)}
               onOpenPostAd={() => setIsPostAdOpen(true)}
             />
 
-            {/* Section 2: Category Grid & Search/Filter Bar */}
+            {/* Category Grid & Search/Filter Bar */}
             <section className="space-y-5">
               {/* Category Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
@@ -532,7 +405,7 @@ sendTelegramNotification(orderMessage);
                 })}
               </div>
 
-              {/* Search & Barishal Location/Price Filters */}
+              {/* Search & Filters */}
               <div className="bg-white p-4 rounded-2xl border border-stone-200/90 space-y-3.5">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                   {/* Search Input */}
@@ -542,23 +415,23 @@ sendTelegramNotification(orderMessage);
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="পণ্য বা এলাকার নাম লিখে খুঁজুন (যেমন: মোবাইল, সদর রোড, জামদানি)..."
+                      placeholder="পণ্য বা এলাকার নাম লিখে খুঁজুন..."
                       className="w-full h-11 pl-10 pr-4 rounded-xl border border-stone-300 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#D94E28]"
                     />
                   </div>
 
-                  {/* Barishal Thana/Location Filter */}
+                  {/* Area Filter */}
                   <div className="md:col-span-3 relative">
                     <MapPin className="w-4 h-4 text-[#D94E28] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <select
-                      aria-label="বরিশালের এলাকা বা থানা নির্বাচন করুন"
+                      aria-label="এলাকা নির্বাচন করুন"
                       value={selectedArea}
                       onChange={(e) => setSelectedArea(e.target.value as BarishalArea)}
                       className="w-full h-11 pl-9 pr-3 rounded-xl border border-stone-300 text-xs font-semibold text-stone-800 bg-white focus:outline-none focus:border-[#D94E28]"
                     >
                       {BARISHAL_AREAS.map((area) => (
                         <option key={area} value={area}>
-                          এলাকা: {area}
+                          {area}
                         </option>
                       ))}
                     </select>
@@ -568,12 +441,12 @@ sendTelegramNotification(orderMessage);
                   <div className="md:col-span-4 relative">
                     <SlidersHorizontal className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <select
-                      aria-label="মূল্য সীমা নির্বাচন করুন"
+                      aria-label="মূল্য নির্বাচন করুন"
                       value={priceFilter}
                       onChange={(e) => setPriceFilter(e.target.value as PriceFilter)}
                       className="w-full h-11 pl-9 pr-3 rounded-xl border border-stone-300 text-xs font-semibold text-stone-800 bg-white focus:outline-none focus:border-[#D94E28]"
                     >
-                      <option value="all">সকল বাজেট (যেকোনো দাম)</option>
+                      <option value="all">সকল বাজেট</option>
                       <option value="under_2000">৳২,০০০ এর নিচে</option>
                       <option value="under_10000">৳১০,০০০ এর নিচে</option>
                       <option value="under_50000">৳৫০,০০০ এর নিচে</option>
@@ -582,7 +455,7 @@ sendTelegramNotification(orderMessage);
                   </div>
                 </div>
 
-                {/* Interactive Mode Switcher (All vs Daraz E-commerce vs Bikroy Classifieds) */}
+                {/* Listing Mode Switcher */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                   <div className="flex items-center gap-1 p-1 bg-stone-100 rounded-xl overflow-x-auto">
                     <button
@@ -605,7 +478,7 @@ sendTelegramNotification(orderMessage);
                           : 'text-stone-600 hover:text-stone-900'
                       }`}
                     >
-                      দারাজ স্টাইল শপ (নতুন পণ্য)
+                      দারাজ স্টাইল
                     </button>
                     <button
                       type="button"
@@ -616,7 +489,7 @@ sendTelegramNotification(orderMessage);
                           : 'text-stone-600 hover:text-stone-900'
                       }`}
                     >
-                      বিক্রয় ক্লাসিফাইড (ব্যবহৃত ও লোকাল)
+                      ক্লাসিফাইড
                     </button>
                   </div>
 
@@ -631,24 +504,22 @@ sendTelegramNotification(orderMessage);
                       className="text-xs font-semibold text-[#D94E28] hover:underline inline-flex items-center gap-1 cursor-pointer"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
-                      <span>ফিল্টার রিসেট করুন</span>
+                      <span>রিসেট করুন</span>
                     </button>
                   )}
                 </div>
               </div>
             </section>
 
-            {/* Section 3: Product Collection Grid */}
+            {/* Product Grid */}
             <section className="space-y-4">
               <div className="flex items-baseline justify-between">
                 <div>
                   <h2 className="text-lg sm:text-xl font-bold text-stone-900">
-                    {listingModeFilter === 'all' && 'নির্বাচিত শপ পণ্য ও ক্লাসিফাইড বিজ্ঞাপন'}
-                    {listingModeFilter === 'ecommerce' && 'অফিশিয়াল সুপার শপ পণ্যসমূহ'}
-                    {listingModeFilter === 'classified' && 'বরিশাল ক্লাসিফাইড কেনা-বেচা বিজ্ঞাপন'}
+                    পণ্য সমূহ
                   </h2>
                   <p className="text-xs text-stone-500">
-                    মোট {toBengaliNumber(filteredProducts.length)}টি পণ্য পাওয়া গেছে · বিস্তারিত দেখতে কার্ডে ক্লিক করুন
+                    মোট {toBengaliNumber(filteredProducts.length)}টি পণ্য পাওয়া গেছে
                   </p>
                 </div>
               </div>
@@ -656,10 +527,10 @@ sendTelegramNotification(orderMessage);
               {filteredProducts.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-stone-200 p-12 text-center space-y-3">
                   <p className="text-base font-semibold text-stone-800">
-                    আপনার অনুসন্ধান অনুযায়ী কোনো পণ্য পাওয়া যায়নি
+                    পণ্য পাওয়া যায়নি
                   </p>
                   <p className="text-xs text-stone-500">
-                    অন্য কোনো এলাকা বা ক্যাটাগরি নির্বাচন করে আবার চেষ্টা করুন।
+                    অন্য ফিল্টার চেষ্টা করুন।
                   </p>
                   <button
                     type="button"
@@ -673,13 +544,14 @@ sendTelegramNotification(orderMessage);
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredProducts.map((product) => {
                     const isAdded = recentlyAddedId === product.id;
+                    const isWishlisted = wishlist.includes(product.id);
 
                     return (
                       <article
                         key={product.id}
                         className="group bg-white rounded-2xl border border-stone-200/90 overflow-hidden flex flex-col justify-between transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-md"
                       >
-                        {/* Top Clickable Area: 4:3 Image + Metadata + Title */}
+                        {/* Product Image */}
                         <div
                           onClick={() => setSelectedProduct(product)}
                           className="cursor-pointer flex-1 flex flex-col"
@@ -690,11 +562,26 @@ sendTelegramNotification(orderMessage);
                               alt={product.title}
                               className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
                             />
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleWishlist(product.id);
+                              }}
+                              className="absolute top-3 right-3 p-2 rounded-full bg-white shadow-sm hover:bg-stone-100 transition-colors"
+                            >
+                              <Heart
+                                className={`w-5 h-5 ${
+                                  isWishlisted
+                                    ? 'fill-red-500 text-red-500'
+                                    : 'text-stone-400'
+                                }`}
+                              />
+                            </button>
                           </div>
 
                           <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
                             <div className="space-y-1.5">
-                              {/* Unboxed Static Metadata with Typographic Separators (Zero-Pill Discipline) */}
                               <div className="flex flex-wrap items-center gap-1.5 text-xs text-stone-500">
                                 <span
                                   className={
@@ -704,8 +591,8 @@ sendTelegramNotification(orderMessage);
                                   }
                                 >
                                   {product.listingType === 'ecommerce'
-                                    ? 'অফিশিয়াল শপ'
-                                    : 'ক্লাসিফাইড বিজ্ঞাপন'}
+                                    ? 'অফিশিয়াল শপ'
+                                    : 'ক্লাসিফাইড'}
                                 </span>
                                 <span aria-hidden="true">·</span>
                                 <span>{product.categoryLabel}</span>
@@ -713,13 +600,12 @@ sendTelegramNotification(orderMessage);
                                 <span>{product.area}</span>
                               </div>
 
-                              {/* Product Title (16px SemiBold) */}
                               <h3 className="text-base font-semibold text-stone-900 line-clamp-2 group-hover:text-[#D94E28] transition-colors leading-snug">
                                 {product.title}
                               </h3>
                             </div>
 
-                            {/* Price, Discount & Rating Baseline */}
+                            {/* Price & Rating */}
                             <div className="pt-2 border-t border-stone-100 flex items-baseline justify-between gap-2">
                               <div className="flex items-baseline gap-2 flex-wrap">
                                 <span className="text-lg font-bold text-stone-900 tabular-nums">
@@ -728,11 +614,6 @@ sendTelegramNotification(orderMessage);
                                 {product.originalPrice && (
                                   <span className="text-xs text-stone-400 line-through tabular-nums">
                                     {formatTaka(product.originalPrice)}
-                                  </span>
-                                )}
-                                {product.discountPercent && (
-                                  <span className="text-xs font-semibold text-[#D94E28] tabular-nums">
-                                    -{toBengaliNumber(product.discountPercent)}%
                                   </span>
                                 )}
                               </div>
@@ -747,19 +628,19 @@ sendTelegramNotification(orderMessage);
                           </div>
                         </div>
 
-                        {/* Card Footer Action Button */}
+                        {/* Action Buttons */}
                         <div className="px-4 pb-4 pt-1 flex items-center gap-2">
                           {product.listingType === 'ecommerce' ? (
                             <>
                               <button
                                 type="button"
                                 onClick={() => handleAddToCart(product, 1)}
-                                className="flex-1 min-h-[42px] px-3 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
+                                className="flex-1 min-h-[42px] px-3 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                               >
                                 {isAdded ? (
                                   <>
                                     <Check className="w-4 h-4 text-amber-300" />
-                                    <span>কার্টে যোগ হয়েছে</span>
+                                    <span>যোগ হয়েছে</span>
                                   </>
                                 ) : (
                                   <>
@@ -781,7 +662,7 @@ sendTelegramNotification(orderMessage);
                               <button
                                 type="button"
                                 onClick={() => handleStartChatWithSeller(product)}
-                                className="flex-1 min-h-[42px] px-3 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
+                                className="flex-1 min-h-[42px] px-3 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                               >
                                 <MessageSquare className="w-3.5 h-3.5" />
                                 <span>বিক্রেতার সাথে চ্যাট</span>
@@ -791,7 +672,7 @@ sendTelegramNotification(orderMessage);
                                 onClick={() => setSelectedProduct(product)}
                                 className="min-h-[42px] px-3.5 py-2 rounded-xl border border-stone-300 hover:bg-stone-100 text-stone-700 text-xs font-semibold whitespace-nowrap cursor-pointer"
                               >
-                                কল ও তথ্য
+                                তথ্য
                               </button>
                             </>
                           )}
@@ -821,6 +702,7 @@ sendTelegramNotification(orderMessage);
 
         {activeTab === 'profile' && (
           <UserDashboard
+            currentUser={currentUser}
             orders={orders}
             userAds={userPostedAds}
             onOpenPostAd={() => setIsPostAdOpen(true)}
@@ -828,19 +710,20 @@ sendTelegramNotification(orderMessage);
             onDeleteAd={handleDeleteAd}
             onAdvanceOrderStatus={handleAdvanceOrderStatus}
             onSelectProduct={(p) => setSelectedProduct(p)}
+            onLogout={handleLogout}
           />
         )}
       </main>
 
-      {/* Quiet Footer */}
+      {/* Footer */}
       <footer className="border-t border-stone-200/80 bg-white py-6 px-4 text-center text-xs text-stone-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© ২০২৬ বরিশাল সুপার শপ (Barishal Super Shop) — সর্বস্বত্ব সংরক্ষিত।</span>
-          <span>সদর রোড · নথুল্লাবাদ · রূপাতলী · চৌমাথা · সমগ্র বরিশাল বিভাগ</span>
+          <span>© ২০২৬ বরিশাল সুপার শপ — সর্বস্বত্ব সংরক্ষিত।</span>
+          <span>সদর রোড · নথুল্লাবাদ · রূপাতলী · চৌমাথা</span>
         </div>
       </footer>
 
-      {/* Fixed Bottom Navigation Bar with Prominent "বিজ্ঞাপন দিন" (Post Ad) CTA */}
+      {/* Bottom Navigation */}
       <BottomNav
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -850,23 +733,28 @@ sendTelegramNotification(orderMessage);
         onOpenPostAd={() => setIsPostAdOpen(true)}
       />
 
-      {/* Product Details Page (PDP) Modal */}
+      {/* Product Details Modal */}
       <ProductDetailModal
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
         onAddToCart={handleAddToCart}
         onBuyNow={handleBuyNow}
         onStartChat={handleStartChatWithSeller}
+        isWishlisted={selectedProduct ? wishlist.includes(selectedProduct.id) : false}
+        onToggleWishlist={() =>
+          selectedProduct && handleToggleWishlist(selectedProduct.id)
+        }
       />
 
-      {/* Bikroy Style "Post Ad" (বিজ্ঞাপন দিন) Modal */}
+      {/* Post Ad Modal */}
       <PostAdModal
         isOpen={isPostAdOpen}
         onClose={() => setIsPostAdOpen(false)}
         onAddProduct={handleAddNewAd}
+        currentUser={currentUser}
       />
 
-      {/* Shopping Cart & Checkout Drawer (COD, bKash, Nagad) */}
+      {/* Shopping Cart Drawer */}
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -874,9 +762,10 @@ sendTelegramNotification(orderMessage);
         onUpdateQuantity={handleUpdateCartQty}
         onRemoveItem={handleRemoveCartItem}
         onPlaceOrder={handlePlaceOrder}
+        currentUser={currentUser}
       />
 
-      {/* PWA Offline Connectivity Indicator */}
+      {/* PWA Offline Indicator */}
       <OfflineIndicator />
     </div>
   );
