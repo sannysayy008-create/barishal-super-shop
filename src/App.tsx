@@ -1,12 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Search,
- const orderMessage = `🛒 *নতুন অর্ডার এসেছে!*
-👤 নাম: ${newOrder.customerName || 'N/A'}
-📞 ফোন: ${newOrder.phone || 'N/A'}
-📍 ঠিকানা: ${newOrder.address || 'N/A'}
-💰 মোট মূল্য: ৳${newOrder.totalAmount || 0}`;
-
+ 
 sendTelegramNotification(orderMessage);
 MapPin,
   Star,
@@ -149,7 +144,14 @@ export default function App() {
     [products]
   );
 
-  // Handlers
+  // Handlersconst orderMessage = `🛒 *নতুন অর্ডার এসেছে!*
+👤 নাম: ${newOrder.customerName || 'N/A'}
+📞 ফোন: ${newOrder.phone || 'N/A'}
+📍 ঠিকানা: ${newOrder.address || 'N/A'}
+💰 মোট মূল্য: ৳${newOrder.totalAmount || 0}`;
+
+sendTelegramNotification(orderMessage);
+
   const handleAddToCart = (product: ProductItem, quantity = 1) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.product.id === product.id);
