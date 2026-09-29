@@ -1,7 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import {
   Search,
-  MapPin,
+ const orderMessage = `🛒 *নতুন অর্ডার এসেছে!*
+👤 নাম: ${newOrder.customerName || 'N/A'}
+📞 ফোন: ${newOrder.phone || 'N/A'}
+📍 ঠিকানা: ${newOrder.address || 'N/A'}
+💰 মোট মূল্য: ৳${newOrder.totalAmount || 0}`;
+
+sendTelegramNotification(orderMessage);
+MapPin,
   Star,
   SlidersHorizontal,
   ShoppingCart,
@@ -54,6 +61,24 @@ const CATEGORY_ICONS: Record<CategoryId, React.ReactNode> = {
   mobile: <Smartphone className="w-5 h-5" />,
   used_items: <Recycle className="w-5 h-5" />,
   vehicles: <Bike className="w-5 h-5" />,
+};
+const sendTelegramNotification = async (messageText: string) => {
+  const BOT_TOKEN = "8685426962:AAF5HuKvQd_oeT2YZVMSI4vueLaF89r5F0M";
+  const CHAT_ID = "8633414899";
+
+  try {
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: messageText,
+        parse_mode: "Markdown",
+      }),
+    });
+  } catch (error) {
+    console.error("Telegram notification error:", error);
+  }
 };
 
 export default function App() {
