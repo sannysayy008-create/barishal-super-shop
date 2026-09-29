@@ -56,27 +56,25 @@ const CATEGORY_ICONS: Record<CategoryId, React.ReactNode> = {
   vehicles: <Bike className="w-5 h-5" />,
 };
 
-// টেলিগ্রাম নোটিফিকেশন পাঠানোর আপডেটেড ফাংশন
-const sendTelegramNotification = async (messageText: string) => {
+// সরাসরি টেলিগ্রাম এপিআইতে ডাটা পাঠানোর সরলীকৃত ফাংশন
+const sendTelegramNotification = (order: OrderRecord) => {
   const BOT_TOKEN = "8685426962:AAF5HuKvQd_oeT2YZVMSI4vueLaF89r5F0M";
   const CHAT_ID = "8633414899";
 
-  try {
-    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,8633414899
-        text: messageText,
-      }),
-    });
+  const name = order?.customerName || 'N/A';
+  const phone = order?.phone || 'N/A';
+  const address = order?.address || 'N/A';
+  const total = order?.totalAmount || 0;
 
-    const data = await response.json();
-    console.log("Telegram API Response:", data);
-  } catch (error) {
-    console.error("Telegram notification error:", error);
-  }
+  const text = `🛒 নতুন অর্ডার এসেছে!\n\n👤 নাম: ${name}\n📞 ফোন: ${phone}\n📍 ঠিকানা: ${address}\n💰 মোট টাকা: ৳${total}`;
+
+  // URL Encode করে নোটিফিকেশন সেন্ড
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`;
+
+  fetch(url)
+    .then((res) => res.json())
+    .then((data) => console.log("Telegram Result:", data))
+    .catch((err) => console.error("Telegram Error:", err));
 };
 
 export default function App() {
@@ -87,7 +85,6 @@ export default function App() {
   ]);
   const [orders, setOrders] = useState<OrderRecord[]>(INITIAL_ORDERS);
   const [chatThreads, setChatThreads] = useState<ChatThread[]>(INITIAL_CHATS);
-  const [activeChatId, setActiveChatId] = useState<string>(INITIAL_CHATS[0].id);
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,20 +97,12 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
   const [isPostAdOpen, setIsPostAdOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
 
-  // Filtered Products
   const filteredProducts = useMemo(() => {
     return products.filter((item) => {
-      if (listingModeFilter !== 'all' && item.listingType !== listingModeFilter) {
-        return false;
-      }
-      if (selectedCategory !== 'all' && item.category !== selectedCategory) {
-        return false;
-      }
-      if (selectedArea !== 'সব এলাকা' && item.area !== selectedArea) {
-        return false;
-      }
+      if (listingModeFilter !== 'all' && item.listingType !== listingModeFilter) return false;
+      if (selectedCategory !== 'all' && item.category !== selectedCategory) return false;
+      if (selectedArea !== 'সব এলাকা' && item.area !== selectedArea) return false;
       if (priceFilter === 'under_2000' && item.price > 2000) return false;
       if (priceFilter === 'under_10000' && item.price > 10000) return false;
       if (priceFilter === 'under_50000' && item.price > 50000) return false;
@@ -121,13 +110,13 @@ export default function App() {
 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchTitle = item.title.toLowerCase().includes(q);
-        const matchDesc = item.description.toLowerCase().includes(q);
-        const matchArea = item.area.toLowerCase().includes(q);
-        const matchCat = item.categoryLabel.toLowerCase().includes(q);
-        return matchTitle || matchDesc || matchArea || matchCat;
+        return (
+          item.title.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q) ||
+          item.area.toLowerCase().includes(q) ||
+          item.categoryLabel.toLowerCase().includes(q)
+        );
       }
-
       return true;
     });
   }, [products, listingModeFilter, selectedCategory, selectedArea, priceFilter, searchQuery]);
@@ -152,8 +141,6 @@ export default function App() {
       }
       return [...prev, { product, quantity }];
     });
-    setRecentlyAddedId(product.id);
-    setTimeout(() => setRecentlyAddedId(null), 1400);
   };
 
   const handleBuyNow = (product: ProductItem, quantity = 1) => {
@@ -178,11 +165,8 @@ export default function App() {
     setOrders((prev) => [newOrder, ...prev]);
     setCart([]);
 
-    // মেসেজ সুন্দর করে সাজানো
-    const orderMessage = `🛒 নতুন অর্ডার এসেছে!\n\n👤 নাম: ${newOrder?.customerName || 'N/A'}\n📞 ফোন: ${newOrder?.phone || 'N/A'}\n📍 ঠিকানা: ${newOrder?.address || 'N/A'}\n💰 মোট মূল্য: ৳${newOrder?.totalAmount || 0}`;
-
-    // টেলিগ্রাম নোটিফিকেশন সেন্ড
-    sendTelegramNotification(orderMessage);
+    // সঙ্গে সঙ্গে টেলিগ্রাম নোটিফিকেশন ট্রিগার
+    sendTelegramNotification(newOrder);
   };
 
   return (
