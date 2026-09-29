@@ -1,0 +1,6 @@
+{
+  "name": "Barisal Super Shop",
+  "description": "Complete multi-vendor e-commerce marketplace featuring SuperMall authentic brands, visual search, vouchers & coins, multi-seller checkout, live order tracking, seller center, and rider logistics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
