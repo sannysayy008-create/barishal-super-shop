@@ -1,5 +1,13 @@
-// @ts-nocheck
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+  originalPrice: number;
+  category: string;
+  image: string;
+}
 
 export function App() {
   // 🔴 এখানে @BotFather থেকে পাওয়া টোকেনটি বসান
@@ -8,21 +16,21 @@ export function App() {
   // 🟢 আপনার দেওয়া Chat ID
   const TELEGRAM_CHAT_ID = "8633414899";
 
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'cart' | 'post' | 'profile' | 'settings'
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [activeTab, setActiveTab] = useState<string>('home');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Customer Profile State
-  const [customerName, setCustomerName] = useState(() => localStorage.getItem('cust_name') || '');
-  const [customerPhone, setCustomerPhone] = useState(() => localStorage.getItem('cust_phone') || '');
-  const [customerAddress, setCustomerAddress] = useState(() => localStorage.getItem('cust_address') || '');
+  const [customerName, setCustomerName] = useState<string>(() => localStorage.getItem('cust_name') || '');
+  const [customerPhone, setCustomerPhone] = useState<string>(() => localStorage.getItem('cust_phone') || '');
+  const [customerAddress, setCustomerAddress] = useState<string>(() => localStorage.getItem('cust_address') || '');
 
   // Settings State
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
   // Auto save profile data
-  const saveProfile = (e) => {
+  const saveProfile = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     localStorage.setItem('cust_name', customerName);
     localStorage.setItem('cust_phone', customerPhone);
@@ -31,7 +39,7 @@ export function App() {
   };
 
   // Products State
-  const [products, setProducts] = useState([
+  const [products, setProducts] = useState<Product[]>([
     { 
       id: 1, 
       title: 'হেয়ার ট্রিমার (T9)', 
@@ -66,18 +74,18 @@ export function App() {
     }
   ]);
 
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState<Product[]>([]);
 
   // Post Ad State
-  const [newTitle, setNewTitle] = useState('');
-  const [newPrice, setNewPrice] = useState('');
-  const [newCategory, setNewCategory] = useState('electronics');
+  const [newTitle, setNewTitle] = useState<string>('');
+  const [newPrice, setNewPrice] = useState<string>('');
+  const [newCategory, setNewCategory] = useState<string>('electronics');
 
-  const addToCart = (product) => {
+  const addToCart = (product: Product) => {
     setCartItems([...cartItems, product]);
   };
 
-  const removeFromCart = (index) => {
+  const removeFromCart = (index: number) => {
     const updated = [...cartItems];
     updated.splice(index, 1);
     setCartItems(updated);
@@ -86,7 +94,7 @@ export function App() {
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
 
   // 📩 টেলিগ্রাম বটে অর্ডার পাঠানোর ফংশন
-  const handleOrderSubmit = async (e) => {
+  const handleOrderSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!customerName || !customerPhone || !customerAddress) {
       alert('দয়া করে আপনার নাম, নম্বর ও ঠিকানা লিখুন।');
@@ -127,12 +135,12 @@ ${itemsList}
     }
   };
 
-  const handlePostAd = (e) => {
+  const handlePostAd = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newTitle || !newPrice) return;
     
     const priceNum = Number(newPrice);
-    const newProd = {
+    const newProd: Product = {
       id: Date.now(),
       title: newTitle,
       price: priceNum,
@@ -469,11 +477,4 @@ ${itemsList}
                   type="checkbox" 
                   checked={notificationsEnabled} 
                   onChange={() => setNotificationsEnabled(!notificationsEnabled)}
-                  className="w-4 h-4 accent-pink-600 cursor-pointer"
-                />
-              </div>
-
-              {/* টেলিগ্রাম ইন্টিগ্রেশন স্ট্যাটাস */}
-              <div className="py-2 border-b">
-                <p className="font-semibold mb-1">টেলিগ্রাম বট স্ট্যাটাস</p>
-                <p className="text-[10px] text-gray-400">Chat ID: <span cl
+                  className="w-4 h-4 accent-pink-600 cursor-pointer
