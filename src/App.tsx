@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export function App() {
   // 🔴 এখানে @BotFather থেকে পাওয়া টোকেনটি বসান
@@ -8,17 +8,29 @@ export function App() {
   // 🟢 আপনার দেওয়া Chat ID
   const TELEGRAM_CHAT_ID = "8633414899";
 
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'cart' | 'post' | 'profile' | 'settings'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
-  // Form State
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
+  // Customer Profile State
+  const [customerName, setCustomerName] = useState(() => localStorage.getItem('cust_name') || '');
+  const [customerPhone, setCustomerPhone] = useState(() => localStorage.getItem('cust_phone') || '');
+  const [customerAddress, setCustomerAddress] = useState(() => localStorage.getItem('cust_address') || '');
 
-  // Products
+  // Settings State
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Auto save profile data
+  const saveProfile = (e) => {
+    e.preventDefault();
+    localStorage.setItem('cust_name', customerName);
+    localStorage.setItem('cust_phone', customerPhone);
+    localStorage.setItem('cust_address', customerAddress);
+    alert('প্রোফাইল তথ্য সংরক্ষণ করা হয়েছে!');
+  };
+
+  // Products State
   const [products, setProducts] = useState([
     { 
       id: 1, 
@@ -108,10 +120,7 @@ ${itemsList}
 
       alert(`ধন্যবাদ ${customerName}! আপনার অর্ডারটি গ্রহণ করা হয়েছে।`);
       setCartItems([]);
-      setIsCartOpen(false);
-      setCustomerName('');
-      setCustomerPhone('');
-      setCustomerAddress('');
+      setActiveTab('home');
     } catch (error) {
       console.error(error);
       alert('অর্ডার পাঠাতে সমস্যা হয়েছে। আপনার Bot Token সঠিক আছে কিনা চেক করুন।');
@@ -134,7 +143,7 @@ ${itemsList}
 
     setProducts([newProd, ...products]);
     alert('বিজ্ঞাপন পোস্ট করা হয়েছে!');
-    setIsPostModalOpen(false);
+    setActiveTab('home');
     setNewTitle('');
     setNewPrice('');
   };
@@ -146,8 +155,9 @@ ${itemsList}
   });
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20 font-sans">
-      {/* হেডার */}
+    <div className={`min-h-screen pb-20 font-sans ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+      
+      {/* নেভিগেশন হেডার */}
       <div className="bg-pink-600 p-3 text-white sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-2 max-w-md mx-auto">
           <input
@@ -158,7 +168,7 @@ ${itemsList}
             className="w-full py-2 px-4 rounded-full text-black text-sm outline-none"
           />
           <button 
-            onClick={() => setIsCartOpen(true)}
+            onClick={() => setActiveTab('cart')}
             className="relative p-2 bg-pink-700 rounded-full text-lg"
           >
             🛒
@@ -170,196 +180,141 @@ ${itemsList}
           </button>
         </div>
 
-        {/* ক্যাটাগরি */}
-        <div className="flex gap-2 mt-2 overflow-x-auto pb-1 max-w-md mx-auto text-xs">
-          <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1 rounded-full whitespace-nowrap font-medium ${
-              selectedCategory === 'all' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
-            }`}
-          >
-            সব পণ্য
-          </button>
-          <button
-            onClick={() => setSelectedCategory('electronics')}
-            className={`px-3 py-1 rounded-full whitespace-nowrap font-medium ${
-              selectedCategory === 'electronics' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
-            }`}
-          >
-            ইলেকট্রনিক্স
-          </button>
-          <button
-            onClick={() => setSelectedCategory('fashion')}
-            className={`px-3 py-1 rounded-full whitespace-nowrap font-medium ${
-              selectedCategory === 'fashion' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
-            }`}
-          >
-            ফ্যাশন
-          </button>
-          <button
-            onClick={() => setSelectedCategory('groceries')}
-            className={`px-3 py-1 rounded-full whitespace-nowrap font-medium ${
-              selectedCategory === 'groceries' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
-            }`}
-          >
-            মুদি ও খাদ্য
-          </button>
-        </div>
-      </div>
-
-      <main className="max-w-md mx-auto p-3 space-y-4">
-        {/* ব্যানার */}
-        <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 rounded-2xl shadow-lg">
-          <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded">SALE</span>
-          <h2 className="text-xl font-extrabold mt-1">বরিশাল সুপার শপ</h2>
-          <p className="text-xs mt-1 opacity-90">দ্রুত ডেলিভারি সুবিধা!</p>
-          <div className="mt-3 flex gap-2">
-            <button 
-              onClick={() => setIsCartOpen(true)}
-              className="bg-white text-pink-600 px-3 py-1.5 rounded-xl font-bold text-xs"
+        {/* ক্যাটাগরি ফিল্টার */}
+        {activeTab === 'home' && (
+          <div className="flex gap-2 mt-2 overflow-x-auto pb-1 max-w-md mx-auto text-xs">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`px-3 py-1 rounded-full whitespace-nowrap font-medium ${
+                selectedCategory === 'all' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
+              }`}
             >
-              এখনই কিনুন
+              সব পণ্য
             </button>
-            <button 
-              onClick={() => setIsPostModalOpen(true)}
-              className="bg-black/20 text-white px-3 py-1.5 rounded-xl font-semibold text-xs border border-white/30"
+            <button
+              onClick={() => setSelectedCategory('electronics')}
+              className={`px-3 py-1 rounded-full whitespace-nowrap font-medium ${
+                selectedCategory === 'electronics' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
+              }`}
             >
-              + ফ্রি বিজ্ঞাপন দিন
+              ইলেকট্রনিক্স
+            </button>
+            <button
+              onClick={() => setSelectedCategory('fashion')}
+              className={`px-3 py-1 rounded-full whitespace-nowrap font-medium ${
+                selectedCategory === 'fashion' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
+              }`}
+            >
+              ফ্যাশন
+            </button>
+            <button
+              onClick={() => setSelectedCategory('groceries')}
+              className={`px-3 py-1 rounded-full whitespace-nowrap font-medium ${
+                selectedCategory === 'groceries' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
+              }`}
+            >
+              মুদি ও খাদ্য
             </button>
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* প্রোডাক্ট গ্রিড */}
-        <div className="bg-white p-3 rounded-2xl shadow-sm">
-          <div className="grid grid-cols-2 gap-2">
-            {filteredProducts.map((product) => (
-              <div key={product.id} className="border border-gray-100 rounded-xl p-2 bg-white shadow-sm">
-                <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 overflow-hidden flex items-center justify-center">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <h4 className="text-xs font-semibold text-gray-800 line-clamp-1">{product.title}</h4>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-pink-600 font-bold text-sm">৳{product.price}</span>
-                  <span className="text-gray-400 text-[10px] line-through">৳{product.originalPrice}</span>
-                </div>
-                <button
-                  onClick={() => addToCart(product)}
-                  className="w-full mt-2 bg-pink-600 text-white py-1 rounded-lg text-xs font-bold"
+      {/* মেইন কন্টেন্ট এলাকা */}
+      <main className="max-w-md mx-auto p-3 space-y-4">
+        
+        {/* হোম পেইজ */}
+        {activeTab === 'home' && (
+          <>
+            {/* ব্যানার */}
+            <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 rounded-2xl shadow-lg">
+              <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded">SALE</span>
+              <h2 className="text-xl font-extrabold mt-1">বরিশাল সুপার শপ</h2>
+              <p className="text-xs mt-1 opacity-90">দ্রুত ডেলিভারি সুবিধা!</p>
+              <div className="mt-3 flex gap-2">
+                <button 
+                  onClick={() => setActiveTab('cart')}
+                  className="bg-white text-pink-600 px-3 py-1.5 rounded-xl font-bold text-xs"
                 >
-                  কার্টে রাখুন
+                  কার্ট দেখুন
+                </button>
+                <button 
+                  onClick={() => setActiveTab('post')}
+                  className="bg-black/20 text-white px-3 py-1.5 rounded-xl font-semibold text-xs border border-white/30"
+                >
+                  + ফ্রি বিজ্ঞাপন দিন
                 </button>
               </div>
-            ))}
-          </div>
-        </div>
-      </main>
-
-      {/* বটম নেভিগেশন */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 flex justify-around items-center max-w-md mx-auto z-20 text-xs text-gray-600">
-        <button onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }} className="text-pink-600 font-bold">
-          🏠 হোম
-        </button>
-        <button onClick={() => setIsPostModalOpen(true)} className="bg-pink-600 text-white px-3 py-1 rounded-full font-bold">
-          + পোস্ট
-        </button>
-        <button onClick={() => setIsCartOpen(true)} className="relative">
-          🛒 কার্ট ({cartItems.length})
-        </button>
-      </div>
-
-      {/* পোস্ট বিজ্ঞাপন মডাল */}
-      {isPostModalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h3 className="font-bold text-gray-800">ফ্রি বিজ্ঞাপন দিন</h3>
-              <button onClick={() => setIsPostModalOpen(false)} className="text-gray-500">✕</button>
-            </div>
-            <form onSubmit={handlePostAd} className="space-y-3">
-              <div>
-                <label className="text-xs text-gray-600">পণ্যের নাম</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="যেমন: মোবাইল"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full border rounded-lg p-2 text-sm mt-1 outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-600">মূল্য (৳)</label>
-                <input
-                  type="number"
-                  required
-                  placeholder="যেমন: ৫০০"
-                  value={newPrice}
-                  onChange={(e) => setNewPrice(e.target.value)}
-                  className="w-full border rounded-lg p-2 text-sm mt-1 outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-600">ক্যাটাগরি</label>
-                <select
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full border rounded-lg p-2 text-sm mt-1 outline-none"
-                >
-                  <option value="electronics">ইলেকট্রনিক্স</option>
-                  <option value="fashion">ফ্যাশন</option>
-                  <option value="groceries">মুদি ও খাদ্য</option>
-                </select>
-              </div>
-              <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-sm">
-                পোস্ট করুন
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* কার্ট মডাল */}
-      {isCartOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h3 className="font-bold text-gray-800">আপনার কার্ট</h3>
-              <button onClick={() => setIsCartOpen(false)} className="text-gray-500">✕</button>
             </div>
 
+            {/* প্রোডাক্ট গ্রিড */}
+            <div className={`p-3 rounded-2xl shadow-sm ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className="grid grid-cols-2 gap-2">
+                {filteredProducts.map((product) => (
+                  <div key={product.id} className={`border rounded-xl p-2 shadow-sm ${darkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-100 bg-white'}`}>
+                    <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 overflow-hidden flex items-center justify-center">
+                      <img 
+                        src={product.image} 
+                        alt={product.title} 
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                    <h4 className="text-xs font-semibold line-clamp-1">{product.title}</h4>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-pink-600 font-bold text-sm">৳{product.price}</span>
+                      <span className="text-gray-400 text-[10px] line-through">৳{product.originalPrice}</span>
+                    </div>
+                    <button
+                      onClick={() => addToCart(product)}
+                      className="w-full mt-2 bg-pink-600 text-white py-1 rounded-lg text-xs font-bold active:scale-95 transition-transform"
+                    >
+                      কার্টে রাখুন
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* কার্ট পেইজ */}
+        {activeTab === 'cart' && (
+          <div className={`p-4 rounded-2xl shadow-sm space-y-3 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className="font-bold border-b pb-2 text-base">আপনার শপিং কার্ট</h3>
             {cartItems.length === 0 ? (
-              <p className="text-center py-6 text-gray-500 text-sm">কার্ট খালি!</p>
+              <div className="text-center py-10 text-gray-400">
+                <p>আপনার কার্ট খালি!</p>
+                <button onClick={() => setActiveTab('home')} className="mt-3 bg-pink-600 text-white px-4 py-1.5 rounded-xl text-xs font-bold">
+                  কেনাকাটা করুন
+                </button>
+              </div>
             ) : (
               <>
-                <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                   {cartItems.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded-lg">
+                    <div key={idx} className={`flex justify-between items-center text-xs p-2.5 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                       <span>{item.title}</span>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-pink-600">৳{item.price}</span>
-                        <button onClick={() => removeFromCart(idx)} className="text-red-500 font-bold">✕</button>
+                        <button onClick={() => removeFromCart(idx)} className="text-red-500 font-bold px-1">✕</button>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="border-t pt-2 flex justify-between font-bold text-sm text-gray-800">
-                  <span>মোট:</span>
+                <div className="border-t pt-2 flex justify-between font-bold text-sm">
+                  <span>মোট টাকা:</span>
                   <span className="text-pink-600">৳{totalPrice}</span>
                 </div>
 
-                <form onSubmit={handleOrderSubmit} className="space-y-2 pt-2">
+                <form onSubmit={handleOrderSubmit} className="space-y-2 pt-2 border-t mt-3">
+                  <h4 className="text-xs font-semibold text-gray-500">ডেলিভারির তথ্য</h4>
                   <input
                     type="text"
                     placeholder="আপনার নাম"
                     required
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full border rounded-lg p-2 text-xs"
+                    className={`w-full border rounded-lg p-2 text-xs outline-none ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'}`}
                   />
                   <input
                     type="tel"
@@ -367,28 +322,158 @@ ${itemsList}
                     required
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full border rounded-lg p-2 text-xs"
+                    className={`w-full border rounded-lg p-2 text-xs outline-none ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'}`}
                   />
                   <textarea
-                    placeholder="ডেলিভারি ঠিকানা"
+                    placeholder="সম্পূর্ণ ডেলিভারি ঠিকানা"
                     required
                     value={customerAddress}
                     onChange={(e) => setCustomerAddress(e.target.value)}
-                    className="w-full border rounded-lg p-2 text-xs"
+                    className={`w-full border rounded-lg p-2 text-xs outline-none ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'}`}
                     rows={2}
                   />
-                  <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-sm">
-                    অর্ডার নিশ্চিত করুন
+                  <button type="submit" className="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-sm shadow-md">
+                    অর্ডার কনফার্ম করুন
                   </button>
                 </form>
               </>
             )}
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        )}
 
-export default App;
-              
+        {/* বিজ্ঞাপন পোস্ট পেইজ */}
+        {activeTab === 'post' && (
+          <div className={`p-4 rounded-2xl shadow-sm space-y-3 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className="font-bold border-b pb-2 text-base">নতুন বিজ্ঞাপন দিন</h3>
+            <form onSubmit={handlePostAd} className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500">পণ্যের নাম</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="যেমন: স্মার্টওয়াচ"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className={`w-full border rounded-lg p-2 text-sm mt-1 outline-none ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'}`}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">দাম (৳)</label>
+                <input
+                  type="number"
+                  required
+                  placeholder="যেমন: ১২০০"
+                  value={newPrice}
+                  onChange={(e) => setNewPrice(e.target.value)}
+                  className={`w-full border rounded-lg p-2 text-sm mt-1 outline-none ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'}`}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">ক্যাটাগরি</label>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className={`w-full border rounded-lg p-2 text-sm mt-1 outline-none ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'}`}
+                >
+                  <option value="electronics">ইলেকট্রনিক্স</option>
+                  <option value="fashion">ফ্যাশন</option>
+                  <option value="groceries">মুদি ও খাদ্য</option>
+                </select>
+              </div>
+              <button type="submit" className="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-sm shadow-md">
+                বিজ্ঞাপন প্রকাশ করুন
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* 👤 প্রোফাইল পেইজ */}
+        {activeTab === 'profile' && (
+          <div className={`p-4 rounded-2xl shadow-sm space-y-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className="flex items-center gap-3 border-b pb-3">
+              <div className="w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+                {customerName ? customerName[0].toUpperCase() : '👤'}
+              </div>
+              <div>
+                <h3 className="font-bold text-base">{customerName || 'আপনার প্রোফাইল'}</h3>
+                <p className="text-xs text-gray-400">{customerPhone || 'তথ্য সেট করুন'}</p>
+              </div>
+            </div>
+
+            <form onSubmit={saveProfile} className="space-y-3">
+              <h4 className="text-xs font-semibold text-gray-500">আপনার ডিফল্ট শিপিং এড্রেস</h4>
+              <div>
+                <label className="text-xs text-gray-500">নাম</label>
+                <input
+                  type="text"
+                  placeholder="আপনার নাম লিখুন"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  className={`w-full border rounded-lg p-2 text-xs mt-1 outline-none ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'}`}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">ফোন নম্বর</label>
+                <input
+                  type="tel"
+                  placeholder="মোবাইল নম্বর"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  className={`w-full border rounded-lg p-2 text-xs mt-1 outline-none ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'}`}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">ঠিকানা</label>
+                <textarea
+                  placeholder="আপনার স্থায়ী ঠিকানা"
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  className={`w-full border rounded-lg p-2 text-xs mt-1 outline-none ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'}`}
+                  rows={2}
+                />
+              </div>
+              <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-xs shadow">
+                তথ্য সেভ করুন
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* ⚙️ সেটিংস পেইজ */}
+        {activeTab === 'settings' && (
+          <div className={`p-4 rounded-2xl shadow-sm space-y-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className="font-bold border-b pb-2 text-base">অ্যাপ সেটিংস</h3>
+
+            <div className="space-y-3 text-xs">
+              {/* ডার্ক মোড */}
+              <div className="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p className="font-semibold">ডার্ক মোড (Dark Mode)</p>
+                  <p className="text-gray-400 text-[10px]">রাতের ব্যবহারের জন্য উপযুক্ত</p>
+                </div>
+                <input 
+                  type="checkbox" 
+                  checked={darkMode} 
+                  onChange={() => setDarkMode(!darkMode)}
+                  className="w-4 h-4 accent-pink-600 cursor-pointer"
+                />
+              </div>
+
+              {/* নোটিফিকেশন */}
+              <div className="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p className="font-semibold">অর্ডার নোটিফিকেশন</p>
+                  <p className="text-gray-400 text-[10px]">অর্ডার আপডেট পেতে দিন</p>
+                </div>
+                <input 
+                  type="checkbox" 
+                  checked={notificationsEnabled} 
+                  onChange={() => setNotificationsEnabled(!notificationsEnabled)}
+                  className="w-4 h-4 accent-pink-600 cursor-pointer"
+                />
+              </div>
+
+              {/* টেলিগ্রাম ইন্টিগ্রেশন স্ট্যাটাস */}
+              <div className="py-2 border-b">
+                <p className="font-semibold mb-1">টেলিগ্রাম বট স্ট্যাটাস</p>
+                <p className="text-[10px] text-gray-400">Chat ID: <span cl
