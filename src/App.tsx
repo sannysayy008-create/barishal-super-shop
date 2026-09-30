@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 
 export function App() {
+  // Language State ('bn' | 'en')
+  const [lang, setLang] = useState<'bn' | 'en'>('bn');
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -10,16 +13,87 @@ export function App() {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('bkash');
+  
+  // Coupon State
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState(0); // in percentage or fixed amount
+  const [couponMsg, setCouponMsg] = useState({ text: '', isError: false });
 
-  // Product State
+  // Translations
+  const t = {
+    bn: {
+      siteName: 'বরিশাল সুপার শপ',
+      searchPlaceholder: 'পণ্যের নাম লিখে খুঁজুন...',
+      all: 'সব পণ্য',
+      electronics: 'ইলেকট্রনিক্স',
+      fashion: 'ফ্যাশন',
+      groceries: 'মুদি ও খাদ্য',
+      bannerTitle: 'বিশেষ অফার!',
+      bannerSub: 'বরিশাল সদরে দ্রুত হোম ডেলিভারি!',
+      buyNow: 'এখনই কিনুন',
+      postAdBtn: '+ ফ্রি বিজ্ঞাপন দিন',
+      cartTitle: 'আপনার কার্ট',
+      cartEmpty: 'আপনার কার্ট খালি!',
+      addToCart: 'কার্টে রাখুন',
+      total: 'মোট:',
+      discountText: 'ডিসকাউন্ট:',
+      payableTotal: 'সর্বমোট দেয়া মূল্য:',
+      couponPlaceholder: 'কুপন কোড লিখুন (যেমন: BARISAL10)',
+      applyCoupon: 'কুপন প্রয়োগ করুন',
+      namePlaceholder: 'আপনার নাম',
+      phonePlaceholder: 'মোবাইল নম্বর',
+      addressPlaceholder: 'ডেলিভারি ঠিকানা',
+      confirmOrder: 'অর্ডার নিশ্চিত করুন',
+      postTitle: 'ফ্রি বিজ্ঞাপন দিন',
+      pName: 'পণ্যের নাম',
+      pPrice: 'মূল্য (৳)',
+      pCategory: 'ক্যাটাগরি',
+      pPhoto: 'পণ্যের ছবি',
+      postSubmit: 'পোস্ট করুন',
+      noResult: 'কোনো পণ্য পাওয়া যায়নি!',
+      showAll: 'সব পণ্য দেখুন'
+    },
+    en: {
+      siteName: 'Barishal Super Shop',
+      searchPlaceholder: 'Search products...',
+      all: 'All Products',
+      electronics: 'Electronics',
+      fashion: 'Fashion',
+      groceries: 'Groceries',
+      bannerTitle: 'Special Offer!',
+      bannerSub: 'Fast home delivery in Barishal!',
+      buyNow: 'Buy Now',
+      postAdBtn: '+ Post Free Ad',
+      cartTitle: 'Your Cart',
+      cartEmpty: 'Your cart is empty!',
+      addToCart: 'Add to Cart',
+      total: 'Subtotal:',
+      discountText: 'Discount:',
+      payableTotal: 'Payable Total:',
+      couponPlaceholder: 'Enter Coupon Code (e.g. BARISAL10)',
+      applyCoupon: 'Apply',
+      namePlaceholder: 'Your Name',
+      phonePlaceholder: 'Phone Number',
+      addressPlaceholder: 'Delivery Address',
+      confirmOrder: 'Confirm Order',
+      postTitle: 'Post Free Ad',
+      pName: 'Product Name',
+      pPrice: 'Price (৳)',
+      pCategory: 'Category',
+      pPhoto: 'Product Photo',
+      postSubmit: 'Post Now',
+      noResult: 'No products found!',
+      showAll: 'Show All Products'
+    }
+  }[lang];
+
+  // Product List
   const [products, setProducts] = useState([
     { 
       id: 1, 
       title: 'হেয়ার ট্রিমার (T9)', 
       price: 253, 
       originalPrice: 430, 
-      condition: 'new',
       category: 'electronics',
       image: 'https://images.unsplash.com/photo-1621607512214-68297480165e?w=300'
     },
@@ -28,7 +102,6 @@ export function App() {
       title: 'নাগা মরীচ বীজ', 
       price: 43, 
       originalPrice: 150, 
-      condition: 'new',
       category: 'groceries',
       image: 'https://images.unsplash.com/photo-1588879460608-251c8901239c?w=300'
     },
@@ -37,7 +110,6 @@ export function App() {
       title: 'গোল্ডেন ব্রেসলেট', 
       price: 159, 
       originalPrice: 390, 
-      condition: 'used',
       category: 'fashion',
       image: 'https://images.unsplash.com/photo-1611591475168-525492261614?w=300'
     },
@@ -46,7 +118,6 @@ export function App() {
       title: 'ব্লুটুথ স্পিকার', 
       price: 779, 
       originalPrice: 950, 
-      condition: 'new',
       category: 'electronics',
       image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300'
     }
@@ -54,10 +125,9 @@ export function App() {
 
   const [cartItems, setCartItems] = useState<any[]>([]);
 
-  // Post Ad Form State
+  // Post Ad Form
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
-  const [newCondition, setNewCondition] = useState('new');
   const [newCategory, setNewCategory] = useState('electronics');
   const [newImage, setNewImage] = useState('');
 
@@ -82,19 +152,36 @@ export function App() {
     setCartItems(updated);
   };
 
+  // Coupon Apply Handler
+  const handleApplyCoupon = () => {
+    const code = couponInput.trim().toUpperCase();
+    if (code === 'BARISAL10') {
+      setAppliedDiscount(10); // 10% Off
+      setCouponMsg({ text: lang === 'bn' ? '১০% ডিসকাউন্ট যোগ হয়েছে!' : '10% Discount Applied!', isError: false });
+    } else if (code === 'FREE50') {
+      setAppliedDiscount(50); // 50 Tk Off
+      setCouponMsg({ text: lang === 'bn' ? '৫০ টাকা কুপন ছাড় যোগ হয়েছে!' : '৳50 Off Applied!', isError: false });
+    } else {
+      setCouponMsg({ text: lang === 'bn' ? 'ভুল বা মেয়াদোত্তীর্ণ কুপন কোড!' : 'Invalid Coupon Code!', isError: true });
+    }
+  };
+
   const handleOrderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !customerPhone || !customerAddress) {
-      alert('দয়া করে আপনার নাম, মোবাইল নম্বর ও ঠিকানা পূরণ করুন।');
+      alert(lang === 'bn' ? 'দয়া করে সব তথ্য পূরণ করুন।' : 'Please fill all details.');
       return;
     }
 
-    alert(`ধন্যবাদ ${customerName}! আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে।`);
+    alert(lang === 'bn' ? `ধন্যবাদ ${customerName}! অর্ডার গ্রহণ করা হয়েছে।` : `Thank you ${customerName}! Order placed successfully.`);
     setCartItems([]);
     setIsCartOpen(false);
     setCustomerName('');
     setCustomerPhone('');
     setCustomerAddress('');
+    setCouponInput('');
+    setAppliedDiscount(0);
+    setCouponMsg({ text: '', isError: false });
   };
 
   const handlePostAd = (e: React.FormEvent) => {
@@ -107,20 +194,22 @@ export function App() {
       title: newTitle,
       price: priceNum,
       originalPrice: priceNum + 100,
-      condition: newCondition,
       category: newCategory,
       image: newImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300'
     };
 
     setProducts([newProd, ...products]);
-    alert('আপনার বিজ্ঞাপন সফলভাবে পোস্ট করা হয়েছে!');
+    alert(lang === 'bn' ? 'বিজ্ঞাপন সফলভাবে পোস্ট করা হয়েছে!' : 'Ad posted successfully!');
     setIsPostModalOpen(false);
     setNewTitle('');
     setNewPrice('');
     setNewImage('');
   };
 
-  const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
+  // Price Calculation with Coupon
+  const subTotal = cartItems.reduce((acc, item) => acc + item.price, 0);
+  const discountAmount = appliedDiscount > 0 ? (appliedDiscount <= 100 ? (subTotal * appliedDiscount) / 100 : appliedDiscount) : 0;
+  const finalTotal = Math.max(0, subTotal - discountAmount);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -130,17 +219,35 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-20 font-sans">
-      {/* হেডার ও সার্চ বার */}
+      {/* হেডার ও অপশনস */}
       <div className="bg-pink-600 p-3 text-white sticky top-0 z-30 shadow-md">
+        <div className="flex items-center justify-between max-w-md mx-auto mb-2 text-xs">
+          <span className="font-bold">{t.siteName}</span>
+          {/* ভাষা পরিবর্তন বাটন */}
+          <div className="flex gap-1 bg-pink-800 p-1 rounded-lg">
+            <button
+              onClick={() => setLang('bn')}
+              className={`px-2 py-0.5 rounded font-bold ${lang === 'bn' ? 'bg-white text-pink-600' : 'text-white'}`}
+            >
+              বাংলা
+            </button>
+            <button
+              onClick={() => setLang('en')}
+              className={`px-2 py-0.5 rounded font-bold ${lang === 'en' ? 'bg-white text-pink-600' : 'text-white'}`}
+            >
+              ENG
+            </button>
+          </div>
+        </div>
+
         <div className="flex items-center gap-2 max-w-md mx-auto">
           <div className="relative flex-1">
-            <span className="absolute left-3 top-2.5 text-gray-400 text-xs">🔍</span>
             <input
               type="text"
-              placeholder="পণ্যের নাম লিখে খুঁজুন..."
+              placeholder={t.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-2 pl-8 pr-8 rounded-full text-black text-sm outline-none"
+              className="w-full py-2 pl-3 pr-8 rounded-full text-black text-sm outline-none"
             />
             {searchQuery && (
               <button 
@@ -172,7 +279,7 @@ export function App() {
               selectedCategory === 'all' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
             }`}
           >
-            সব পণ্য
+            {t.all}
           </button>
           <button
             onClick={() => setSelectedCategory('electronics')}
@@ -180,7 +287,7 @@ export function App() {
               selectedCategory === 'electronics' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
             }`}
           >
-            ইলেকট্রনিক্স
+            {t.electronics}
           </button>
           <button
             onClick={() => setSelectedCategory('fashion')}
@@ -188,7 +295,7 @@ export function App() {
               selectedCategory === 'fashion' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
             }`}
           >
-            ফ্যাশন
+            {t.fashion}
           </button>
           <button
             onClick={() => setSelectedCategory('groceries')}
@@ -196,7 +303,7 @@ export function App() {
               selectedCategory === 'groceries' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
             }`}
           >
-            মুদি ও খাদ্য
+            {t.groceries}
           </button>
         </div>
       </div>
@@ -204,39 +311,35 @@ export function App() {
       <main className="max-w-md mx-auto p-3 space-y-4">
         {/* ব্যানার */}
         <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 rounded-2xl shadow-lg">
-          <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded">SALE</span>
-          <h2 className="text-xl font-extrabold mt-1">বরিশাল সুপার শপ</h2>
-          <p className="text-xs mt-1 opacity-90">দ্রুত ডেলিভারি সুবিধা!</p>
+          <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded">PROMO</span>
+          <h2 className="text-xl font-extrabold mt-1">{t.bannerTitle}</h2>
+          <p className="text-xs mt-1 opacity-90">{t.bannerSub}</p>
           <div className="mt-3 flex gap-2">
             <button 
               onClick={() => setIsCartOpen(true)}
               className="bg-white text-pink-600 px-3 py-1.5 rounded-xl font-bold text-xs"
             >
-              এখনই কিনুন
+              {t.buyNow}
             </button>
             <button 
               onClick={() => setIsPostModalOpen(true)}
               className="bg-black/20 text-white px-3 py-1.5 rounded-xl font-semibold text-xs border border-white/30"
             >
-              + ফ্রি বিজ্ঞাপন দিন
+              {t.postAdBtn}
             </button>
           </div>
         </div>
 
         {/* পণ্য তালিকা */}
         <div className="bg-white p-3 rounded-2xl shadow-sm">
-          <h3 className="font-bold text-gray-800 text-sm mb-3">
-            {searchQuery ? `"${searchQuery}" এর ফলাফল` : 'পণ্যসমূহ'}
-          </h3>
-
           {filteredProducts.length === 0 ? (
             <div className="text-center py-8 space-y-2">
-              <p className="text-sm font-semibold text-gray-600">কোনো পণ্য পাওয়া যায়নি!</p>
+              <p className="text-sm font-semibold text-gray-600">{t.noResult}</p>
               <button 
                 onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
                 className="text-xs text-pink-600 font-bold underline"
               >
-                সব পণ্য দেখুন
+                {t.showAll}
               </button>
             </div>
           ) : (
@@ -259,7 +362,7 @@ export function App() {
                     onClick={() => addToCart(product)}
                     className="w-full mt-2 bg-pink-600 text-white py-1 rounded-lg text-xs font-bold"
                   >
-                    কার্টে রাখুন
+                    {t.addToCart}
                   </button>
                 </div>
               ))}
@@ -271,13 +374,13 @@ export function App() {
       {/* নেভিগেশন বার */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 flex justify-around items-center max-w-md mx-auto z-20 text-xs text-gray-600">
         <button onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }} className="text-pink-600 font-bold">
-          🏠 হোম
+          🏠 {lang === 'bn' ? 'হোম' : 'Home'}
         </button>
         <button onClick={() => setIsPostModalOpen(true)} className="bg-pink-600 text-white px-3 py-1 rounded-full font-bold">
-          + পোস্ট
+          {t.postAdBtn}
         </button>
         <button onClick={() => setIsCartOpen(true)} className="relative">
-          🛒 কার্ট ({cartItems.length})
+          🛒 {lang === 'bn' ? 'কার্ট' : 'Cart'} ({cartItems.length})
         </button>
       </div>
 
@@ -286,46 +389,46 @@ export function App() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3">
             <div className="flex justify-between items-center border-b pb-2">
-              <h3 className="font-bold text-gray-800">ফ্রি বিজ্ঞাপন দিন</h3>
+              <h3 className="font-bold text-gray-800">{t.postTitle}</h3>
               <button onClick={() => setIsPostModalOpen(false)} className="text-gray-500">✕</button>
             </div>
             <form onSubmit={handlePostAd} className="space-y-3">
               <div>
-                <label className="text-xs text-gray-600">পণ্যের নাম</label>
+                <label className="text-xs text-gray-600">{t.pName}</label>
                 <input
                   type="text"
                   required
-                  placeholder="যেমন: স্মার্ট ওয়াচ"
+                  placeholder="e.g. Smart Watch"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   className="w-full border rounded-lg p-2 text-sm mt-1 outline-none"
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-600">মূল্য (৳)</label>
+                <label className="text-xs text-gray-600">{t.pPrice}</label>
                 <input
                   type="number"
                   required
-                  placeholder="যেমন: ৫০০"
+                  placeholder="e.g. 500"
                   value={newPrice}
                   onChange={(e) => setNewPrice(e.target.value)}
                   className="w-full border rounded-lg p-2 text-sm mt-1 outline-none"
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-600">ক্যাটাগরি</label>
+                <label className="text-xs text-gray-600">{t.pCategory}</label>
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
                   className="w-full border rounded-lg p-2 text-sm mt-1 outline-none"
                 >
-                  <option value="electronics">ইলেকট্রনিক্স</option>
-                  <option value="fashion">ফ্যাশন</option>
-                  <option value="groceries">মুদি ও খাদ্য</option>
+                  <option value="electronics">{t.electronics}</option>
+                  <option value="fashion">{t.fashion}</option>
+                  <option value="groceries">{t.groceries}</option>
                 </select>
               </div>
               <div>
-                <label className="text-xs text-gray-600">পণ্যের ছবি</label>
+                <label className="text-xs text-gray-600">{t.pPhoto}</label>
                 <input
                   type="file"
                   accept="image/*"
@@ -334,27 +437,27 @@ export function App() {
                 />
               </div>
               <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-sm">
-                পোস্ট করুন
+                {t.postSubmit}
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* কার্ট মডাল */}
+      {/* কার্ট ও কুপন মডাল */}
       {isCartOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b pb-2">
-              <h3 className="font-bold text-gray-800">আপনার কার্ট</h3>
+              <h3 className="font-bold text-gray-800">{t.cartTitle}</h3>
               <button onClick={() => setIsCartOpen(false)} className="text-gray-500">✕</button>
             </div>
 
             {cartItems.length === 0 ? (
-              <p className="text-center py-6 text-gray-500 text-sm">কার্ট খালি!</p>
+              <p className="text-center py-6 text-gray-500 text-sm">{t.cartEmpty}</p>
             ) : (
               <>
-                <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
                   {cartItems.map((item, idx) => (
                     <div key={idx} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded-lg">
                       <span>{item.title}</span>
@@ -366,48 +469,37 @@ export function App() {
                   ))}
                 </div>
 
-                <div className="border-t pt-2 flex justify-between font-bold text-sm text-gray-800">
-                  <span>মোট:</span>
-                  <span className="text-pink-600">৳{totalPrice}</span>
+                {/* কুপন কোড সেকশন */}
+                <div className="border-t pt-2 space-y-1">
+                  <div className="flex gap-1">
+                    <input
+                      type="text"
+                      placeholder={t.couponPlaceholder}
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      className="flex-1 border rounded-lg px-2 py-1 text-xs outline-none uppercase"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      className="bg-gray-800 text-white px-3 py-1 rounded-lg text-xs font-bold"
+                    >
+                      {t.applyCoupon}
+                    </button>
+                  </div>
+                  {couponMsg.text && (
+                    <p className={`text-[10px] ${couponMsg.isError ? 'text-red-500' : 'text-green-600 font-bold'}`}>
+                      {couponMsg.text}
+                    </p>
+                  )}
                 </div>
 
-                <form onSubmit={handleOrderSubmit} className="space-y-2 pt-2">
-                  <input
-                    type="text"
-                    placeholder="আপনার নাম"
-                    required
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full border rounded-lg p-2 text-xs"
-                  />
-                  <input
-                    type="tel"
-                    placeholder="মোবাইল নম্বর"
-                    required
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full border rounded-lg p-2 text-xs"
-                  />
-                  <textarea
-                    placeholder="ডেলিভারি ঠিকানা"
-                    required
-                    value={customerAddress}
-                    onChange={(e) => setCustomerAddress(e.target.value)}
-                    className="w-full border rounded-lg p-2 text-xs"
-                    rows={2}
-                  />
-                  <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-sm">
-                    অর্ডার নিশ্চিত করুন
-                  </button>
-                </form>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default App;
-    
+                {/* দাম এর হিসাব */}
+                <div className="border-t pt-2 space-y-1 text-xs text-gray-700">
+                  <div className="flex justify-between">
+                    <span>{t.total}</span>
+                    <span>৳{subTotal}</span>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-green-600 font-semibold">
+                      <span>{t.discountText}</s
