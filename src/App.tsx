@@ -48,12 +48,44 @@ export function App() {
   const [customerAddress, setCustomerAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('bkash');
 
-  // Product State
+  // Product State with Images
   const [products, setProducts] = useState<any[]>([
-    { id: 1, title: 'হেয়ার ট্রিমার (T9)', price: 253, originalPrice: 430, discount: '-41%', condition: 'new' },
-    { id: 2, title: 'নাগা মরীচ বীজ', price: 43, originalPrice: 150, discount: '-71%', condition: 'new' },
-    { id: 3, title: 'গোল্ডেন ব্রেসলেট', price: 159, originalPrice: 390, discount: '-59%', condition: 'used' },
-    { id: 4, title: 'ব্লুটুথ স্পিকার', price: 779, originalPrice: 950, discount: '-18%', condition: 'new' }
+    { 
+      id: 1, 
+      title: 'হেয়ার ট্রিমার (T9)', 
+      price: 253, 
+      originalPrice: 430, 
+      discount: '-41%', 
+      condition: 'new',
+      image: 'https://images.unsplash.com/photo-1621607512214-68297480165e?w=300'
+    },
+    { 
+      id: 2, 
+      title: 'নাগা মরীচ বীজ', 
+      price: 43, 
+      originalPrice: 150, 
+      discount: '-71%', 
+      condition: 'new',
+      image: 'https://images.unsplash.com/photo-1588879460608-251c8901239c?w=300'
+    },
+    { 
+      id: 3, 
+      title: 'গোল্ডেন ব্রেসলেট', 
+      price: 159, 
+      originalPrice: 390, 
+      discount: '-59%', 
+      condition: 'used',
+      image: 'https://images.unsplash.com/photo-1611591475168-525492261614?w=300'
+    },
+    { 
+      id: 4, 
+      title: 'ব্লুটুথ স্পিকার', 
+      price: 779, 
+      originalPrice: 950, 
+      discount: '-18%', 
+      condition: 'new',
+      image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300'
+    }
   ]);
 
   const [cartItems, setCartItems] = useState<any[]>([]);
@@ -109,7 +141,8 @@ export function App() {
       price: priceNum,
       originalPrice: priceNum + 100,
       discount: '-10%',
-      condition: newCondition
+      condition: newCondition,
+      image: 'https://via.placeholder.com/150'
     };
 
     setProducts([newProd, ...products]);
@@ -124,7 +157,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-20 font-sans">
-      {/* দারাজ স্টাইল সার্চবার ও হেডার */}
+      {/* হেডার */}
       <div className="bg-pink-600 p-3 text-white sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-2 max-w-md mx-auto">
           <div className="relative flex-1">
@@ -156,7 +189,7 @@ export function App() {
       </div>
 
       <main className="max-w-md mx-auto p-3 space-y-4">
-        {/* রানিং প্রমোশনাল ব্যানার */}
+        {/* ব্যানার */}
         <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 rounded-2xl shadow-lg">
           <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded">PAYDAY SALE</span>
           <h2 className="text-xl font-extrabold mt-1">15% OFF + Free Delivery</h2>
@@ -189,8 +222,12 @@ export function App() {
           <div className="grid grid-cols-2 gap-2">
             {filteredProducts.map((product) => (
               <div key={product.id} className="border border-gray-100 rounded-xl p-2 bg-white relative shadow-sm">
-                <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 flex items-center justify-center text-xs text-gray-400 relative">
-                  [ছবি]
+                <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 relative overflow-hidden flex items-center justify-center">
+                  <img 
+                    src={product.image} 
+                    alt={product.title} 
+                    className="w-full h-full object-cover rounded-lg"
+                  />
                   <span className={`absolute bottom-1 left-1 text-[9px] px-1.5 py-0.5 rounded font-bold ${
                     product.condition === 'new' ? 'bg-green-500 text-white' : 'bg-amber-500 text-white'
                   }`}>
@@ -383,3 +420,4 @@ export function App() {
 }
 
 export default App;
+    
