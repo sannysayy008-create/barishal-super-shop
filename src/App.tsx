@@ -20,13 +20,15 @@ export function App() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+  // User Role State: 'user' | 'admin' | 'moderator'
+  const [userRole, setUserRole] = useState<'user' | 'admin' | 'moderator'>('user');
+
   // Customer Profile State
   const [customerName, setCustomerName] = useState<string>(() => localStorage.getItem('cust_name') || '');
   const [customerPhone, setCustomerPhone] = useState<string>(() => localStorage.getItem('cust_phone') || '');
   const [customerAddress, setCustomerAddress] = useState<string>(() => localStorage.getItem('cust_address') || '');
 
   // Settings State
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
   // Auto save profile data
@@ -89,6 +91,13 @@ export function App() {
     const updated = [...cartItems];
     updated.splice(index, 1);
     setCartItems(updated);
+  };
+
+  // Admin Functionality
+  const deleteProduct = (id: number) => {
+    if (window.confirm('আপনি কি নিশ্চিত এই পণ্যটি ডিলিট করতে চান?')) {
+      setProducts(products.filter(p => p.id !== id));
+    }
   };
 
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
@@ -230,6 +239,13 @@ ${itemsList}
       {/* মেইন কন্টেন্ট এলাকা */}
       <main className="max-w-md mx-auto p-3 space-y-4">
         
+        {/* রোল ইন্ডিকেটর ব্যানার */}
+        {userRole !== 'user' && (
+          <div className={`p-2 rounded-xl text-center text-xs font-bold ${userRole === 'admin' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>
+            {userRole === 'admin' ? '👑 এডমিন মোড সক্রিয়' : '🛡️ মডারেটর মোড সক্রিয়'}
+          </div>
+        )}
+
         {/* হোম পেইজ */}
         {activeTab === 'home' && (
           <>
@@ -258,7 +274,18 @@ ${itemsList}
             <div className={`p-3 rounded-2xl shadow-sm ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <div className="grid grid-cols-2 gap-2">
                 {filteredProducts.map((product) => (
-                  <div key={product.id} className={`border rounded-xl p-2 shadow-sm ${darkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-100 bg-white'}`}>
+                  <div key={product.id} className={`border rounded-xl p-2 shadow-sm relative ${darkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-100 bg-white'}`}>
+                    
+                    {/* Admin Delete Button */}
+                    {userRole === 'admin' && (
+                      <button 
+                        onClick={() => deleteProduct(product.id)}
+                        className="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10"
+                      >
+                        ডিলিট 🗑️
+                      </button>
+                    )}
+
                     <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 overflow-hidden flex items-center justify-center">
                       <img 
                         src={product.image} 
@@ -271,12 +298,22 @@ ${itemsList}
                       <span className="text-pink-600 font-bold text-sm">৳{product.price}</span>
                       <span className="text-gray-400 text-[10px] line-through">৳{product.originalPrice}</span>
                     </div>
-                    <button
-                      onClick={() => addToCart(product)}
-                      className="w-full mt-2 bg-pink-600 text-white py-1 rounded-lg text-xs font-bold active:scale-95 transition-transform"
-                    >
-                      কার্টে রাখুন
-                    </button>
+
+                    {userRole === 'moderator' ? (
+                      <button
+                        onClick={() => alert(`মডারেটর একশন: ${product.title} ফ্ল্যাগড করা হয়েছে।`)}
+                        className="w-full mt-2 bg-blue-600 text-white py-1 rounded-lg text-xs font-bold"
+                      >
+                        রিভিউ করুন
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => addToCart(product)}
+                        className="w-full mt-2 bg-pink-600 text-white py-1 rounded-lg text-xs font-bold active:scale-95 transition-transform"
+                      >
+                        কার্টে রাখুন
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -349,7 +386,7 @@ ${itemsList}
           </div>
         )}
 
-        {/* বিজ্ঞাপন পোস্ট পেইজ */}
+        {/* পোস্ট বিজ্ঞাপন পেইজ */}
         {activeTab === 'post' && (
           <div className={`p-4 rounded-2xl shadow-sm space-y-3 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <h3 className="font-bold border-b pb-2 text-base">নতুন বিজ্ঞাপন দিন</h3>
@@ -443,38 +480,4 @@ ${itemsList}
               <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-xs shadow">
                 তথ্য সেভ করুন
               </button>
-            </form>
-          </div>
-        )}
-
-        {/* ⚙️ সেটিংস পেইজ */}
-        {activeTab === 'settings' && (
-          <div className={`p-4 rounded-2xl shadow-sm space-y-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className="font-bold border-b pb-2 text-base">অ্যাপ সেটিংস</h3>
-
-            <div className="space-y-3 text-xs">
-              {/* ডার্ক মোড */}
-              <div className="flex items-center justify-between py-2 border-b">
-                <div>
-                  <p className="font-semibold">ডার্ক মোড (Dark Mode)</p>
-                  <p className="text-gray-400 text-[10px]">রাতের ব্যবহারের জন্য উপযুক্ত</p>
-                </div>
-                <input 
-                  type="checkbox" 
-                  checked={darkMode} 
-                  onChange={() => setDarkMode(!darkMode)}
-                  className="w-4 h-4 accent-pink-600 cursor-pointer"
-                />
-              </div>
-
-              {/* নোটিফিকেশন */}
-              <div className="flex items-center justify-between py-2 border-b">
-                <div>
-                  <p className="font-semibold">অর্ডার নোটিফিকেশন</p>
-                  <p className="text-gray-400 text-[10px]">অর্ডার আপডেট পেতে দিন</p>
-                </div>
-                <input 
-                  type="checkbox" 
-                  checked={notificationsEnabled} 
-                  onChange={() => setNotificationsEnabled(!notificationsEnabled)}
-                  className="w-4 h-4 accent-pink-600 cursor-pointer
+     
