@@ -1,3 +1,37 @@
+import React, { useState, useEffect } from 'react';
+import { LoginModal } from './components/LoginModal';
+
+export function App() {
+  const [user, setUser] = useState<{ name: string; phone: string } | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user_profile');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    } else {
+      setShowLoginModal(true);
+    }
+  }, []);
+
+  const handleLoginSuccess = (userData: { name: string; phone: string }) => {
+    setUser(userData);
+    setShowLoginModal(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {showLoginModal && <LoginModal onSuccess={handleLoginSuccess} />}
+
+      <header className="bg-green-600 text-white p-4 shadow-md flex justify-between items-center">
+        <h1 className="text-lg font-bold">বরিশাল সুপার শপ</h1>
+        {user && <span className="text-sm bg-green-700 px-3 py-1 rounded-full">👤 {user.name}</span>}
+      </header>
+
+      {/* আপনার বাকী অ্যাপ কোড */}
+    </div>
+  );
+}
 import React, { useMemo, useState } from 'react';
 import {
   Search,
