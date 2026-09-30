@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 
 export function App() {
-  // Language State ('bn' | 'en')
-  const [lang, setLang] = useState<'bn' | 'en'>('bn');
-
+  const [lang, setLang] = useState('bn');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -16,7 +14,7 @@ export function App() {
   
   // Coupon State
   const [couponInput, setCouponInput] = useState('');
-  const [appliedDiscount, setAppliedDiscount] = useState(0); // in percentage or fixed amount
+  const [appliedDiscount, setAppliedDiscount] = useState(0);
   const [couponMsg, setCouponMsg] = useState({ text: '', isError: false });
 
   // Translations
@@ -38,8 +36,8 @@ export function App() {
       total: 'মোট:',
       discountText: 'ডিসকাউন্ট:',
       payableTotal: 'সর্বমোট দেয়া মূল্য:',
-      couponPlaceholder: 'কুপন কোড লিখুন (যেমন: BARISAL10)',
-      applyCoupon: 'কুপন প্রয়োগ করুন',
+      couponPlaceholder: 'কুপন কোড (যেমন: BARISAL10)',
+      applyCoupon: 'কুপন দিন',
       namePlaceholder: 'আপনার নাম',
       phonePlaceholder: 'মোবাইল নম্বর',
       addressPlaceholder: 'ডেলিভারি ঠিকানা',
@@ -70,7 +68,7 @@ export function App() {
       total: 'Subtotal:',
       discountText: 'Discount:',
       payableTotal: 'Payable Total:',
-      couponPlaceholder: 'Enter Coupon Code (e.g. BARISAL10)',
+      couponPlaceholder: 'Coupon Code (e.g. BARISAL10)',
       applyCoupon: 'Apply',
       namePlaceholder: 'Your Name',
       phonePlaceholder: 'Phone Number',
@@ -123,7 +121,7 @@ export function App() {
     }
   ]);
 
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState([]);
 
   // Post Ad Form
   const [newTitle, setNewTitle] = useState('');
@@ -131,42 +129,41 @@ export function App() {
   const [newCategory, setNewCategory] = useState('electronics');
   const [newImage, setNewImage] = useState('');
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewImage(reader.result as string);
+        setNewImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const addToCart = (product: any) => {
+  const addToCart = (product) => {
     setCartItems([...cartItems, product]);
   };
 
-  const removeFromCart = (index: number) => {
+  const removeFromCart = (index) => {
     const updated = [...cartItems];
     updated.splice(index, 1);
     setCartItems(updated);
   };
 
-  // Coupon Apply Handler
   const handleApplyCoupon = () => {
     const code = couponInput.trim().toUpperCase();
     if (code === 'BARISAL10') {
-      setAppliedDiscount(10); // 10% Off
+      setAppliedDiscount(10);
       setCouponMsg({ text: lang === 'bn' ? '১০% ডিসকাউন্ট যোগ হয়েছে!' : '10% Discount Applied!', isError: false });
     } else if (code === 'FREE50') {
-      setAppliedDiscount(50); // 50 Tk Off
+      setAppliedDiscount(50);
       setCouponMsg({ text: lang === 'bn' ? '৫০ টাকা কুপন ছাড় যোগ হয়েছে!' : '৳50 Off Applied!', isError: false });
     } else {
       setCouponMsg({ text: lang === 'bn' ? 'ভুল বা মেয়াদোত্তীর্ণ কুপন কোড!' : 'Invalid Coupon Code!', isError: true });
     }
   };
 
-  const handleOrderSubmit = (e: React.FormEvent) => {
+  const handleOrderSubmit = (e) => {
     e.preventDefault();
     if (!customerName || !customerPhone || !customerAddress) {
       alert(lang === 'bn' ? 'দয়া করে সব তথ্য পূরণ করুন।' : 'Please fill all details.');
@@ -184,7 +181,7 @@ export function App() {
     setCouponMsg({ text: '', isError: false });
   };
 
-  const handlePostAd = (e: React.FormEvent) => {
+  const handlePostAd = (e) => {
     e.preventDefault();
     if (!newTitle || !newPrice) return;
     
@@ -206,7 +203,6 @@ export function App() {
     setNewImage('');
   };
 
-  // Price Calculation with Coupon
   const subTotal = cartItems.reduce((acc, item) => acc + item.price, 0);
   const discountAmount = appliedDiscount > 0 ? (appliedDiscount <= 100 ? (subTotal * appliedDiscount) / 100 : appliedDiscount) : 0;
   const finalTotal = Math.max(0, subTotal - discountAmount);
@@ -219,11 +215,10 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-20 font-sans">
-      {/* হেডার ও অপশনস */}
+      {/* হেডার */}
       <div className="bg-pink-600 p-3 text-white sticky top-0 z-30 shadow-md">
         <div className="flex items-center justify-between max-w-md mx-auto mb-2 text-xs">
           <span className="font-bold">{t.siteName}</span>
-          {/* ভাষা পরিবর্তন বাটন */}
           <div className="flex gap-1 bg-pink-800 p-1 rounded-lg">
             <button
               onClick={() => setLang('bn')}
@@ -271,7 +266,7 @@ export function App() {
           </button>
         </div>
 
-        {/* ক্যাটাগরি ফিল্টার */}
+        {/* ক্যাটাগরি */}
         <div className="flex gap-2 mt-2 overflow-x-auto pb-1 max-w-md mx-auto text-xs">
           <button
             onClick={() => setSelectedCategory('all')}
@@ -330,7 +325,7 @@ export function App() {
           </div>
         </div>
 
-        {/* পণ্য তালিকা */}
+        {/* প্রোডাক্ট গ্রিড */}
         <div className="bg-white p-3 rounded-2xl shadow-sm">
           {filteredProducts.length === 0 ? (
             <div className="text-center py-8 space-y-2">
@@ -444,7 +439,7 @@ export function App() {
         </div>
       )}
 
-      {/* কার্ট ও কুপন মডাল */}
+      {/* কার্ট মডাল */}
       {isCartOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3 max-h-[90vh] overflow-y-auto">
@@ -469,7 +464,7 @@ export function App() {
                   ))}
                 </div>
 
-                {/* কুপন কোড সেকশন */}
+                {/* কুপন সেকশন */}
                 <div className="border-t pt-2 space-y-1">
                   <div className="flex gap-1">
                     <input
@@ -494,7 +489,7 @@ export function App() {
                   )}
                 </div>
 
-                {/* দাম এর হিসাব */}
+                {/* হিসেব */}
                 <div className="border-t pt-2 space-y-1 text-xs text-gray-700">
                   <div className="flex justify-between">
                     <span>{t.total}</span>
@@ -502,4 +497,12 @@ export function App() {
                   </div>
                   {discountAmount > 0 && (
                     <div className="flex justify-between text-green-600 font-semibold">
-                      <span>{t.discountText}</s
+                      <span>{t.discountText}</span>
+                      <span>-৳{discountAmount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-sm text-pink-600 border-t pt-1">
+                    <span>{t.payableTotal}</span>
+                    <span>৳{finalTotal}</span>
+                  </div>
+      
