@@ -39,6 +39,7 @@ ${orderDetails.cartItems.map((item: any, idx: number) => `${idx + 1}. ${item.tit
 export function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   
@@ -48,7 +49,7 @@ export function App() {
   const [customerAddress, setCustomerAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('bkash');
 
-  // Product State with Images
+  // Product State with Categories
   const [products, setProducts] = useState<any[]>([
     { 
       id: 1, 
@@ -57,6 +58,7 @@ export function App() {
       originalPrice: 430, 
       discount: '-41%', 
       condition: 'new',
+      category: 'electronics',
       image: 'https://images.unsplash.com/photo-1621607512214-68297480165e?w=300'
     },
     { 
@@ -66,6 +68,7 @@ export function App() {
       originalPrice: 150, 
       discount: '-71%', 
       condition: 'new',
+      category: 'groceries',
       image: 'https://images.unsplash.com/photo-1588879460608-251c8901239c?w=300'
     },
     { 
@@ -75,6 +78,7 @@ export function App() {
       originalPrice: 390, 
       discount: '-59%', 
       condition: 'used',
+      category: 'fashion',
       image: 'https://images.unsplash.com/photo-1611591475168-525492261614?w=300'
     },
     { 
@@ -84,19 +88,20 @@ export function App() {
       originalPrice: 950, 
       discount: '-18%', 
       condition: 'new',
+      category: 'electronics',
       image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300'
     }
   ]);
 
   const [cartItems, setCartItems] = useState<any[]>([]);
 
-  // Post Ad Form State (With File Upload)
+  // Post Ad Form State
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newCondition, setNewCondition] = useState('new');
+  const [newCategory, setNewCategory] = useState('electronics');
   const [newImage, setNewImage] = useState<string>('');
 
-  // Handle File Selection and Convert to Base64 Image
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -155,6 +160,7 @@ export function App() {
       originalPrice: priceNum + 100,
       discount: '-10%',
       condition: newCondition,
+      category: newCategory,
       image: newImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300'
     };
 
@@ -167,21 +173,36 @@ export function App() {
   };
 
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
-  const filteredProducts = products.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  // Filter products by search text and category
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="min-h-screen bg-gray-100 pb-20 font-sans">
-      {/* হেডার */}
+      {/* উন্নত হেডার ও সার্চ বার */}
       <div className="bg-pink-600 p-3 text-white sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-2 max-w-md mx-auto">
           <div className="relative flex-1">
+            <span className="absolute left-3 top-2.5 text-gray-400 text-xs">🔍</span>
             <input
               type="text"
-              placeholder="বরিশাল সুপার শপে খুঁজুন..."
+              placeholder="পণ্যের নাম লিখে খুঁজুন..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-2 pl-3 pr-8 rounded-full text-black text-sm outline-none"
+              className="w-full py-2 pl-8 pr-8 rounded-full text-black text-sm outline-none focus:ring-2 focus:ring-yellow-400"
             />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-2 text-gray-500 text-xs bg-gray-200 rounded-full w-4 h-4 flex items-center justify-center font-bold"
+              >
+                ✕
+              </button>
+            )}
           </div>
           <button 
             onClick={() => setIsCartOpen(true)}
@@ -195,10 +216,41 @@ export function App() {
             )}
           </button>
         </div>
-        <div className="flex justify-between text-[10px] mt-2 pt-1 border-t border-pink-500 opacity-90 max-w-md mx-auto">
-          <span>💳 Safe Payment</span>
-          <span>🚚 Fast Delivery</span>
-          <span>🔄 Free Return</span>
+
+        {/* ক্যাটাগরি ফিল্টার বার */}
+        <div className="flex gap-2 mt-2 overflow-x-auto pb-1 max-w-md mx-auto text-xs no-scrollbar">
+          <button
+            onClick={() => setSelectedCategory('all')}
+            className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition ${
+              selectedCategory === 'all' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
+            }`}
+          >
+            সব পণ্য
+          </button>
+          <button
+            onClick={() => setSelectedCategory('electronics')}
+            className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition ${
+              selectedCategory === 'electronics' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
+            }`}
+          >
+            ইলেকট্রনিক্স
+          </button>
+          <button
+            onClick={() => setSelectedCategory('fashion')}
+            className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition ${
+              selectedCategory === 'fashion' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
+            }`}
+          >
+            ফ্যাশন
+          </button>
+          <button
+            onClick={() => setSelectedCategory('groceries')}
+            className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition ${
+              selectedCategory === 'groceries' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
+            }`}
+          >
+            মুদি ও খাদ্য
+          </button>
         </div>
       </div>
 
@@ -224,50 +276,68 @@ export function App() {
           </div>
         </div>
 
-        {/* ফ্ল্যাশ সেল সেকশন */}
+        {/* পণ্য তালিকা সেকশন */}
         <div className="bg-white p-3 rounded-2xl shadow-sm">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-red-600 text-base">Flash Sale</h3>
-              <span className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded">02:27:22</span>
+              <h3 className="font-bold text-gray-800 text-base">
+                {searchQuery ? `"${searchQuery}" এর ফলাফল` : 'সকল পণ্য'}
+              </h3>
+              <span className="bg-pink-100 text-pink-600 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                {filteredProducts.length} টি পণ্য
+              </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            {filteredProducts.map((product) => (
-              <div key={product.id} className="border border-gray-100 rounded-xl p-2 bg-white relative shadow-sm">
-                <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 relative overflow-hidden flex items-center justify-center">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  <span className={`absolute bottom-1 left-1 text-[9px] px-1.5 py-0.5 rounded font-bold ${
-                    product.condition === 'new' ? 'bg-green-500 text-white' : 'bg-amber-500 text-white'
-                  }`}>
-                    {product.condition === 'new' ? 'নতুন' : 'পুরাতন'}
-                  </span>
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-10 space-y-2">
+              <p className="text-3xl">🔍</p>
+              <p className="text-sm font-semibold text-gray-600">কোনো পণ্য পাওয়া যায়নি!</p>
+              <p className="text-xs text-gray-400">অন্য কোনো নাম বা ক্যাটাগরিতে খুঁজে দেখুন।</p>
+              <button 
+                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+                className="mt-2 text-xs text-pink-600 font-bold underline"
+              >
+                সব পণ্য দেখুন
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {filteredProducts.map((product) => (
+                <div key={product.id} className="border border-gray-100 rounded-xl p-2 bg-white relative shadow-sm">
+                  <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 relative overflow-hidden flex items-center justify-center">
+                    <img 
+                      src={product.image} 
+                      alt={product.title} 
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    <span className={`absolute bottom-1 left-1 text-[9px] px-1.5 py-0.5 rounded font-bold ${
+                      product.condition === 'new' ? 'bg-green-500 text-white' : 'bg-amber-500 text-white'
+                    }`}>
+                      {product.condition === 'new' ? 'নতুন' : 'পুরাতন'}
+                    </span>
+                  </div>
+                  <h4 className="text-xs font-semibold text-gray-800 line-clamp-1">{product.title}</h4>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className="text-pink-600 font-bold text-sm">৳{product.price}</span>
+                    <span className="text-gray-400 text-[10px] line-through">৳{product.originalPrice}</span>
+                  </div>
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="w-full mt-2 bg-pink-600 text-white py-1 rounded-lg text-xs font-bold"
+                  >
+                    কার্টে রাখুন
+                  </button>
                 </div>
-                <h4 className="text-xs font-semibold text-gray-800 line-clamp-1">{product.title}</h4>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-pink-600 font-bold text-sm">৳{product.price}</span>
-                  <span className="text-gray-400 text-[10px] line-through">৳{product.originalPrice}</span>
-                </div>
-                <button
-                  onClick={() => addToCart(product)}
-                  className="w-full mt-2 bg-pink-600 text-white py-1 rounded-lg text-xs font-bold"
-                >
-                  কার্টে রাখুন
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
       {/* নেভিগেশন বার */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 flex justify-around items-center max-w-md mx-auto z-20 text-xs text-gray-600">
-        <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-pink-600 font-bold' : ''}>
+        <button onClick={() => { setActiveTab('home'); setSearchQuery(''); setSelectedCategory('all'); }} className={activeTab === 'home' ? 'text-pink-600 font-bold' : ''}>
           🏠 হোম
         </button>
         <button onClick={() => setIsPostModalOpen(true)} className="bg-pink-600 text-white px-3 py-1 rounded-full font-bold">
@@ -283,7 +353,7 @@ export function App() {
         </button>
       </div>
 
-      {/* পোস্ট করার মডাল (গ্যালারি থেকে সরাসরি ছবি আপলোড) */}
+      {/* পোস্ট করার মডাল */}
       {isPostModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3">
@@ -313,6 +383,18 @@ export function App() {
                   onChange={(e) => setNewPrice(e.target.value)}
                   className="w-full border rounded-lg p-2 text-sm mt-1 outline-none focus:border-pink-500"
                 />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600">ক্যাটাগরি</label>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full border rounded-lg p-2 text-sm mt-1 outline-none focus:border-pink-500"
+                >
+                  <option value="electronics">ইলেকট্রনিক্স</option>
+                  <option value="fashion">ফ্যাশন</option>
+                  <option value="groceries">মুদি ও খাদ্য</option>
+                </select>
               </div>
               <div>
                 <label className="text-xs text-gray-600">পণ্যের ছবি সিলেক্ট করুন</label>
@@ -404,50 +486,4 @@ export function App() {
                   />
 
                   <div>
-                    <label className="text-xs font-semibold text-gray-700">পেমেন্ট মেথড নির্বাচন করুন:</label>
-                    <div className="grid grid-cols-3 gap-2 mt-1">
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('bkash')}
-                        className={`p-2 rounded-lg border text-xs font-bold ${
-                          paymentMethod === 'bkash' ? 'border-pink-600 bg-pink-50 text-pink-600' : 'border-gray-200'
-                        }`}
-                      >
-                        bKash
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('nagad')}
-                        className={`p-2 rounded-lg border text-xs font-bold ${
-                          paymentMethod === 'nagad' ? 'border-orange-600 bg-orange-50 text-orange-600' : 'border-gray-200'
-                        }`}
-                      >
-                        Nagad
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('cod')}
-                        className={`p-2 rounded-lg border text-xs font-bold ${
-                          paymentMethod === 'cod' ? 'border-green-600 bg-green-50 text-green-600' : 'border-gray-200'
-                        }`}
-                      >
-                        Cash On
-                      </button>
-                    </div>
-                  </div>
-
-                  <button type="submit" className="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-sm mt-2">
-                    অর্ডার নিশ্চিত করুন
-                  </button>
-                </form>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default App;
-      
+                    <label className="text-xs font-semibold text-gray-700">পেমেন্ট মেথড নির্বাচন করুন:</lab
