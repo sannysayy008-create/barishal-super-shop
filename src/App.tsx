@@ -18,8 +18,6 @@ export function App() {
 
   const [activeTab, setActiveTab] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [userRole, setUserRole] = useState<'user' | 'admin' | 'moderator'>('user');
   
   // Language & Profile State
   const [lang, setLang] = useState<'bn' | 'en'>('bn');
@@ -56,7 +54,7 @@ export function App() {
   ]);
 
   const [cartItems, setCartItems] = useState<Product[]>([]);
-  
+
   // Post Ad Form State
   const [newTitle, setNewTitle] = useState<string>('');
   const [newPrice, setNewPrice] = useState<string>('');
@@ -65,7 +63,7 @@ export function App() {
   const [isFlash, setIsFlash] = useState<boolean>(false);
   const [newImage, setNewImage] = useState<string>('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300');
 
-  // Handle Image Upload
+  // Image Upload Handling
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -78,9 +76,9 @@ export function App() {
   };
 
   const addToCart = (product: Product) => setCartItems([...cartItems, product]);
-
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
 
+  // Telegram Order Submit
   const handleOrderSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!customerName || !customerPhone || !customerAddress) {
@@ -91,11 +89,13 @@ export function App() {
     const telegramMessage = `🛒 *নতুন অর্ডার এসেছে!*\n\n👤 *নাম:* ${customerName}\n📞 *ফোন:* ${customerPhone}\n🏠 *ঠিকানা:* ${customerAddress}\n\n📦 *পণ্য:* \n${itemsList}\n\n💰 *মোট:* ৳${totalPrice}`;
 
     try {
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: telegramMessage, parse_mode: 'Markdown' }),
-      });
+      if (TELEGRAM_BOT_TOKEN !== "YOUR_TELEGRAM_BOT_TOKEN_HERE") {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: telegramMessage, parse_mode: 'Markdown' }),
+        });
+      }
       alert(lang === 'bn' ? 'অর্ডার গ্রহণ করা হয়েছে!' : 'Order received!');
       setCartItems([]);
       setActiveTab('home');
@@ -104,14 +104,12 @@ export function App() {
     }
   };
 
-  // Handle Post Ad Submission
+  // Post Ad Submission
   const handlePostAd = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newTitle || !newPrice) return;
     const priceNum = Number(newPrice);
     const origPriceNum = newOriginalPrice ? Number(newOriginalPrice) : priceNum + 150;
-    
-    // Calculate Discount Percentage
     const discountPercent = Math.round(((origPriceNum - priceNum) / origPriceNum) * 100);
 
     const newProd: Product = {
@@ -127,9 +125,8 @@ export function App() {
     };
 
     setProducts([newProd, ...products]);
-    alert(lang === 'bn' ? 'আপনার বিজ্ঞাপনটি সফলভাবে পোস্ট করা হয়েছে!' : 'Ad posted successfully!');
-    
-    // Reset Form
+    alert(lang === 'bn' ? 'বিজ্ঞাপনটি সফলভাবে পোস্ট হয়েছে!' : 'Ad posted successfully!');
+
     setNewTitle('');
     setNewPrice('');
     setNewOriginalPrice('');
@@ -255,29 +252,29 @@ export function App() {
           </>
         )}
 
-        {/* Post Ad (বিজ্ঞাপন পোস্ট) Tab */}
+        {/* Post Ad (বিজ্ঞাপন দিন) Form */}
         {activeTab === 'post' && (
           <div className="bg-white p-4 rounded-xl shadow-sm space-y-3">
-            <h3 className="font-bold border-b pb-2 text-sm text-pink-600">📢 {lang === 'bn' ? 'নতুন বিজ্ঞাপন দিন' : 'Post New Ad'}</h3>
+            <h3 className="font-bold border-b pb-2 text-sm text-pink-600">📌 নতুন বিজ্ঞাপন ছাড়ুন</h3>
             <form onSubmit={handlePostAd} className="space-y-3 text-xs">
               <div>
-                <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'পণ্যের নাম / টাইটেল' : 'Product Title'}</label>
-                <input type="text" placeholder="যেমন: ব্র্যান্ড নিউ ওয়াচ" required value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
+                <label className="text-gray-600 font-semibold">পণ্যের নাম / শিরোনাম</label>
+                <input type="text" placeholder="পণ্যের শিরোনাম লিখুন" required value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'অফার প্রাইস (৳)' : 'Offer Price (৳)'}</label>
-                  <input type="number" placeholder="500" required value={newPrice} onChange={(e) => setNewPrice(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
+                  <label className="text-gray-600 font-semibold">অফার মূল্য (৳)</label>
+                  <input type="number" placeholder="৳300" required value={newPrice} onChange={(e) => setNewPrice(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
                 </div>
                 <div>
-                  <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'আগের দাম (৳)' : 'Original Price (৳)'}</label>
-                  <input type="number" placeholder="1000" value={newOriginalPrice} onChange={(e) => setNewOriginalPrice(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
+                  <label className="text-gray-600 font-semibold">আসল মূল্য (৳)</label>
+                  <input type="number" placeholder="৳500" value={newOriginalPrice} onChange={(e) => setNewOriginalPrice(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
                 </div>
               </div>
 
               <div>
-                <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'ক্যাটাগরি' : 'Category'}</label>
+                <label className="text-gray-600 font-semibold">ক্যাটাগরি সিলেক্ট করুন</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1">
                   <option value="electronics">Electronics</option>
                   <option value="fashion">Fashion & Lifestyle</option>
@@ -286,24 +283,24 @@ export function App() {
               </div>
 
               <div className="flex items-center gap-2 bg-pink-50 p-2 rounded border border-pink-200">
-                <input type="checkbox" id="flashSale" checked={isFlash} onChange={(e) => setIsFlash(e.target.checked)} className="w-4 h-4 text-pink-600" />
-                <label htmlFor="flashSale" className="font-bold text-pink-600 cursor-pointer text-xs">⚡ Flash Sale-এ দেখান</label>
+                <input type="checkbox" id="flashSaleOpt" checked={isFlash} onChange={(e) => setIsFlash(e.target.checked)} className="w-4 h-4 text-pink-600" />
+                <label htmlFor="flashSaleOpt" className="font-bold text-pink-600 cursor-pointer text-xs">⚡ Flash Sale-এ দেখান</label>
               </div>
 
               <div>
-                <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'ছবি আপলোড করুন (ফোন/কম্পিউটার)' : 'Upload Image'}</label>
+                <label className="text-gray-600 font-semibold">পণ্যের ছবি আপলোড করুন</label>
                 <input type="file" accept="image/*" onChange={handleImageChange} className="w-full border p-1 rounded text-black mt-1" />
               </div>
 
               {newImage && (
                 <div>
                   <p className="text-[10px] text-gray-500 mb-1">প্রিভিউ:</p>
-                  <img src={newImage} alt="Preview" className="w-20 h-20 object-cover rounded border" />
+                  <img src={newImage} alt="Preview" className="w-16 h-16 object-cover rounded border" />
                 </div>
               )}
 
               <button type="submit" className="w-full bg-pink-600 text-white py-2.5 rounded-lg font-bold text-xs shadow-md hover:bg-pink-700">
-                🚀 {lang === 'bn' ? 'বিজ্ঞাপন প্রকাশ করুন' : 'Publish Ad'}
+                🚀 বিজ্ঞাপন পোস্ট করুন
               </button>
             </form>
           </div>
@@ -314,7 +311,7 @@ export function App() {
           <div className="bg-white p-4 rounded-xl shadow-sm text-center space-y-2">
             <div className="text-3xl">💬</div>
             <h3 className="font-bold text-sm">মেসেজ সেন্টার</h3>
-            <p className="text-xs text-gray-500">আপনার কোনো নতুন নোটিফিকেশন বা মেসেজ নেই।</p>
+            <p className="text-xs text-gray-500">আপনার কোনো নতুন মেসেজ নেই।</p>
           </div>
         )}
 
@@ -360,4 +357,9 @@ export function App() {
       </main>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0
+      <div className="fixed bottom-0 left-0 right-0 border-t py-1 bg-white flex justify-around text-[10px] text-gray-700 font-medium z-40">
+        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center ${activeTab === 'home' ? 'text-pink-600 font-bold' : ''}`}>
+          <span className="text-sm">🏠</span>
+          <span>For You</span>
+        </button>
+        <button onClick={() => setActiveTab('messages')} className=
