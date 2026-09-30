@@ -90,10 +90,11 @@ export function App() {
 
   const [cartItems, setCartItems] = useState<any[]>([]);
 
-  // Post Ad Form State
+  // Post Ad Form State (With Image URL)
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newCondition, setNewCondition] = useState('new');
+  const [newImage, setNewImage] = useState('');
 
   const addToCart = (product: any) => {
     setCartItems([...cartItems, product]);
@@ -142,7 +143,7 @@ export function App() {
       originalPrice: priceNum + 100,
       discount: '-10%',
       condition: newCondition,
-      image: 'https://via.placeholder.com/150'
+      image: newImage.trim() !== '' ? newImage : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300'
     };
 
     setProducts([newProd, ...products]);
@@ -150,6 +151,7 @@ export function App() {
     setIsPostModalOpen(false);
     setNewTitle('');
     setNewPrice('');
+    setNewImage('');
   };
 
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
@@ -269,7 +271,7 @@ export function App() {
         </button>
       </div>
 
-      {/* পোস্ট মডাল */}
+      {/* পোস্ট করার মডাল (ইমেজ লিংক অপশনসহ) */}
       {isPostModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3">
@@ -283,9 +285,10 @@ export function App() {
                 <input
                   type="text"
                   required
+                  placeholder="যেমন: স্মার্ট ওয়াচ"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full border rounded-lg p-2 text-sm mt-1"
+                  className="w-full border rounded-lg p-2 text-sm mt-1 outline-none focus:border-pink-500"
                 />
               </div>
               <div>
@@ -293,23 +296,35 @@ export function App() {
                 <input
                   type="number"
                   required
+                  placeholder="যেমন: ৫০০"
                   value={newPrice}
                   onChange={(e) => setNewPrice(e.target.value)}
-                  className="w-full border rounded-lg p-2 text-sm mt-1"
+                  className="w-full border rounded-lg p-2 text-sm mt-1 outline-none focus:border-pink-500"
                 />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600">পণ্যের ছবির লিংক (Image URL)</label>
+                <input
+                  type="url"
+                  placeholder="https://example.com/image.jpg"
+                  value={newImage}
+                  onChange={(e) => setNewImage(e.target.value)}
+                  className="w-full border rounded-lg p-2 text-sm mt-1 outline-none focus:border-pink-500"
+                />
+                <p className="text-[10px] text-gray-400 mt-0.5">* ফাকা রাখলে ডিফল্ট ছবি বসবে</p>
               </div>
               <div>
                 <label className="text-xs text-gray-600">অবস্থা</label>
                 <select
                   value={newCondition}
                   onChange={(e) => setNewCondition(e.target.value)}
-                  className="w-full border rounded-lg p-2 text-sm mt-1"
+                  className="w-full border rounded-lg p-2 text-sm mt-1 outline-none focus:border-pink-500"
                 >
-                  <option value="new">নতুন</option>
-                  <option value="used">পুরাতন</option>
+                  <option value="new">নতুন (New)</option>
+                  <option value="used">পুরাতন (Used)</option>
                 </select>
               </div>
-              <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-sm">
+              <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-sm hover:bg-pink-700">
                 পোস্ট করুন
               </button>
             </form>
@@ -420,4 +435,4 @@ export function App() {
 }
 
 export default App;
-    
+                      
