@@ -1,334 +1,192 @@
-import React, { useState, useEffect } from 'react';
+updatedPost.idimport React, { useState, useEffect } from 'react';
 import { LoginModal } from './components/LoginModal';
+import { EditPostModal } from './components/EditPostModal';
+import { sendTelegramMessage } from './services/telegram';
+import { UserProfile, Post } from './types';
 
 export function App() {
-  const [user, setUser] = useState<{ name: string; phone: string } | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  
+  // নতুন পোস্ট তৈরির ইনপুট স্টেট
+  const [newTitle, setNewTitle] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  const [newDesc, setNewDesc] = useState('');
 
+  // ১. অ্যাপে ঢোকার সাথে সাথে কাস্টমার লগইন চেক করা
   useEffect(() => {
     const savedUser = localStorage.getItem('user_profile');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
+      setShowLoginModal(false);
     } else {
       setShowLoginModal(true);
     }
   }, []);
 
-  const handleLoginSuccess = (userData: { name: string; phone: string }) => {
+  // ২. নতুন কাস্টমার লগইন সম্পন্ন হলে
+  const handleLoginSuccess = (userData: UserProfile) => {
     setUser(userData);
     setShowLoginModal(false);
+    
+    // টেলিগ্রামে নোটিফিকেশন পাঠানো
+    sendTelegramMessage(`
+<b>🔔 নতুন রেজিস্ট্রেশন!</b>
+👤 নাম: ${userData.name}
+📱 ফোন: ${userData.phone}
+    `);
+  };
+
+  // ৩. নতুন পোস্ট/বিজ্ঞাপন যোগ করা
+  const handleCreatePost = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle || !newPrice || !user) return;
+
+    const newPost: Post = {
+      id: Date.now().toString(),
+      title: newTitle,
+      price: newPrice,
+      description: newDesc,
+      image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500', // ডিফল্ট ছবি
+      authorName: user.name,
+      authorPhone: user.phone,
+      status: 'approved',
+      createdAt: new Date().toLocaleDateString('bn-BD'),
+    };
+
+    setPosts([newPost, ...posts]);
+    setNewTitle('');
+    setNewPrice('');
+    setNewDesc('');
+
+    // টেলিগ্রামে নোটিফিকেশন পাঠানো
+    sendTelegramMessage(`8633414899
+<b>📢 নতুন পোস্ট করা হয়েছে!</b>
+📌 শিরোনাম: ${newPost.title}
+💰 দাম: ৳${newPost.price}
+👤 পোস্টকারী: ${newPost.authorName} (${newPost.authorPhone})
+    `);
+  };
+
+  // ৪. এডমিন/মডারেটর কর্তৃক পোস্ট আপডেট (এডিট)
+  const handleSaveEdit = (updatedPost: Post) => {
+    setPosts(posts.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
+    setEditingPost(null);
+  };
+
+  // ৫. পোস্ট ডিলিট করা
+  const handleDeletePost = (id: string) => {
+    if (confirm('আপনি কি পোস্টটি ডিলিট করতে চান?')) {
+      setPosts(posts.filter((p) => p.id !== id));
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100 pb-12">
+      {/* এককালীন বাধ্যতামূলক লগইন মোডাল */}
       {showLoginModal && <LoginModal onSuccess={handleLoginSuccess} />}
 
-      <header className="bg-green-600 text-white p-4 shadow-md flex justify-between items-center">
-        <h1 className="text-lg font-bold">বরিশাল সুপার শপ</h1>
-        {user && <span className="text-sm bg-green-700 px-3 py-1 rounded-full">👤 {user.name}</span>}
+      {/* পোস্ট এডিট করার মোডাল */}
+      {editingPost && (
+        <EditPostModal
+          post={editingPost}
+          onSave={handleSaveEdit}
+          onClose={() => setEditingPost(null)}
+        />
+      )}
+
+      {/* হেডার / নেভিগেশন */}
+      <header className="bg-green-700 text-white p-4 shadow-lg flex justify-between items-center sticky top-0 z-40">
+        <h1 className="text-xl font-bold">বরিশাল সুপার শপ</h1>
+        {user && (
+          <div className="text-sm bg-green-800 px-3 py-1.5 rounded-full border border-green-600">
+            👤 {user.name} ({user.phone})
+          </div>
+        )}
       </header>
 
-      {/* আপনার বাকী অ্যাপ কোড */}
-    </div>
-  );
-}
-import React, { useMemo, useState } from 'react';
-import {
-  Search,
-  MapPin,
-  Star,
-  SlidersHorizontal,
-  ShoppingCart,
-  MessageSquare,
-  Smartphone,
-  Shirt,
-  ShoppingBasket,
-  Tv,
-  Recycle,
-  Bike,
-  LayoutGrid,
-  Check,
-  RotateCcw,
-} from 'lucide-react';
-import {
-  BARISHAL_AREAS,
-  CATEGORIES,
-  INITIAL_CHATS,
-  INITIAL_ORDERS,
-  INITIAL_PRODUCTS,
-  formatTaka,
-  toBengaliNumber,
-} from './data/mockData';
-import {
-  BarishalArea,
-  CartItem,
-  CategoryId,
-  ChatThread,
-  OrderRecord,
-  ProductItem,
-} from './types';
-import { ActiveTab, Header } from './components/Header';
-import { BottomNav } from './components/BottomNav';
-import { HeroBanner } from './components/HeroBanner';
-import { SafeImage } from './components/SafeImage';
-import { ProductDetailModal } from './components/ProductDetailModal';
-import { PostAdModal } from './components/PostAdModal';
-import { CartDrawer } from './components/CartDrawer';
-import { ChatView } from './components/ChatView';
-import { UserDashboard } from './components/UserDashboard';
-import { OfflineIndicator, QuickAppDownloadBanner } from './components/PWAInstallButton';
+      <main className="max-w-2xl mx-auto p-4 space-y-6">
+        {/* নতুন পোস্ট করার ফরম */}
+        <div className="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
+          <h2 className="text-lg font-bold text-gray-800 mb-3">বিজ্ঞাপন বা পণ্য পোস্ট করুন</h2>
+          <form onSubmit={handleCreatePost} className="space-y-3">
+            <input
+              type="text"
+              required
+              placeholder="পণ্যের নাম/শিরোনাম"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="w-full p-2.5 border rounded-xl outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <input
+              type="text"
+              required
+              placeholder="দাম (টাকা)"
+              value={newPrice}
+              onChange={(e) => setNewPrice(e.target.value)}
+              className="w-full p-2.5 border rounded-xl outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <textarea
+              placeholder="বিস্তারিত বিবরণ..."
+              value={newDesc}
+              onChange={(e) => setNewDesc(e.target.value)}
+              className="w-full p-2.5 border rounded-xl outline-none focus:ring-2 focus:ring-green-500"
+              rows={2}
+            />
+            <button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl transition shadow"
+            >
+              পোস্ট প্রকাশ করুন
+            </button>
+          </form>
+        </div>
 
-type PriceFilter = 'all' | 'under_2000' | 'under_10000' | 'under_50000' | 'above_50000';
+        {/* পোস্টের লিস্ট */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-gray-800">সাম্প্রতিক বিজ্ঞাপন ও পোস্টসমূহ</h2>
+          {posts.length === 0 ? (
+            <p className="text-center text-gray-500 py-6 bg-white rounded-2xl">এখনো কোনো পোস্ট করা হয়নি।</p>
+          ) : (
+            posts.map((post) => (
+              <div key={post.id} className="bg-white rounded-2xl p-4 shadow-md border border-gray-100 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">{post.title}</h3>
+                    <p className="text-sm text-green-700 font-semibold">৳{post.price}</p>
+                  </div>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md">{post.createdAt}</span>
+                </div>
 
-const CATEGORY_ICONS: Record<CategoryId, React.ReactNode> = {
-  all: <LayoutGrid className="w-5 h-5" />,
-  electronics: <Tv className="w-5 h-5" />,
-  fashion: <Shirt className="w-5 h-5" />,
-  grocery: <ShoppingBasket className="w-5 h-5" />,
-  mobile: <Smartphone className="w-5 h-5" />,
-  used_items: <Recycle className="w-5 h-5" />,
-  vehicles: <Bike className="w-5 h-5" />,
-};
+                <p className="text-sm text-gray-600">{post.description}</p>
 
-// সরাসরি টেলিগ্রাম এপিআইতে ডাটা পাঠানোর সরলীকৃত ফাংশন
-const sendTelegramNotification = (order: OrderRecord) => {
-  const BOT_TOKEN = "8685426962:AAF5HuKvQd_oeT2YZVMSI4vueLaF89r5F0M";
-  const CHAT_ID = "8633414899";
+                <div className="text-xs text-gray-500 border-t pt-2 flex justify-between items-center">
+                  <span>পোস্টকারী: {post.authorName} ({post.authorPhone})</span>
 
-  const name = order?.customerName || 'N/A';
-  const phone = order?.phone || 'N/A';
-  const address = order?.address || 'N/A';
-  const total = order?.totalAmount || 0;
-
-  const text = `🛒 নতুন অর্ডার এসেছে!\n\n👤 নাম: ${name}\n📞 ফোন: ${phone}\n📍 ঠিকানা: ${address}\n💰 মোট টাকা: ৳${total}`;
-
-  // URL Encode করে নোটিফিকেশন সেন্ড
-  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`;
-
-  fetch(url)
-    .then((res) => res.json())
-    .then((data) => console.log("Telegram Result:", data))
-    .catch((err) => console.error("Telegram Error:", err));
-};
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('home');
-  const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
-  const [cart, setCart] = useState<CartItem[]>([
-    { product: INITIAL_PRODUCTS[0], quantity: 1 },
-  ]);
-  const [orders, setOrders] = useState<OrderRecord[]>(INITIAL_ORDERS);
-  const [chatThreads, setChatThreads] = useState<ChatThread[]>(INITIAL_CHATS);
-
-  // Search & Filter states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
-  const [selectedArea, setSelectedArea] = useState<BarishalArea>('সব এলাকা');
-  const [priceFilter, setPriceFilter] = useState<PriceFilter>('all');
-  const [listingModeFilter, setListingModeFilter] = useState<'all' | 'ecommerce' | 'classified'>('all');
-
-  // Modals & Drawers
-  const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
-  const [isPostAdOpen, setIsPostAdOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-
-  const filteredProducts = useMemo(() => {
-    return products.filter((item) => {
-      if (listingModeFilter !== 'all' && item.listingType !== listingModeFilter) return false;
-      if (selectedCategory !== 'all' && item.category !== selectedCategory) return false;
-      if (selectedArea !== 'সব এলাকা' && item.area !== selectedArea) return false;
-      if (priceFilter === 'under_2000' && item.price > 2000) return false;
-      if (priceFilter === 'under_10000' && item.price > 10000) return false;
-      if (priceFilter === 'under_50000' && item.price > 50000) return false;
-      if (priceFilter === 'above_50000' && item.price <= 50000) return false;
-
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        return (
-          item.title.toLowerCase().includes(q) ||
-          item.description.toLowerCase().includes(q) ||
-          item.area.toLowerCase().includes(q) ||
-          item.categoryLabel.toLowerCase().includes(q)
-        );
-      }
-      return true;
-    });
-  }, [products, listingModeFilter, selectedCategory, selectedArea, priceFilter, searchQuery]);
-
-  const totalCartItems = useMemo(
-    () => cart.reduce((sum, item) => sum + item.quantity, 0),
-    [cart]
-  );
-
-  const unreadChatCount = useMemo(
-    () => chatThreads.reduce((sum, t) => sum + t.unreadCount, 0),
-    [chatThreads]
-  );
-
-  const handleAddToCart = (product: ProductItem, quantity = 1) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.product.id === product.id ? { ...i, quantity: i.quantity + quantity } : i
-        );
-      }
-      return [...prev, { product, quantity }];
-    });
-  };
-
-  const handleBuyNow = (product: ProductItem, quantity = 1) => {
-    handleAddToCart(product, quantity);
-    setSelectedProduct(null);
-    setIsCartOpen(true);
-  };
-
-  const handleUpdateCartQty = (productId: string, delta: number) => {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.product.id === productId
-            ? { ...item, quantity: item.quantity + delta }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const handlePlaceOrder = (newOrder: OrderRecord) => {
-    setOrders((prev) => [newOrder, ...prev]);
-    setCart([]);
-
-    // সঙ্গে সঙ্গে টেলিগ্রাম নোটিফিকেশন ট্রিগার
-    sendTelegramNotification(newOrder);
-  };
-
-  return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 pb-20">
-      <OfflineIndicator />
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        listingModeFilter={listingModeFilter}
-        setListingModeFilter={setListingModeFilter}
-        cartCount={totalCartItems}
-        unreadChatCount={unreadChatCount}
-        onOpenCart={() => setIsCartOpen(true)}
-        onOpenPostAd={() => setIsPostAdOpen(true)}
-      />
-
-      <main className="max-w-7xl mx-auto px-4 py-4 space-y-6">
-        <HeroBanner
-          onSelectCategory={(cat) => setSelectedCategory(cat)}
-          onOpenPostAd={() => setIsPostAdOpen(true)}
-        />
-        <QuickAppDownloadBanner />
-
-        {/* Categories */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold text-stone-800">ক্যাটাগরি</h2>
-          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all ${
-                  selectedCategory === cat.id
-                    ? 'bg-amber-500 text-white border-amber-500 shadow-md scale-105'
-                    : 'bg-white text-stone-600 border-stone-200 hover:border-amber-300'
-                }`}
-              >
-                {CATEGORY_ICONS[cat.id]}
-                <span className="text-xs font-medium mt-1.5 text-center line-clamp-1">
-                  {cat.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* Product Grid */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-stone-800">পণ্যসমূহ</h2>
-            <span className="text-sm text-stone-500">
-              মোট: {toBengaliNumber(filteredProducts.length)} টি
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
-              >
-                <div
-                  className="cursor-pointer relative"
-                  onClick={() => setSelectedProduct(product)}
-                >
-                  <SafeImage
-                    src={product.image}
-                    alt={product.title}
-                    className="w-full h-40 object-cover"
-                  />
-                  <div className="p-3">
-                    <span className="text-xs text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-md">
-                      {product.categoryLabel}
-                    </span>
-                    <h3 className="font-bold text-stone-800 line-clamp-2 mt-1 text-sm">
-                      {product.title}
-                    </h3>
-                    <p className="text-amber-600 font-bold mt-2 text-base">
-                      {formatTaka(product.price)}
-                    </p>
+                  {/* এডমিন/মডারেটর অ্যাকশন (এডিট ও ডিলিট) */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditingPost(post)}
+                      className="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg text-xs font-semibold hover:bg-blue-100"
+                    >
+                      ✏️ এডিট
+                    </button>
+                    <button
+                      onClick={() => handleDeletePost(post.id)}
+                      className="bg-red-50 text-red-600 px-2.5 py-1 rounded-lg text-xs font-semibold hover:bg-red-100"
+                    >
+                      🗑️ ডিলিট
+                    </button>
                   </div>
                 </div>
-
-                <div className="p-3 pt-0">
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    className="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1 transition-all"
-                  >
-                    <ShoppingCart className="w-3.5 h-3.5" />
-                    কার্টে রাখুন
-                  </button>
-                </div>
               </div>
-            ))}
-          </div>
-        </section>
+            ))
+          )}
+        </div>
       </main>
-
-      {/* Modals */}
-      {selectedProduct && (
-        <ProductDetailModal
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          onAddToCart={handleAddToCart}
-          onBuyNow={handleBuyNow}
-        />
-      )}
-
-      {isPostAdOpen && (
-        <PostAdModal
-          onClose={() => setIsPostAdOpen(false)}
-          onAddProduct={(newProd) => setProducts((prev) => [newProd, ...prev])}
-        />
-      )}
-
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cart}
-        onUpdateQuantity={handleUpdateCartQty}
-        onPlaceOrder={handlePlaceOrder}
-      />
-
-      <BottomNav
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        unreadChatCount={unreadChatCount}
-      />
     </div>
   );
-    }
+             }
+              
