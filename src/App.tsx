@@ -10,28 +10,19 @@ interface Product {
 }
 
 export function App() {
-  // 🔴 এখানে @BotFather থেকে পাওয়া টোকেনটি বসান
   const TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE";
-  
-  // 🟢 আপনার দেওয়া Chat ID
   const TELEGRAM_CHAT_ID = "8633414899";
 
   const [activeTab, setActiveTab] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-
-  // User Role State: 'user' | 'admin' | 'moderator'
   const [userRole, setUserRole] = useState<'user' | 'admin' | 'moderator'>('user');
 
-  // Customer Profile State
   const [customerName, setCustomerName] = useState<string>(() => localStorage.getItem('cust_name') || '');
   const [customerPhone, setCustomerPhone] = useState<string>(() => localStorage.getItem('cust_phone') || '');
   const [customerAddress, setCustomerAddress] = useState<string>(() => localStorage.getItem('cust_address') || '');
-
-  // Settings State
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
-  // Auto save profile data
   const saveProfile = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     localStorage.setItem('cust_name', customerName);
@@ -40,7 +31,6 @@ export function App() {
     alert('প্রোফাইল তথ্য সংরক্ষণ করা হয়েছে!');
   };
 
-  // Products State
   const [products, setProducts] = useState<Product[]>([
     { 
       id: 1, 
@@ -77,8 +67,6 @@ export function App() {
   ]);
 
   const [cartItems, setCartItems] = useState<Product[]>([]);
-
-  // Post Ad State
   const [newTitle, setNewTitle] = useState<string>('');
   const [newPrice, setNewPrice] = useState<string>('');
   const [newCategory, setNewCategory] = useState<string>('electronics');
@@ -93,7 +81,6 @@ export function App() {
     setCartItems(updated);
   };
 
-  // Admin Functionality
   const deleteProduct = (id: number) => {
     if (window.confirm('আপনি কি নিশ্চিত এই পণ্যটি ডিলিট করতে চান?')) {
       setProducts(products.filter(p => p.id !== id));
@@ -102,7 +89,6 @@ export function App() {
 
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
 
-  // 📩 টেলিগ্রাম বটে অর্ডার পাঠানোর ফংশন
   const handleOrderSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!customerName || !customerPhone || !customerAddress) {
@@ -174,7 +160,6 @@ ${itemsList}
   return (
     <div className={`min-h-screen pb-20 font-sans ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
       
-      {/* নেভিগেশন হেডার */}
       <div className="bg-pink-600 p-3 text-white sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-2 max-w-md mx-auto">
           <input
@@ -197,7 +182,6 @@ ${itemsList}
           </button>
         </div>
 
-        {/* ক্যাটাগরি ফিল্টার */}
         {activeTab === 'home' && (
           <div className="flex gap-2 mt-2 overflow-x-auto pb-1 max-w-md mx-auto text-xs">
             <button
@@ -236,20 +220,16 @@ ${itemsList}
         )}
       </div>
 
-      {/* মেইন কন্টেন্ট এলাকা */}
       <main className="max-w-md mx-auto p-3 space-y-4">
         
-        {/* রোল ইন্ডিকেটর ব্যানার */}
         {userRole !== 'user' && (
           <div className={`p-2 rounded-xl text-center text-xs font-bold ${userRole === 'admin' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>
             {userRole === 'admin' ? '👑 এডমিন মোড সক্রিয়' : '🛡️ মডারেটর মোড সক্রিয়'}
           </div>
         )}
 
-        {/* হোম পেইজ */}
         {activeTab === 'home' && (
           <>
-            {/* ব্যানার */}
             <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 rounded-2xl shadow-lg">
               <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded">SALE</span>
               <h2 className="text-xl font-extrabold mt-1">বরিশাল সুপার শপ</h2>
@@ -270,13 +250,11 @@ ${itemsList}
               </div>
             </div>
 
-            {/* প্রোডাক্ট গ্রিড */}
             <div className={`p-3 rounded-2xl shadow-sm ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <div className="grid grid-cols-2 gap-2">
                 {filteredProducts.map((product) => (
                   <div key={product.id} className={`border rounded-xl p-2 shadow-sm relative ${darkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-100 bg-white'}`}>
                     
-                    {/* Admin Delete Button */}
                     {userRole === 'admin' && (
                       <button 
                         onClick={() => deleteProduct(product.id)}
@@ -321,7 +299,6 @@ ${itemsList}
           </>
         )}
 
-        {/* কার্ট পেইজ */}
         {activeTab === 'cart' && (
           <div className={`p-4 rounded-2xl shadow-sm space-y-3 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <h3 className="font-bold border-b pb-2 text-base">আপনার শপিং কার্ট</h3>
@@ -386,7 +363,6 @@ ${itemsList}
           </div>
         )}
 
-        {/* পোস্ট বিজ্ঞাপন পেইজ */}
         {activeTab === 'post' && (
           <div className={`p-4 rounded-2xl shadow-sm space-y-3 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <h3 className="font-bold border-b pb-2 text-base">নতুন বিজ্ঞাপন দিন</h3>
@@ -432,7 +408,6 @@ ${itemsList}
           </div>
         )}
 
-        {/* 👤 প্রোফাইল পেইজ */}
         {activeTab === 'profile' && (
           <div className={`p-4 rounded-2xl shadow-sm space-y-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="flex items-center gap-3 border-b pb-3">
@@ -480,4 +455,18 @@ ${itemsList}
               <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-xs shadow">
                 তথ্য সেভ করুন
               </button>
-     
+            </form>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className={`p-4 rounded-2xl shadow-sm space-y-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className="font-bold border-b pb-2 text-base">অ্যাপ সেটিংস ও কন্ট্রোল</h3>
+
+            <div className="space-y-3 text-xs">
+              <div className="py-2 border-b">
+                <p className="font-semibold mb-2">ইউজার রোল সিলেক্ট করুন (Control Mode)</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <button 
+                    onClick={() => setUserRole('user')}
+                    className={`py-1.5 rounded-lg border font-bold ${userRole 
