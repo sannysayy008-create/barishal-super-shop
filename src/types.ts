@@ -98,3 +98,20 @@ export interface ChatThread {
   messages: ChatMessage[];
   unreadCount: number;
 }
+export interface UserProfile {
+  name: string;
+  phone: string;
+  role?: 'admin' | 'moderator' | 'user';
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  description: string;
+  price: string;
+  image?: string;
+  authorName: string;
+  authorPhone: string;
+  status: 'pending' | 'approved';
+  createdAt: string;
+}
