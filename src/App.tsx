@@ -56,9 +56,13 @@ export function App() {
   ]);
 
   const [cartItems, setCartItems] = useState<Product[]>([]);
+  
+  // Post Ad Form State
   const [newTitle, setNewTitle] = useState<string>('');
   const [newPrice, setNewPrice] = useState<string>('');
+  const [newOriginalPrice, setNewOriginalPrice] = useState<string>('');
   const [newCategory, setNewCategory] = useState<string>('electronics');
+  const [isFlash, setIsFlash] = useState<boolean>(false);
   const [newImage, setNewImage] = useState<string>('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300');
 
   // Handle Image Upload
@@ -100,30 +104,43 @@ export function App() {
     }
   };
 
+  // Handle Post Ad Submission
   const handlePostAd = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newTitle || !newPrice) return;
     const priceNum = Number(newPrice);
+    const origPriceNum = newOriginalPrice ? Number(newOriginalPrice) : priceNum + 150;
+    
+    // Calculate Discount Percentage
+    const discountPercent = Math.round(((origPriceNum - priceNum) / origPriceNum) * 100);
+
     const newProd: Product = {
       id: Date.now(),
       title: newTitle,
       price: priceNum,
-      originalPrice: priceNum + 150,
-      discount: '-50%',
+      originalPrice: origPriceNum,
+      discount: `-${discountPercent > 0 ? discountPercent : 10}%`,
       category: newCategory,
-      image: newImage
+      image: newImage,
+      isFlashSale: isFlash,
+      isTopRanked: !isFlash
     };
+
     setProducts([newProd, ...products]);
-    alert(lang === 'bn' ? 'বিজ্ঞাপন প্রকাশিত হয়েছে!' : 'Post published!');
-    setActiveTab('home');
+    alert(lang === 'bn' ? 'আপনার বিজ্ঞাপনটি সফলভাবে পোস্ট করা হয়েছে!' : 'Ad posted successfully!');
+    
+    // Reset Form
     setNewTitle('');
     setNewPrice('');
+    setNewOriginalPrice('');
+    setIsFlash(false);
+    setActiveTab('home');
   };
 
   return (
     <div className={`min-h-screen pb-20 font-sans ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
       
-      {/* Header Search Bar with Camera Icon */}
+      {/* Header Search Bar */}
       <div className="bg-pink-600 p-2.5 sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-2 max-w-md mx-auto">
           <div className="relative w-full flex items-center bg-white rounded-full px-3 py-1.5 shadow-inner">
@@ -134,7 +151,6 @@ export function App() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full text-xs text-black outline-none pr-6 bg-transparent"
             />
-            {/* Camera Search Icon */}
             <label className="cursor-pointer text-gray-500 text-sm hover:text-pink-600">
               📷
               <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
@@ -145,7 +161,6 @@ export function App() {
           </button>
         </div>
 
-        {/* Feature Badges */}
         <div className="flex justify-between max-w-md mx-auto text-[10px] text-white mt-2 px-1 font-medium">
           <span>💳 Safe Payment</span>
           <span>🚚 Fast Delivery</span>
@@ -155,19 +170,17 @@ export function App() {
 
       <main className="max-w-md mx-auto p-2 space-y-3">
         
-        {/* Home Tab Content */}
+        {/* Home Tab */}
         {activeTab === 'home' && (
           <>
-            {/* Quick Category Icons */}
             <div className="grid grid-cols-5 gap-1 text-center text-[10px] bg-white p-2 rounded-xl shadow-sm">
               <div className="p-1"><div className="bg-yellow-400 rounded-full w-8 h-8 mx-auto flex items-center justify-center font-bold text-xs text-white">💰</div><span>Coins</span></div>
               <div className="p-1"><div className="bg-orange-500 rounded-full w-8 h-8 mx-auto flex items-center justify-center font-bold text-xs text-white">CHOICE</div><span>Choice</span></div>
               <div className="p-1"><div className="bg-purple-600 rounded-full w-8 h-8 mx-auto flex items-center justify-center font-bold text-xs text-white">📱</div><span>Mobile</span></div>
               <div className="p-1"><div className="bg-pink-500 rounded-full w-8 h-8 mx-auto flex items-center justify-center font-bold text-xs text-white">🎁</div><span>Freebie</span></div>
-              <div className="p-1"><div className="bg-red-500 rounded-full w-8 h-8 mx-auto flex items-center justify-center font-bold text-xs text-white">BUY</div><span>Save More</span></div>
+              <div className="p-1"><div className="bg-red-500 rounded-full w-8 h-8 mx-auto flex items-center justify-center font-bold text-white">BUY</div><span>Save More</span></div>
             </div>
 
-            {/* Voucher Banner */}
             <div className="bg-gradient-to-r from-pink-100 to-orange-100 p-3 rounded-xl border border-pink-200 flex justify-between items-center shadow-sm">
               <div>
                 <p className="text-xs font-bold text-pink-600">Welcome: 15% OFF + Free Delivery</p>
@@ -181,7 +194,6 @@ export function App() {
               </button>
             </div>
 
-            {/* Payday Sale Banner */}
             <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-2 rounded-xl text-white font-bold text-xs flex justify-between items-center shadow">
               <div>
                 <span>🔥 PAYDAY SALE</span>
@@ -243,26 +255,55 @@ export function App() {
           </>
         )}
 
-        {/* Post Ad Tab */}
+        {/* Post Ad (বিজ্ঞাপন পোস্ট) Tab */}
         {activeTab === 'post' && (
           <div className="bg-white p-4 rounded-xl shadow-sm space-y-3">
-            <h3 className="font-bold border-b pb-2 text-sm">{lang === 'bn' ? 'নতুন বিজ্ঞাপন দিন' : 'Post New Ad'}</h3>
+            <h3 className="font-bold border-b pb-2 text-sm text-pink-600">📢 {lang === 'bn' ? 'নতুন বিজ্ঞাপন দিন' : 'Post New Ad'}</h3>
             <form onSubmit={handlePostAd} className="space-y-3 text-xs">
               <div>
-                <label className="text-gray-500">{lang === 'bn' ? 'পণ্যের নাম' : 'Product Name'}</label>
-                <input type="text" required value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
+                <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'পণ্যের নাম / টাইটেল' : 'Product Title'}</label>
+                <input type="text" placeholder="যেমন: ব্র্যান্ড নিউ ওয়াচ" required value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
               </div>
-              <div>
-                <label className="text-gray-500">{lang === 'bn' ? 'দাম (৳)' : 'Price (৳)'}</label>
-                <input type="number" required value={newPrice} onChange={(e) => setNewPrice(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'অফার প্রাইস (৳)' : 'Offer Price (৳)'}</label>
+                  <input type="number" placeholder="500" required value={newPrice} onChange={(e) => setNewPrice(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
+                </div>
+                <div>
+                  <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'আগের দাম (৳)' : 'Original Price (৳)'}</label>
+                  <input type="number" placeholder="1000" value={newOriginalPrice} onChange={(e) => setNewOriginalPrice(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1" />
+                </div>
               </div>
+
               <div>
-                <label className="text-gray-500">{lang === 'bn' ? 'ছবি আপলোড করুন (ফোন/কম্পিউটার)' : 'Upload Image'}</label>
+                <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'ক্যাটাগরি' : 'Category'}</label>
+                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full border p-2 rounded text-black outline-none mt-1">
+                  <option value="electronics">Electronics</option>
+                  <option value="fashion">Fashion & Lifestyle</option>
+                  <option value="groceries">Groceries & Plant</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 bg-pink-50 p-2 rounded border border-pink-200">
+                <input type="checkbox" id="flashSale" checked={isFlash} onChange={(e) => setIsFlash(e.target.checked)} className="w-4 h-4 text-pink-600" />
+                <label htmlFor="flashSale" className="font-bold text-pink-600 cursor-pointer text-xs">⚡ Flash Sale-এ দেখান</label>
+              </div>
+
+              <div>
+                <label className="text-gray-600 font-semibold">{lang === 'bn' ? 'ছবি আপলোড করুন (ফোন/কম্পিউটার)' : 'Upload Image'}</label>
                 <input type="file" accept="image/*" onChange={handleImageChange} className="w-full border p-1 rounded text-black mt-1" />
               </div>
-              {newImage && <img src={newImage} alt="Preview" className="w-16 h-16 object-cover rounded border" />}
-              <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-lg font-bold text-xs shadow">
-                {lang === 'bn' ? 'বিজ্ঞাপন প্রকাশ করুন' : 'Publish Ad'}
+
+              {newImage && (
+                <div>
+                  <p className="text-[10px] text-gray-500 mb-1">প্রিভিউ:</p>
+                  <img src={newImage} alt="Preview" className="w-20 h-20 object-cover rounded border" />
+                </div>
+              )}
+
+              <button type="submit" className="w-full bg-pink-600 text-white py-2.5 rounded-lg font-bold text-xs shadow-md hover:bg-pink-700">
+                🚀 {lang === 'bn' ? 'বিজ্ঞাপন প্রকাশ করুন' : 'Publish Ad'}
               </button>
             </form>
           </div>
@@ -318,43 +359,5 @@ export function App() {
 
       </main>
 
-      {/* Daraz Exact Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 border-t py-1 bg-white flex justify-around text-[10px] text-gray-700 font-medium z-40">
-        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center ${activeTab === 'home' ? 'text-pink-600 font-bold' : ''}`}>
-          <span className="text-sm">🏠</span>
-          <span>For You</span>
-        </button>
-        <button onClick={() => setActiveTab('messages')} className={`flex flex-col items-center relative ${activeTab === 'messages' ? 'text-pink-600 font-bold' : ''}`}>
-          <span className="text-sm">💬</span>
-          <span>Messages</span>
-          <span className="absolute -top-1 right-2 bg-red-500 text-white text-[8px] px-1 rounded-full font-bold">12</span>
-        </button>
-        
-        {/* Middle 50% OFF Banner Badge */}
-        <button onClick={() => setActiveTab('post')} className="flex flex-col items-center -mt-3">
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[8px] font-black p-1.5 rounded-full shadow-lg border-2 border-white text-center leading-tight">
-            UP TO<br/><span className="text-[10px]">50%</span><br/>OFF
-          </div>
-        </button>
-
-        <button onClick={() => setActiveTab('cart')} className={`flex flex-col items-center relative ${activeTab === 'cart' ? 'text-pink-600 font-bold' : ''}`}>
-          <span className="text-sm">🛒</span>
-          <span>Cart</span>
-          {cartItems.length > 0 && (
-            <span className="absolute -top-1 right-2 bg-red-500 text-white text-[8px] px-1 rounded-full font-bold">
-              {cartItems.length}
-            </span>
-          )}
-        </button>
-        <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center ${activeTab === 'settings' ? 'text-pink-600 font-bold' : ''}`}>
-          <span className="text-sm">👤</span>
-          <span>Account</span>
-        </button>
-      </div>
-
-    </div>
-  );
-}
-
-export default App;
-    
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0
