@@ -90,11 +90,23 @@ export function App() {
 
   const [cartItems, setCartItems] = useState<any[]>([]);
 
-  // Post Ad Form State (With Image URL)
+  // Post Ad Form State (With File Upload)
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newCondition, setNewCondition] = useState('new');
-  const [newImage, setNewImage] = useState('');
+  const [newImage, setNewImage] = useState<string>('');
+
+  // Handle File Selection and Convert to Base64 Image
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const addToCart = (product: any) => {
     setCartItems([...cartItems, product]);
@@ -143,7 +155,7 @@ export function App() {
       originalPrice: priceNum + 100,
       discount: '-10%',
       condition: newCondition,
-      image: newImage.trim() !== '' ? newImage : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300'
+      image: newImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300'
     };
 
     setProducts([newProd, ...products]);
@@ -271,7 +283,7 @@ export function App() {
         </button>
       </div>
 
-      {/* পোস্ট করার মডাল (ইমেজ লিংক অপশনসহ) */}
+      {/* পোস্ট করার মডাল (গ্যালারি থেকে সরাসরি ছবি আপলোড) */}
       {isPostModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3">
@@ -303,15 +315,18 @@ export function App() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-600">পণ্যের ছবির লিংক (Image URL)</label>
+                <label className="text-xs text-gray-600">পণ্যের ছবি সিলেক্ট করুন</label>
                 <input
-                  type="url"
-                  placeholder="https://example.com/image.jpg"
-                  value={newImage}
-                  onChange={(e) => setNewImage(e.target.value)}
-                  className="w-full border rounded-lg p-2 text-sm mt-1 outline-none focus:border-pink-500"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="w-full border rounded-lg p-1 text-xs mt-1 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100"
                 />
-                <p className="text-[10px] text-gray-400 mt-0.5">* ফাকা রাখলে ডিফল্ট ছবি বসবে</p>
+                {newImage && (
+                  <div className="mt-2">
+                    <img src={newImage} alt="Preview" className="w-16 h-16 object-cover rounded-lg border" />
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-xs text-gray-600">অবস্থা</label>
@@ -435,4 +450,4 @@ export function App() {
 }
 
 export default App;
-                      
+    
