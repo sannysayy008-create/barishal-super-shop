@@ -1,91 +1,24 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 
 export function App() {
-  const [lang, setLang] = useState('bn');
+  // 🔴 এখানে @BotFather থেকে পাওয়া টোকেনটি বসান
+  const TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE";
+  
+  // 🟢 আপনার দেওয়া Chat ID
+  const TELEGRAM_CHAT_ID = "8633414899";
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  
-  // Checkout Form State
+
+  // Form State
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
-  
-  // Coupon State
-  const [couponInput, setCouponInput] = useState('');
-  const [appliedDiscount, setAppliedDiscount] = useState(0);
-  const [couponMsg, setCouponMsg] = useState({ text: '', isError: false });
 
-  // Translations
-  const t = {
-    bn: {
-      siteName: 'বরিশাল সুপার শপ',
-      searchPlaceholder: 'পণ্যের নাম লিখে খুঁজুন...',
-      all: 'সব পণ্য',
-      electronics: 'ইলেকট্রনিক্স',
-      fashion: 'ফ্যাশন',
-      groceries: 'মুদি ও খাদ্য',
-      bannerTitle: 'বিশেষ অফার!',
-      bannerSub: 'বরিশাল সদরে দ্রুত হোম ডেলিভারি!',
-      buyNow: 'এখনই কিনুন',
-      postAdBtn: '+ ফ্রি বিজ্ঞাপন দিন',
-      cartTitle: 'আপনার কার্ট',
-      cartEmpty: 'আপনার কার্ট খালি!',
-      addToCart: 'কার্টে রাখুন',
-      total: 'মোট:',
-      discountText: 'ডিসকাউন্ট:',
-      payableTotal: 'সর্বমোট দেয়া মূল্য:',
-      couponPlaceholder: 'কুপন কোড (যেমন: BARISAL10)',
-      applyCoupon: 'কুপন দিন',
-      namePlaceholder: 'আপনার নাম',
-      phonePlaceholder: 'মোবাইল নম্বর',
-      addressPlaceholder: 'ডেলিভারি ঠিকানা',
-      confirmOrder: 'অর্ডার নিশ্চিত করুন',
-      postTitle: 'ফ্রি বিজ্ঞাপন দিন',
-      pName: 'পণ্যের নাম',
-      pPrice: 'মূল্য (৳)',
-      pCategory: 'ক্যাটাগরি',
-      pPhoto: 'পণ্যের ছবি',
-      postSubmit: 'পোস্ট করুন',
-      noResult: 'কোনো পণ্য পাওয়া যায়নি!',
-      showAll: 'সব পণ্য দেখুন'
-    },
-    en: {
-      siteName: 'Barishal Super Shop',
-      searchPlaceholder: 'Search products...',
-      all: 'All Products',
-      electronics: 'Electronics',
-      fashion: 'Fashion',
-      groceries: 'Groceries',
-      bannerTitle: 'Special Offer!',
-      bannerSub: 'Fast home delivery in Barishal!',
-      buyNow: 'Buy Now',
-      postAdBtn: '+ Post Free Ad',
-      cartTitle: 'Your Cart',
-      cartEmpty: 'Your cart is empty!',
-      addToCart: 'Add to Cart',
-      total: 'Subtotal:',
-      discountText: 'Discount:',
-      payableTotal: 'Payable Total:',
-      couponPlaceholder: 'Coupon Code (e.g. BARISAL10)',
-      applyCoupon: 'Apply',
-      namePlaceholder: 'Your Name',
-      phonePlaceholder: 'Phone Number',
-      addressPlaceholder: 'Delivery Address',
-      confirmOrder: 'Confirm Order',
-      postTitle: 'Post Free Ad',
-      pName: 'Product Name',
-      pPrice: 'Price (৳)',
-      pCategory: 'Category',
-      pPhoto: 'Product Photo',
-      postSubmit: 'Post Now',
-      noResult: 'No products found!',
-      showAll: 'Show All Products'
-    }
-  }[lang];
-
-  // Product List
+  // Products
   const [products, setProducts] = useState([
     { 
       id: 1, 
@@ -123,22 +56,10 @@ export function App() {
 
   const [cartItems, setCartItems] = useState([]);
 
-  // Post Ad Form
+  // Post Ad State
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newCategory, setNewCategory] = useState('electronics');
-  const [newImage, setNewImage] = useState('');
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const addToCart = (product) => {
     setCartItems([...cartItems, product]);
@@ -150,35 +71,51 @@ export function App() {
     setCartItems(updated);
   };
 
-  const handleApplyCoupon = () => {
-    const code = couponInput.trim().toUpperCase();
-    if (code === 'BARISAL10') {
-      setAppliedDiscount(10);
-      setCouponMsg({ text: lang === 'bn' ? '১০% ডিসকাউন্ট যোগ হয়েছে!' : '10% Discount Applied!', isError: false });
-    } else if (code === 'FREE50') {
-      setAppliedDiscount(50);
-      setCouponMsg({ text: lang === 'bn' ? '৫০ টাকা কুপন ছাড় যোগ হয়েছে!' : '৳50 Off Applied!', isError: false });
-    } else {
-      setCouponMsg({ text: lang === 'bn' ? 'ভুল বা মেয়াদোত্তীর্ণ কুপন কোড!' : 'Invalid Coupon Code!', isError: true });
-    }
-  };
+  const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
 
-  const handleOrderSubmit = (e) => {
+  // 📩 টেলিগ্রাম বটে অর্ডার পাঠানোর ফংশন
+  const handleOrderSubmit = async (e) => {
     e.preventDefault();
     if (!customerName || !customerPhone || !customerAddress) {
-      alert(lang === 'bn' ? 'দয়া করে সব তথ্য পূরণ করুন।' : 'Please fill all details.');
+      alert('দয়া করে আপনার নাম, নম্বর ও ঠিকানা লিখুন।');
       return;
     }
 
-    alert(lang === 'bn' ? `ধন্যবাদ ${customerName}! অর্ডার গ্রহণ করা হয়েছে।` : `Thank you ${customerName}! Order placed successfully.`);
-    setCartItems([]);
-    setIsCartOpen(false);
-    setCustomerName('');
-    setCustomerPhone('');
-    setCustomerAddress('');
-    setCouponInput('');
-    setAppliedDiscount(0);
-    setCouponMsg({ text: '', isError: false });
+    const itemsList = cartItems.map((item) => `• ${item.title} - ৳${item.price}`).join('\n');
+    
+    const telegramMessage = 
+`🛒 *নতুন অর্ডার এসেছে!*
+
+👤 *গ্রাহকের নাম:* ${customerName}
+📞 *ফোন নম্বর:* ${customerPhone}
+🏠 *ঠিকানা:* ${customerAddress}
+
+📦 *অর্ডারকৃত পণ্যসমূহ:*
+${itemsList}
+
+💰 *সর্বমোট:* ৳${totalPrice}`;
+
+    try {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: telegramMessage,
+          parse_mode: 'Markdown',
+        }),
+      });
+
+      alert(`ধন্যবাদ ${customerName}! আপনার অর্ডারটি গ্রহণ করা হয়েছে।`);
+      setCartItems([]);
+      setIsCartOpen(false);
+      setCustomerName('');
+      setCustomerPhone('');
+      setCustomerAddress('');
+    } catch (error) {
+      console.error(error);
+      alert('অর্ডার পাঠাতে সমস্যা হয়েছে। আপনার Bot Token সঠিক আছে কিনা চেক করুন।');
+    }
   };
 
   const handlePostAd = (e) => {
@@ -192,20 +129,15 @@ export function App() {
       price: priceNum,
       originalPrice: priceNum + 100,
       category: newCategory,
-      image: newImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300'
+      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300'
     };
 
     setProducts([newProd, ...products]);
-    alert(lang === 'bn' ? 'বিজ্ঞাপন সফলভাবে পোস্ট করা হয়েছে!' : 'Ad posted successfully!');
+    alert('বিজ্ঞাপন পোস্ট করা হয়েছে!');
     setIsPostModalOpen(false);
     setNewTitle('');
     setNewPrice('');
-    setNewImage('');
   };
-
-  const subTotal = cartItems.reduce((acc, item) => acc + item.price, 0);
-  const discountAmount = appliedDiscount > 0 ? (appliedDiscount <= 100 ? (subTotal * appliedDiscount) / 100 : appliedDiscount) : 0;
-  const finalTotal = Math.max(0, subTotal - discountAmount);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -217,42 +149,14 @@ export function App() {
     <div className="min-h-screen bg-gray-100 pb-20 font-sans">
       {/* হেডার */}
       <div className="bg-pink-600 p-3 text-white sticky top-0 z-30 shadow-md">
-        <div className="flex items-center justify-between max-w-md mx-auto mb-2 text-xs">
-          <span className="font-bold">{t.siteName}</span>
-          <div className="flex gap-1 bg-pink-800 p-1 rounded-lg">
-            <button
-              onClick={() => setLang('bn')}
-              className={`px-2 py-0.5 rounded font-bold ${lang === 'bn' ? 'bg-white text-pink-600' : 'text-white'}`}
-            >
-              বাংলা
-            </button>
-            <button
-              onClick={() => setLang('en')}
-              className={`px-2 py-0.5 rounded font-bold ${lang === 'en' ? 'bg-white text-pink-600' : 'text-white'}`}
-            >
-              ENG
-            </button>
-          </div>
-        </div>
-
         <div className="flex items-center gap-2 max-w-md mx-auto">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              placeholder={t.searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-2 pl-3 pr-8 rounded-full text-black text-sm outline-none"
-            />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-2.5 text-gray-500 text-xs font-bold"
-              >
-                ✕
-              </button>
-            )}
-          </div>
+          <input
+            type="text"
+            placeholder="পণ্যের নাম লিখে খুঁজুন..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full py-2 px-4 rounded-full text-black text-sm outline-none"
+          />
           <button 
             onClick={() => setIsCartOpen(true)}
             className="relative p-2 bg-pink-700 rounded-full text-lg"
@@ -274,7 +178,7 @@ export function App() {
               selectedCategory === 'all' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
             }`}
           >
-            {t.all}
+            সব পণ্য
           </button>
           <button
             onClick={() => setSelectedCategory('electronics')}
@@ -282,7 +186,7 @@ export function App() {
               selectedCategory === 'electronics' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
             }`}
           >
-            {t.electronics}
+            ইলেকট্রনিক্স
           </button>
           <button
             onClick={() => setSelectedCategory('fashion')}
@@ -290,7 +194,7 @@ export function App() {
               selectedCategory === 'fashion' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
             }`}
           >
-            {t.fashion}
+            ফ্যাশন
           </button>
           <button
             onClick={() => setSelectedCategory('groceries')}
@@ -298,7 +202,7 @@ export function App() {
               selectedCategory === 'groceries' ? 'bg-white text-pink-600 font-bold' : 'bg-pink-700 text-white'
             }`}
           >
-            {t.groceries}
+            মুদি ও খাদ্য
           </button>
         </div>
       </div>
@@ -306,133 +210,112 @@ export function App() {
       <main className="max-w-md mx-auto p-3 space-y-4">
         {/* ব্যানার */}
         <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 rounded-2xl shadow-lg">
-          <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded">PROMO</span>
-          <h2 className="text-xl font-extrabold mt-1">{t.bannerTitle}</h2>
-          <p className="text-xs mt-1 opacity-90">{t.bannerSub}</p>
+          <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded">SALE</span>
+          <h2 className="text-xl font-extrabold mt-1">বরিশাল সুপার শপ</h2>
+          <p className="text-xs mt-1 opacity-90">দ্রুত ডেলিভারি সুবিধা!</p>
           <div className="mt-3 flex gap-2">
             <button 
               onClick={() => setIsCartOpen(true)}
               className="bg-white text-pink-600 px-3 py-1.5 rounded-xl font-bold text-xs"
             >
-              {t.buyNow}
+              এখনই কিনুন
             </button>
             <button 
               onClick={() => setIsPostModalOpen(true)}
               className="bg-black/20 text-white px-3 py-1.5 rounded-xl font-semibold text-xs border border-white/30"
             >
-              {t.postAdBtn}
+              + ফ্রি বিজ্ঞাপন দিন
             </button>
           </div>
         </div>
 
         {/* প্রোডাক্ট গ্রিড */}
         <div className="bg-white p-3 rounded-2xl shadow-sm">
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-8 space-y-2">
-              <p className="text-sm font-semibold text-gray-600">{t.noResult}</p>
-              <button 
-                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                className="text-xs text-pink-600 font-bold underline"
-              >
-                {t.showAll}
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              {filteredProducts.map((product) => (
-                <div key={product.id} className="border border-gray-100 rounded-xl p-2 bg-white shadow-sm">
-                  <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 relative overflow-hidden flex items-center justify-center">
-                    <img 
-                      src={product.image} 
-                      alt={product.title} 
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <h4 className="text-xs font-semibold text-gray-800 line-clamp-1">{product.title}</h4>
-                  <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-pink-600 font-bold text-sm">৳{product.price}</span>
-                    <span className="text-gray-400 text-[10px] line-through">৳{product.originalPrice}</span>
-                  </div>
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="w-full mt-2 bg-pink-600 text-white py-1 rounded-lg text-xs font-bold"
-                  >
-                    {t.addToCart}
-                  </button>
+          <div className="grid grid-cols-2 gap-2">
+            {filteredProducts.map((product) => (
+              <div key={product.id} className="border border-gray-100 rounded-xl p-2 bg-white shadow-sm">
+                <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 overflow-hidden flex items-center justify-center">
+                  <img 
+                    src={product.image} 
+                    alt={product.title} 
+                    className="w-full h-full object-cover rounded-lg"
+                  />
                 </div>
-              ))}
-            </div>
-          )}
+                <h4 className="text-xs font-semibold text-gray-800 line-clamp-1">{product.title}</h4>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-pink-600 font-bold text-sm">৳{product.price}</span>
+                  <span className="text-gray-400 text-[10px] line-through">৳{product.originalPrice}</span>
+                </div>
+                <button
+                  onClick={() => addToCart(product)}
+                  className="w-full mt-2 bg-pink-600 text-white py-1 rounded-lg text-xs font-bold"
+                >
+                  কার্টে রাখুন
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
 
-      {/* নেভিগেশন বার */}
+      {/* বটম নেভিগেশন */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 flex justify-around items-center max-w-md mx-auto z-20 text-xs text-gray-600">
         <button onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }} className="text-pink-600 font-bold">
-          🏠 {lang === 'bn' ? 'হোম' : 'Home'}
+          🏠 হোম
         </button>
         <button onClick={() => setIsPostModalOpen(true)} className="bg-pink-600 text-white px-3 py-1 rounded-full font-bold">
-          {t.postAdBtn}
+          + পোস্ট
         </button>
         <button onClick={() => setIsCartOpen(true)} className="relative">
-          🛒 {lang === 'bn' ? 'কার্ট' : 'Cart'} ({cartItems.length})
+          🛒 কার্ট ({cartItems.length})
         </button>
       </div>
 
-      {/* পোস্ট মডাল */}
+      {/* পোস্ট বিজ্ঞাপন মডাল */}
       {isPostModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3">
             <div className="flex justify-between items-center border-b pb-2">
-              <h3 className="font-bold text-gray-800">{t.postTitle}</h3>
+              <h3 className="font-bold text-gray-800">ফ্রি বিজ্ঞাপন দিন</h3>
               <button onClick={() => setIsPostModalOpen(false)} className="text-gray-500">✕</button>
             </div>
             <form onSubmit={handlePostAd} className="space-y-3">
               <div>
-                <label className="text-xs text-gray-600">{t.pName}</label>
+                <label className="text-xs text-gray-600">পণ্যের নাম</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Smart Watch"
+                  placeholder="যেমন: মোবাইল"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   className="w-full border rounded-lg p-2 text-sm mt-1 outline-none"
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-600">{t.pPrice}</label>
+                <label className="text-xs text-gray-600">মূল্য (৳)</label>
                 <input
                   type="number"
                   required
-                  placeholder="e.g. 500"
+                  placeholder="যেমন: ৫০০"
                   value={newPrice}
                   onChange={(e) => setNewPrice(e.target.value)}
                   className="w-full border rounded-lg p-2 text-sm mt-1 outline-none"
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-600">{t.pCategory}</label>
+                <label className="text-xs text-gray-600">ক্যাটাগরি</label>
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
                   className="w-full border rounded-lg p-2 text-sm mt-1 outline-none"
                 >
-                  <option value="electronics">{t.electronics}</option>
-                  <option value="fashion">{t.fashion}</option>
-                  <option value="groceries">{t.groceries}</option>
+                  <option value="electronics">ইলেকট্রনিক্স</option>
+                  <option value="fashion">ফ্যাশন</option>
+                  <option value="groceries">মুদি ও খাদ্য</option>
                 </select>
               </div>
-              <div>
-                <label className="text-xs text-gray-600">{t.pPhoto}</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="w-full border rounded-lg p-1 text-xs mt-1"
-                />
-              </div>
               <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-sm">
-                {t.postSubmit}
+                পোস্ট করুন
               </button>
             </form>
           </div>
@@ -444,15 +327,15 @@ export function App() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b pb-2">
-              <h3 className="font-bold text-gray-800">{t.cartTitle}</h3>
+              <h3 className="font-bold text-gray-800">আপনার কার্ট</h3>
               <button onClick={() => setIsCartOpen(false)} className="text-gray-500">✕</button>
             </div>
 
             {cartItems.length === 0 ? (
-              <p className="text-center py-6 text-gray-500 text-sm">{t.cartEmpty}</p>
+              <p className="text-center py-6 text-gray-500 text-sm">কার্ট খালি!</p>
             ) : (
               <>
-                <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                   {cartItems.map((item, idx) => (
                     <div key={idx} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded-lg">
                       <span>{item.title}</span>
@@ -464,45 +347,48 @@ export function App() {
                   ))}
                 </div>
 
-                {/* কুপন সেকশন */}
-                <div className="border-t pt-2 space-y-1">
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      placeholder={t.couponPlaceholder}
-                      value={couponInput}
-                      onChange={(e) => setCouponInput(e.target.value)}
-                      className="flex-1 border rounded-lg px-2 py-1 text-xs outline-none uppercase"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleApplyCoupon}
-                      className="bg-gray-800 text-white px-3 py-1 rounded-lg text-xs font-bold"
-                    >
-                      {t.applyCoupon}
-                    </button>
-                  </div>
-                  {couponMsg.text && (
-                    <p className={`text-[10px] ${couponMsg.isError ? 'text-red-500' : 'text-green-600 font-bold'}`}>
-                      {couponMsg.text}
-                    </p>
-                  )}
+                <div className="border-t pt-2 flex justify-between font-bold text-sm text-gray-800">
+                  <span>মোট:</span>
+                  <span className="text-pink-600">৳{totalPrice}</span>
                 </div>
 
-                {/* হিসেব */}
-                <div className="border-t pt-2 space-y-1 text-xs text-gray-700">
-                  <div className="flex justify-between">
-                    <span>{t.total}</span>
-                    <span>৳{subTotal}</span>
-                  </div>
-                  {discountAmount > 0 && (
-                    <div className="flex justify-between text-green-600 font-semibold">
-                      <span>{t.discountText}</span>
-                      <span>-৳{discountAmount}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between font-bold text-sm text-pink-600 border-t pt-1">
-                    <span>{t.payableTotal}</span>
-                    <span>৳{finalTotal}</span>
-                  </div>
-      
+                <form onSubmit={handleOrderSubmit} className="space-y-2 pt-2">
+                  <input
+                    type="text"
+                    placeholder="আপনার নাম"
+                    required
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="w-full border rounded-lg p-2 text-xs"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="মোবাইল নম্বর"
+                    required
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    className="w-full border rounded-lg p-2 text-xs"
+                  />
+                  <textarea
+                    placeholder="ডেলিভারি ঠিকানা"
+                    required
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    className="w-full border rounded-lg p-2 text-xs"
+                    rows={2}
+                  />
+                  <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold text-sm">
+                    অর্ডার নিশ্চিত করুন
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
+              
