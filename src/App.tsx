@@ -24,7 +24,6 @@ export function App() {
   const [customerName, setCustomerName] = useState<string>(() => localStorage.getItem('cust_name') || '');
   const [customerPhone, setCustomerPhone] = useState<string>(() => localStorage.getItem('cust_phone') || '');
   const [customerAddress, setCustomerAddress] = useState<string>(() => localStorage.getItem('cust_address') || '');
-  const [darkMode, setDarkMode] = useState<boolean>(false);
   const [voucherCollected, setVoucherCollected] = useState<boolean>(false);
 
   // Flash Sale Countdown Timer State
@@ -135,7 +134,7 @@ export function App() {
   };
 
   return (
-    <div className={`min-h-screen pb-20 font-sans ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+    <div className="min-h-screen pb-20 font-sans bg-gray-100 text-gray-900">
       
       {/* Header Search Bar */}
       <div className="bg-pink-600 p-2.5 sticky top-0 z-30 shadow-md">
@@ -252,7 +251,7 @@ export function App() {
           </>
         )}
 
-        {/* Post Ad (বিজ্ঞাপন দিন) Form */}
+        {/* Post Ad Form */}
         {activeTab === 'post' && (
           <div className="bg-white p-4 rounded-xl shadow-sm space-y-3">
             <h3 className="font-bold border-b pb-2 text-sm text-pink-600">📌 নতুন বিজ্ঞাপন ছাড়ুন</h3>
@@ -362,4 +361,5 @@ export function App() {
           <span className="text-sm">🏠</span>
           <span>For You</span>
         </button>
-        <button onClick={() => setActiveTab('messages')} className=
+        <button onClick={() => setActiveTab('messages')} className={`flex flex-col items-center relative ${activeTab === 'messages' ? 'text-pink-600 font-bold' : ''}`}>
+          <span cl
