@@ -1,28 +1,17 @@
 import React, { useState, useEffect } from 'react';
 
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  originalPrice: number;
-  discount: string;
-  category: string;
-  image: string;
-  isFlashSale?: boolean;
-}
-
 export function App() {
   const TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE";
   const TELEGRAM_CHAT_ID = "8633414899";
 
-  const [activeTab, setActiveTab] = useState<string>('home');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [lang, setLang] = useState<'bn' | 'en'>('bn');
+  const [activeTab, setActiveTab] = useState('home');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [lang, setLang] = useState('bn');
 
-  const [customerName, setCustomerName] = useState<string>('');
-  const [customerPhone, setCustomerPhone] = useState<string>('');
-  const [customerAddress, setCustomerAddress] = useState<string>('');
-  const [voucherCollected, setVoucherCollected] = useState<boolean>(false);
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
+  const [voucherCollected, setVoucherCollected] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 13, seconds: 22 });
 
@@ -38,7 +27,7 @@ export function App() {
     return () => clearInterval(timer);
   }, []);
 
-  const [products, setProducts] = useState<Product[]>([
+  const [products, setProducts] = useState([
     { id: 1, title: 'ব্যাকপ্যাক ব্যাগ', price: 580, originalPrice: 1260, discount: '-54%', category: 'fashion', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300', isFlashSale: true },
     { id: 2, title: 'Hi-Fi ওয়্যারলেস এয়ারবাডস', price: 365, originalPrice: 1200, discount: '-70%', category: 'electronics', image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300', isFlashSale: true },
     { id: 3, title: 'মিক্সড কালার বীজ', price: 33, originalPrice: 95, discount: '-65%', category: 'groceries', image: 'https://images.unsplash.com/photo-1588879460608-251c8901239c?w=300', isFlashSale: true },
@@ -47,35 +36,35 @@ export function App() {
     { id: 6, title: 'রোড ম্যাট লিপস্টিক সেট', price: 100, originalPrice: 330, discount: '-70%', category: 'fashion', image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' }
   ]);
 
-  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState([]);
 
-  const [newTitle, setNewTitle] = useState<string>('');
-  const [newPrice, setNewPrice] = useState<string>('');
-  const [newOriginalPrice, setNewOriginalPrice] = useState<string>('');
-  const [newCategory, setNewCategory] = useState<string>('electronics');
-  const [isFlash, setIsFlash] = useState<boolean>(false);
-  const [newImage, setNewImage] = useState<string>('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300');
+  const [newTitle, setNewTitle] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  const [newOriginalPrice, setNewOriginalPrice] = useState('');
+  const [newCategory, setNewCategory] = useState('electronics');
+  const [isFlash, setIsFlash] = useState(false);
+  const [newImage, setNewImage] = useState('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300');
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (reader.result) {
-          setNewImage(reader.result as string);
+          setNewImage(reader.result);
         }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product) => {
     setCartItems([...cartItems, product]);
   };
 
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
 
-  const handleOrderSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleOrderSubmit = async (e) => {
     e.preventDefault();
     if (!customerName || !customerPhone || !customerAddress) {
       alert('দয়া করে সব তথ্য পূরণ করুন');
@@ -100,14 +89,14 @@ export function App() {
     }
   };
 
-  const handlePostAd = (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePostAd = (e) => {
     e.preventDefault();
     if (!newTitle || !newPrice) return;
     const priceNum = Number(newPrice);
     const origPriceNum = newOriginalPrice ? Number(newOriginalPrice) : priceNum + 200;
     const discountPercent = Math.round(((origPriceNum - priceNum) / origPriceNum) * 100);
 
-    const newProd: Product = {
+    const newProd = {
       id: Date.now(),
       title: newTitle,
       price: priceNum,
@@ -347,7 +336,7 @@ export function App() {
 
             <div className="border-t pt-3 space-y-2 text-gray-600">
               <p className="font-semibold cursor-pointer hover:text-pink-600">📦 আমার অর্ডারসমূহ</p>
-              <p className="font-semibold cursor-pointer hover:text-pink-600">⚙️️ অ্যাপ সেটিংস ও নোটিফিকেশন</p>
+              <p className="font-semibold cursor-pointer hover:text-pink-600">⚙ অ্যাপ সেটিংস ও নোটিফিকেশন</p>
               <p className="font-semibold cursor-pointer hover:text-pink-600">📞 হেল্প ও সাপোর্ট</p>
             </div>
           </div>
@@ -359,4 +348,10 @@ export function App() {
           <span className="text-base">🏠</span>
           <span>For You</span>
         </button>
+        <button onClick={() => setActiveTab('messages')} className={activeTab === 'messages' ? 'flex flex-col items-center relative text-pink-600 font-bold' : 'flex flex-col items-center relative'}>
+          <span className="text-base">💬</span>
+          <span>Messages</span>
+        </button>
         
+        <button onClick={() => setActiveTab('post')} className="flex flex-col items-center -mt-4">
+          <div className="bg-gradient-to-r from-o
