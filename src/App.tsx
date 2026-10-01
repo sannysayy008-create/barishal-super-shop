@@ -347,7 +347,7 @@ export function App() {
 
             <div className="border-t pt-3 space-y-2 text-gray-600">
               <p className="font-semibold cursor-pointer hover:text-pink-600">📦 আমার অর্ডারসমূহ</p>
-              <p className="font-semibold cursor-pointer hover:text-pink-600">⚙️ অ্যাপ সেটিংস ও নোটিফিকেশন</p>
+              <p className="font-semibold cursor-pointer hover:text-pink-600">⚙️️ অ্যাপ সেটিংস ও নোটিফিকেশন</p>
               <p className="font-semibold cursor-pointer hover:text-pink-600">📞 হেল্প ও সাপোর্ট</p>
             </div>
           </div>
@@ -359,4 +359,4 @@ export function App() {
           <span className="text-base">🏠</span>
           <span>For You</span>
         </button>
-        <
+        
