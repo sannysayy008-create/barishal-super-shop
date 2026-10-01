@@ -1,111 +1,95 @@
 import React, { useState } from 'react';
 
-export default function OrderForm() {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    productName: '',
-    quantity: '1',
-  });
+export default function OrderSection() {
+  const [product, setProduct] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleOrder = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    // এখানে চাইলে আপনি টেলিগ্রাম বট বা ব্যাকএন্ডে ডেটা পাঠানোর লজিক যুক্ত করতে পারেন
+    
+    // টেলিগ্রাম বটের মাধ্যমে আপনার আইডি (8633414899)-তে অর্ডার পাঠানোর লজিক
+    const botToken = "YOUR_BOT_TOKEN"; // আপনার টেলিগ্রাম বটের টোকেন এখানে বসাতে পারেন
+    const chatId = "8633414899"; // আপনার দেওয়া টেলিগ্রাম আইডি
+    const message = `🚨 নতুন অর্ডার এসেছে!\n\n🛍️ পণ্য: ${product}\n👤 নাম: ${name}\n📞 ফোন: ${phone}\n📍 ঠিকানা: ${address}`;
+
+    // টেলিগ্রাম এপিআই কল (যদি টোকেন থাকে তবে কাজ করবে, না থাকলেও ফর্ম সাবমিট দেখাবে)
+    if (botToken && botToken !== "YOUR_BOT_TOKEN") {
+      fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: message })
+      }).catch(err => console.log(err));
+    }
+
+    setSuccess(true);
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm max-w-md mx-auto my-2 text-xs">
-      <h3 className="font-bold text-sm text-pink-600 border-b pb-2 mb-3">📦 অর্ডার কনফার্ম করুন</h3>
-
-      {submitted ? (
-        <div className="text-center py-6 space-y-2">
-          <div className="text-3xl">✅</div>
-          <p className="font-bold text-green-600 text-sm">আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!</p>
-          <p className="text-gray-500 text-[10px]">খুব শীঘ্রই আমরা আপনার সাথে যোগাযোগ করব।</p>
+    <div className="bg-white p-4 rounded-xl shadow-sm mb-3">
+      <h3 className="font-bold text-xs text-pink-600 mb-2 border-b pb-1">🛒 সরাসরি অর্ডার করুন</h3>
+      
+      {success ? (
+        <div className="text-center py-4 text-green-600 font-bold text-xs">
+          ✅ আপনার অর্ডার সফলভাবে সাবমিট হয়েছে! খুব শীঘ্রই আপনার সাথে যোগাযোগ করা হবে।
           <button 
-            onClick={() => setSubmitted(false)} 
-            className="mt-3 bg-pink-600 text-white px-4 py-1.5 rounded-full font-bold text-xs"
+            onClick={() => setSuccess(false)} 
+            className="block mx-auto mt-2 bg-pink-600 text-white px-3 py-1 rounded text-[10px]"
           >
             আরেকটি অর্ডার করুন
           </button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleOrder} className="space-y-2 text-xs">
           <div>
-            <label className="block text-gray-700 font-medium mb-1">আপনার নাম</label>
-            <input
-              type="text"
-              name="name"
+            <label className="block text-gray-600 mb-0.5">পণ্যের নাম</label>
+            <input 
+              type="text" 
               required
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="পূর্ণ নাম লিখুন"
-              className="w-full border rounded p-2 text-xs outline-none focus:border-pink-600"
+              value={product} 
+              onChange={(e) => setProduct(e.target.value)} 
+              placeholder="যেমন: ব্যাকপ্যাক ব্যাগ" 
+              className="w-full border rounded p-1.5 outline-none focus:border-pink-600"
             />
           </div>
-
           <div>
-            <label className="block text-gray-700 font-medium mb-1">মোবাইল নাম্বার</label>
-            <input
-              type="tel"
-              name="phone"
+            <label className="block text-gray-600 mb-0.5">আপনার নাম</label>
+            <input 
+              type="text" 
               required
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="০১XXXXXXXXX"
-              className="w-full border rounded p-2 text-xs outline-none focus:border-pink-600"
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              placeholder="আপনার নাম লিখুন" 
+              className="w-full border rounded p-1.5 outline-none focus:border-pink-600"
             />
           </div>
-
           <div>
-            <label className="block text-gray-700 font-medium mb-1">পণ্যের নাম / বিবরণ</label>
-            <input
-              type="text"
-              name="productName"
+            <label className="block text-gray-600 mb-0.5">মোবাইল নাম্বার</label>
+            <input 
+              type="tel" 
               required
-              value={formData.productName}
-              onChange={handleChange}
-              placeholder="যেমন: ব্যাকপ্যাক ব্যাগ"
-              className="w-full border rounded p-2 text-xs outline-none focus:border-pink-600"
+              value={phone} 
+              onChange={(e) => setPhone(e.target.value)} 
+              placeholder="01XXXXXXXXX" 
+              className="w-full border rounded p-1.5 outline-none focus:border-pink-600"
             />
           </div>
-
           <div>
-            <label className="block text-gray-700 font-medium mb-1">পরিমাণ</label>
-            <input
-              type="number"
-              name="quantity"
-              min="1"
-              value={formData.quantity}
-              onChange={handleChange}
-              className="w-full border rounded p-2 text-xs outline-none focus:border-pink-600"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">পূর্ণ ঠিকানা</label>
-            <textarea
-              name="address"
+            <label className="block text-gray-600 mb-0.5">ডেলিভারি ঠিকানা</label>
+            <textarea 
               required
               rows={2}
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="বাসা/রোড, থানা, জেলা (যেমন: বরিশাল সদর, বরিশাল)"
-              className="w-full border rounded p-2 text-xs outline-none focus:border-pink-600"
+              value={address} 
+              onChange={(e) => setAddress(e.target.value)} 
+              placeholder="বাসা, রোড, থানা, জেলা" 
+              className="w-full border rounded p-1.5 outline-none focus:border-pink-600"
             />
           </div>
-
-          <button
-            type="submit"
-            className="w-full bg-pink-600 text-white py-2 rounded-lg font-bold text-xs shadow hover:bg-pink-700 transition"
+          <button 
+            type="submit" 
+            className="w-full bg-pink-600 text-white py-2 rounded font-bold shadow hover:bg-pink-700 transition"
           >
             অর্ডার কনফার্ম করুন
           </button>
