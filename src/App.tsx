@@ -8,8 +8,8 @@ interface Product {
   category: string;
   seller: string;
   img: string;
-  rating: number;
-  sold: number;
+  rating?: number;
+  sold?: number;
 }
 
 interface UserProfile {
@@ -44,36 +44,36 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([
     { 
       id: 1, 
-      title: 'স্মার্ট ওয়াচ (Smart Watch)', 
-      price: 551, 
-      discount: '-72%', 
+      title: '1.8" / 2.4" Full Touch Bluetooth MP3 Player', 
+      price: 1664, 
+      discount: '-61%', 
       category: 'গ্যাজেট', 
       seller: 'রনি ট্রেইডার্স', 
-      img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&auto=format&fit=crop&q=60',
-      rating: 4.8,
-      sold: 120
+      img: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=300&auto=format&fit=crop&q=60',
+      rating: 4.1,
+      sold: 46
     },
     { 
       id: 2, 
-      title: 'এয়ারপডস প্রু (Airpods Pro)', 
-      price: 249, 
-      discount: '-71%', 
+      title: 'Mini CCTV Camera A9 WiFi 1080P', 
+      price: 458, 
+      discount: 'HOT', 
       category: 'গ্যাজেট', 
       seller: 'সাফওয়ান স্টোর', 
-      img: 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=300&auto=format&fit=crop&q=60',
-      rating: 4.5,
-      sold: 85
+      img: 'https://images.unsplash.com/photo-1557862921-37829c790f19?w=300&auto=format&fit=crop&q=60',
+      rating: 4.0,
+      sold: 91
     },
     { 
       id: 3, 
-      title: 'ম্যাসাজ গান (Massage Gun)', 
-      price: 464, 
-      discount: '-54%', 
-      category: 'হেলথ', 
+      title: 'Coolpad Cool 40i Smartphone 8GB+128GB', 
+      price: 12990, 
+      discount: 'OFFER', 
+      category: 'মোবাইল', 
       seller: 'বরিশাল মার্ট', 
-      img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&auto=format&fit=crop&q=60',
-      rating: 4.2,
-      sold: 46
+      img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&auto=format&fit=crop&q=60',
+      rating: 5.0,
+      sold: 12
     },
   ]);
 
@@ -224,7 +224,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* SHOP TAB */}
+      {/* SHOP / HOME TAB */}
       {activeTab === 'shop' && (
         <div>
           <div style={{ backgroundColor: '#fff', padding: '10px 12px', borderBottom: '1px solid #e4e4e7' }}>
@@ -235,7 +235,7 @@ export default function App() {
           </div>
 
           <div style={{ padding: '12px' }}>
-            <h3 style={{ fontSize: '15px', color: '#27272a', marginBottom: '10px' }}>সর্বশেষ পণ্যসমূহ 🛍️</h3>
+            <h3 style={{ fontSize: '15px', color: '#27272a', marginBottom: '10px' }}>সর্বশেষ পণ্যসমূহ 🛍</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
               {products.map((p) => (
                 <div key={p.id} onClick={() => handleProductClick(p)} style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '8px', border: '1px solid #e4e4e7', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}>
@@ -243,9 +243,11 @@ export default function App() {
                     <img src={p.img} alt={p.title} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '6px' }} />
                     <span style={{ fontSize: '9px', backgroundColor: '#f3f4f6', padding: '2px 6px', borderRadius: '4px', color: '#4b5563', display: 'inline-block', marginTop: '4px' }}>{p.category}</span>
                     <h4 style={{ margin: '4px 0', fontSize: '13px', color: '#18181b', lineHeight: '1.2' }}>{p.title}</h4>
-                    <div style={{ fontSize: '10px', color: '#f59e0b', margin: '2px 0' }}>
-                      ⭐ {p.rating} | <span style={{ color: '#71717a' }}>{p.sold} Sold</span>
-                    </div>
+                    {p.rating && (
+                      <div style={{ fontSize: '10px', color: '#f59e0b', margin: '2px 0' }}>
+                        ⭐ {p.rating} | <span style={{ color: '#71717a' }}>{p.sold} Sold</span>
+                      </div>
+                    )}
                   </div>
                   <div style={{ marginTop: '8px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -254,7 +256,7 @@ export default function App() {
                     </div>
                     <button 
                       onClick={(e) => { e.stopPropagation(); setCart([...cart, p]); alert('কার্টে যোগ করা হয়েছে!'); }}
-                      style={{ width: '100%', backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
+                      style={{ width: '100%', backgroundColor: '#f57224', color: '#fff', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
                     >
                       🛒 কার্টে যোগ করুন
                     </button>
@@ -269,17 +271,27 @@ export default function App() {
       {/* MESSAGES TAB */}
       {activeTab === 'messages' && (
         <div style={{ padding: '12px' }}>
-          <h3 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>📩 Messages & Notifications</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <h3 style={{ margin: 0, fontSize: '18px' }}>Messages</h3>
+            <span style={{ fontSize: '12px', color: '#71717a' }}>🧹 Mark all as read</span>
+          </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ backgroundColor: '#fff', padding: '12px', borderRadius: '8px', borderLeft: '4px solid #f57224', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '12px', color: '#f57224', fontWeight: 'bold' }}>📢 mega offer 50% OFF</div>
-              <p style={{ margin: '4px 0', fontSize: '13px', color: '#3f3f46' }}>আজকের বিশেষ গ্যাজেটে ৫০% পর্যন্ত ছাড় পান! এখনই শপ ক্যাটাগরি ব্রাউজ করুন।</p>
+              <div style={{ fontSize: '12px', color: '#f57224', fontWeight: 'bold' }}>🔥 FUN COINS SATURDAY WITH FREE GIFTS</div>
+              <p style={{ margin: '4px 0', fontSize: '13px', color: '#3f3f46' }}>40% OFF + free gifts from Coins Treasure Chest!</p>
+              <small style={{ fontSize: '10px', color: '#a1a1aa' }}>Yesterday</small>
+            </div>
+
+            <div style={{ backgroundColor: '#fff', padding: '12px', borderRadius: '8px', borderLeft: '4px solid #3b82f6', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              <div style={{ fontSize: '12px', color: '#3b82f6', fontWeight: 'bold' }}>🕹️ 1 Min of Candy = Coins 🕶️</div>
+              <p style={{ margin: '4px 0', fontSize: '13px', color: '#3f3f46' }}>Start playing NOW or regret later!</p>
               <small style={{ fontSize: '10px', color: '#a1a1aa' }}>Yesterday</small>
             </div>
 
             <div style={{ backgroundColor: '#fff', padding: '12px', borderRadius: '8px', borderLeft: '4px solid #16a34a', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 'bold' }}>🚚 Fast Delivery Update</div>
-              <p style={{ margin: '4px 0', fontSize: '13px', color: '#3f3f46' }}>বরিশাল সদরে ২৪ ঘণ্টার মধ্যে দ্রুত ডেলিভারি সুবিধা চালু হয়েছে।</p>
+              <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 'bold' }}>🚚 এবার পার্সেল পৌঁছবে দ্রুত</div>
+              <p style={{ margin: '4px 0', fontSize: '13px', color: '#3f3f46' }}>বরিশাল সদরে দ্রুত হোম ডেলিভারি শুরু হয়েছে!</p>
               <small style={{ fontSize: '10px', color: '#a1a1aa' }}>2 days ago</small>
             </div>
           </div>
@@ -323,7 +335,6 @@ export default function App() {
       {/* ACCOUNT TAB */}
       {activeTab === 'account' && (
         <div style={{ padding: '12px' }}>
-          {/* User Profile Card */}
           <div style={{ backgroundColor: '#fff', padding: '16px', borderRadius: '10px', border: '1px solid #e4e4e7', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
             <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#f57224', color: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '20px' }}>
               {user.name.charAt(0).toUpperCase()}
@@ -334,7 +345,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* My Orders Section */}
           <div style={{ backgroundColor: '#fff', padding: '14px', borderRadius: '10px', border: '1px solid #e4e4e7', marginBottom: '14px' }}>
             <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#27272a' }}>📦 My Orders</h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', textAlign: 'center' }}>
@@ -357,7 +367,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Recently Viewed */}
           <div style={{ backgroundColor: '#fff', padding: '14px', borderRadius: '10px', border: '1px solid #e4e4e7' }}>
             <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#27272a' }}>👁️ Recently Viewed</h4>
             {recentlyViewed.length === 0 ? (
@@ -380,12 +389,4 @@ export default function App() {
       {/* POST PRODUCT TAB */}
       {activeTab === 'post' && (
         <div style={{ padding: '12px' }}>
-          <div style={{ backgroundColor: '#fff', padding: '16px', borderRadius: '10px', border: '1px solid #e4e4e7' }}>
-            <h3 style={{ margin: '0 0 12px 0', color: '#18181b', fontSize: '16px' }}>➕ পণ্য বিক্রির জন্য পোস্ট করুন</h3>
-            <form onSubmit={handlePostSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 'bold' }}>পণ্যের ছবি আপলোড</label>
-                <input type="file" accept="image/*" onChange={handleImageChange} style={{ width: '100%', padding: '6px', marginTop: '4px', fontSize: '12px' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: '12px
+          <div style={{ back
