@@ -11,14 +11,6 @@ interface Product {
   sold: number;
 }
 
-interface Order {
-  id: string;
-  items: Product[];
-  totalAmount: number;
-  date: string;
-  status: 'To Pay' | 'To Ship' | 'To Receive' | 'To Review';
-}
-
 interface UserProfile {
   name: string;
   phone: string;
@@ -26,11 +18,12 @@ interface UserProfile {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'shop' | 'cart' | 'account' | 'post' | 'admin'>('shop');
+  const [activeTab, setActiveTab] = useState<'shop' | 'cart' | 'account' | 'post'>('shop');
   
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    const savedUser = localStorage.getItem('bss_user');
-    return savedUser ? JSON.parse(savedUser) : { name: 'Fida Al Sani', phone: '01700000000', address: 'Barishal Sadar' };
+  const [user] = useState<UserProfile>({
+    name: 'Fida Al Sani',
+    phone: '01700000000',
+    address: 'Barishal Sadar'
   });
 
   const [cart, setCart] = useState<Product[]>([]);
@@ -57,7 +50,6 @@ export default function App() {
     }
   ]);
 
-  // নতুন প্রোডাক্ট পোস্ট করার স্টেট
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -93,13 +85,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Top Header */}
       <header className="bg-emerald-600 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
         <h1 className="text-xl font-bold">🛒 Barishal Super Shop</h1>
-        <span className="text-sm bg-emerald-700 px-2 py-1 rounded">স্বাগতম, {user?.name}</span>
+        <span className="text-sm bg-emerald-700 px-2 py-1 rounded">স্বাগতম, {user.name}</span>
       </header>
 
-      {/* Main Content Based on Active Tab */}
       <main className="p-4 max-w-4xl mx-auto">
         {activeTab === 'shop' && (
           <div>
@@ -146,7 +136,7 @@ export default function App() {
             <h2 className="text-lg font-semibold mb-4 text-gray-800">নতুন পণ্য পোস্ট করুন</h2>
             <form onSubmit={handlePostProduct} className="space-y-3">
               <div>
-                পণ্যর নাম:
+                <label className="text-xs text-gray-600">পণ্যের নাম:</label>
                 <input 
                   type="text" 
                   value={newProduct.name} 
@@ -157,7 +147,7 @@ export default function App() {
                 />
               </div>
               <div>
-                মূল্য (টাকা):
+                <label className="text-xs text-gray-600">মূল্য (টাকা):</label>
                 <input 
                   type="number" 
                   value={newProduct.price} 
@@ -168,7 +158,7 @@ export default function App() {
                 />
               </div>
               <div>
-                ছবির লিংক (URL):
+                <label className="text-xs text-gray-600">ছবির লিংক (URL):</label>
                 <input 
                   type="text" 
                   value={newProduct.img} 
@@ -187,14 +177,13 @@ export default function App() {
         {activeTab === 'account' && (
           <div className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4 text-gray-800">প্রোফাইল ড্যাশবোর্ড</h2>
-            <p className="text-sm"><strong>নাম:</strong> {user?.name}</p>
-            <p className="text-sm mt-2"><strong>ফোন:</strong> {user?.phone}</p>
-            <p className="text-sm mt-2"><strong>ঠিকানা:</strong> {user?.address}</p>
+            <p className="text-sm"><strong>নাম:</strong> {user.name}</p>
+            <p className="text-sm mt-2"><strong>ফোন:</strong> {user.phone}</p>
+            <p className="text-sm mt-2"><strong>ঠিকানা:</strong> {user.address}</p>
           </div>
         )}
       </main>
 
-      {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 shadow-lg z-50">
         <button onClick={() => setActiveTab('shop')} className={`text-xs ${activeTab === 'shop' ? 'text-emerald-600 font-bold' : 'text-gray-500'}`}>
           হোম
@@ -203,7 +192,7 @@ export default function App() {
           কার্ট ({cart.length})
         </button>
         <button onClick={() => setActiveTab('post')} className={`text-xs ${activeTab === 'post' ? 'text-emerald-600 font-bold' : 'text-gray-500'}`}>
-          পস্ট
+          পোস্ট
         </button>
         <button onClick={() => setActiveTab('account')} className={`text-xs ${activeTab === 'account' ? 'text-emerald-600 font-bold' : 'text-gray-500'}`}>
           প্রোফাইল
