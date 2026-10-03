@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// Interfaces
 interface Product {
   id: number;
   title: string;
@@ -28,21 +27,17 @@ interface Order {
 }
 
 export default function App() {
-  // Active Tab: 'shop', 'post', 'cart', 'admin'
   const [activeTab, setActiveTab] = useState<'shop' | 'post' | 'cart' | 'admin'>('shop');
 
-  // User Profile State (Stored in LocalStorage)
   const [user, setUser] = useState<UserProfile | null>(() => {
     const savedUser = localStorage.getItem('bss_user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  // Login Form State
   const [loginName, setLoginName] = useState('');
   const [loginPhone, setLoginPhone] = useState('');
   const [loginAddress, setLoginAddress] = useState('');
 
-  // Products Data State
   const [products, setProducts] = useState<Product[]>([
     { 
       id: 1, 
@@ -73,16 +68,13 @@ export default function App() {
     },
   ]);
 
-  // Cart State
   const [cart, setCart] = useState<Product[]>([]);
 
-  // Orders State (Stored in LocalStorage for Admin)
   const [orders, setOrders] = useState<Order[]>(() => {
     const savedOrders = localStorage.getItem('bss_orders');
     return savedOrders ? JSON.parse(savedOrders) : [];
   });
 
-  // New Post Form State
   const [postTitle, setPostTitle] = useState('');
   const [postPrice, setPostPrice] = useState('');
   const [postCategory, setPostCategory] = useState('গ্যাজেট');
@@ -90,12 +82,10 @@ export default function App() {
   const [postPhone, setPostPhone] = useState('');
   const [postImage, setPostImage] = useState<string>('https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=300&auto=format&fit=crop&q=60');
 
-  // Save Orders to LocalStorage whenever updated
   useEffect(() => {
     localStorage.setItem('bss_orders', JSON.stringify(orders));
   }, [orders]);
 
-  // Handle Login Submit
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginName || !loginPhone) {
@@ -112,7 +102,6 @@ export default function App() {
     alert('স্বাগতম! আপনার অ্যাকাউন্ট নিবন্ধিত হয়েছে।');
   };
 
-  // Handle Image Upload
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -122,7 +111,6 @@ export default function App() {
     }
   };
 
-  // Submit Product Post
   const handlePostSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!postTitle || !postPrice || !sellerName || !postPhone) {
@@ -149,7 +137,6 @@ export default function App() {
     alert('🎉 আপনার পণ্যটি পোস্ট করা হয়েছে!');
   };
 
-  // Order Placement
   const handlePlaceOrder = () => {
     if (!user) return;
     if (cart.length === 0) return;
@@ -169,7 +156,6 @@ export default function App() {
     alert(`🎉 আপনার অর্ডারটি সফলভাবে নেওয়া হয়েছে!\nঅর্ডার আইডি: ${newOrder.id}`);
   };
 
-  // If First Time User (Not Logged In)
   if (!user) {
     return (
       <div style={{ maxWidth: '480px', margin: '0 auto', backgroundColor: '#f4f4f5', minHeight: '100vh', fontFamily: 'sans-serif', padding: '20px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -205,7 +191,6 @@ export default function App() {
   return (
     <div style={{ maxWidth: '480px', margin: '0 auto', backgroundColor: '#f4f4f5', minHeight: '100vh', fontFamily: 'sans-serif', paddingBottom: '70px' }}>
       
-      {/* Top Header */}
       <div style={{ backgroundColor: '#e11d48', color: '#fff', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 20 }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>বরিশাল সুপার শপ</h2>
@@ -219,7 +204,6 @@ export default function App() {
         </button>
       </div>
 
-      {/* SHOP VIEW */}
       {activeTab === 'shop' && (
         <div>
           <div style={{ backgroundColor: '#fff', padding: '10px 12px', borderBottom: '1px solid #e4e4e7' }}>
@@ -259,7 +243,6 @@ export default function App() {
         </div>
       )}
 
-      {/* POST PRODUCT VIEW */}
       {activeTab === 'post' && (
         <div style={{ padding: '12px' }}>
           <div style={{ backgroundColor: '#fff', padding: '16px', borderRadius: '10px', border: '1px solid #e4e4e7' }}>
@@ -272,6 +255,15 @@ export default function App() {
               <div>
                 <label style={{ fontSize: '12px', fontWeight: 'bold' }}>পণ্যের নাম</label>
                 <input type="text" required value={postTitle} onChange={(e) => setPostTitle(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 'bold' }}>ক্যাটাগরি</label>
+                <select value={postCategory} onChange={(e) => setPostCategory(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box', marginTop: '4px' }}>
+                  <option value="গ্যাজেট">গ্যাজেট</option>
+                  <option value="হেলথ">হেলথ</option>
+                  <option value="ফ্যাশন">ফ্যাশন</option>
+                  <option value="গ্রোসারি">গ্রোসারি</option>
+                </select>
               </div>
               <div>
                 <label style={{ fontSize: '12px', fontWeight: 'bold' }}>মূল্য (৳)</label>
@@ -293,7 +285,6 @@ export default function App() {
         </div>
       )}
 
-      {/* CART & ORDER FORM VIEW */}
       {activeTab === 'cart' && (
         <div style={{ padding: '12px' }}>
           <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>🛒 আপনার কার্ট ও অর্ডার ফর্ম</h3>
@@ -311,7 +302,6 @@ export default function App() {
                 </div>
               ))}
 
-              {/* Automated Order Form Details */}
               <div style={{ backgroundColor: '#fff', padding: '12px', borderRadius: '8px', border: '1px solid #e4e4e7', marginTop: '10px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: '#18181b', borderBottom: '1px solid #f4f4f5', paddingBottom: '4px' }}>📋 কাস্টমার ডেলিভারি তথ্য</h4>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>নাম:</strong> {user.name}</p>
@@ -328,7 +318,6 @@ export default function App() {
         </div>
       )}
 
-      {/* ADMIN PANEL VIEW */}
       {activeTab === 'admin' && (
         <div style={{ padding: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -365,7 +354,6 @@ export default function App() {
         </div>
       )}
 
-      {/* BOTTOM NAVIGATION */}
       <div style={{ position: 'fixed', bottom: 0, width: '100%', maxWidth: '480px', backgroundColor: '#fff', borderTop: '1px solid #e4e4e7', display: 'flex', justifyContent: 'space-around', padding: '8px 0', fontSize: '11px', color: '#71717a', zIndex: 30 }}>
         <div onClick={() => setActiveTab('shop')} style={{ textAlign: 'center', cursor: 'pointer', color: activeTab === 'shop' ? '#e11d48' : '#71717a', fontWeight: activeTab === 'shop' ? 'bold' : 'normal' }}>
           🛍️<br />শপ
@@ -379,6 +367,6 @@ export default function App() {
       </div>
 
     </div>
-  
-    }
-                                                                  
+  );
+            }
+                  
