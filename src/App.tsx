@@ -18,7 +18,7 @@ interface UserProfile {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'shop' | 'cart' | 'account' | 'post'>('shop');
+  const [activeTab, setActiveTab] = useState<'shop' | 'cart' | 'post' | 'account' | 'admin'>('shop');
   
   const [user] = useState<UserProfile>({
     name: 'Fida Al Sani',
@@ -182,6 +182,13 @@ export default function App() {
             <p className="text-sm mt-2"><strong>ঠিকানা:</strong> {user.address}</p>
           </div>
         )}
+
+        {activeTab === 'admin' && (
+          <div className="bg-white p-4 rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">অ্যাডমিন প্যানেল</h2>
+            <p className="text-sm text-gray-600">মোট পণ্য তালিকা: {products.length}টি</p>
+          </div>
+        )}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 shadow-lg z-50">
@@ -197,7 +204,10 @@ export default function App() {
         <button onClick={() => setActiveTab('account')} className={`text-xs ${activeTab === 'account' ? 'text-emerald-600 font-bold' : 'text-gray-500'}`}>
           প্রোফাইল
         </button>
+        <button onClick={() => setActiveTab('admin')} className={`text-xs ${activeTab === 'admin' ? 'text-emerald-600 font-bold' : 'text-gray-500'}`}>
+          অ্যাডমিন
+        </button>
       </nav>
     </div>
   );
-}
+            }
