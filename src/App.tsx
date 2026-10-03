@@ -28,9 +28,6 @@ interface Order {
 }
 
 export default function App() {
-  // PWA/Install Prompt State
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-
   // Active Tab: 'shop', 'post', 'cart', 'admin'
   const [activeTab, setActiveTab] = useState<'shop' | 'post' | 'cart' | 'admin'>('shop');
 
@@ -92,16 +89,6 @@ export default function App() {
   const [sellerName, setSellerName] = useState('');
   const [postPhone, setPostPhone] = useState('');
   const [postImage, setPostImage] = useState<string>('https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=300&auto=format&fit=crop&q=60');
-
-  // PWA Listener
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, []);
 
   // Save Orders to LocalStorage whenever updated
   useEffect(() => {
@@ -386,4 +373,11 @@ export default function App() {
         <div onClick={() => setActiveTab('post')} style={{ textAlign: 'center', cursor: 'pointer', color: activeTab === 'post' ? '#e11d48' : '#71717a', fontWeight: activeTab === 'post' ? 'bold' : 'normal' }}>
           ➕<br />বিক্রি করুন
         </div>
-        <div onClick={() => setActiveTab('cart')} style={{ textAlign: 'center', cursor: 'pointer', color: acti
+        <div onClick={() => setActiveTab('cart')} style={{ textAlign: 'center', cursor: 'pointer', color: activeTab === 'cart' ? '#e11d48' : '#71717a', fontWeight: activeTab === 'cart' ? 'bold' : 'normal' }}>
+          🛒<br />কার্ট ({cart.length})
+        </div>
+      </div>
+
+    </div>
+  );
+}
