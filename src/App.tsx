@@ -134,12 +134,11 @@ export default function App() {
     setSellerName('');
     setPostPhone('');
     setActiveTab('shop');
-    alert('🎉 আপনার পণ্যটি পোস্ট করা হয়েছে!');
+    alert('আপনার পণ্যটি পোস্ট করা হয়েছে!');
   };
 
   const handlePlaceOrder = () => {
-    if (!user) return;
-    if (cart.length === 0) return;
+    if (!user || cart.length === 0) return;
 
     const newOrder: Order = {
       id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
@@ -153,7 +152,7 @@ export default function App() {
 
     setOrders([newOrder, ...orders]);
     setCart([]);
-    alert(`🎉 আপনার অর্ডারটি সফলভাবে নেওয়া হয়েছে!\nঅর্ডার আইডি: ${newOrder.id}`);
+    alert(`আপনার অর্ডারটি সফলভাবে নেওয়া হয়েছে!\nঅর্ডার আইডি: ${newOrder.id}`);
   };
 
   if (!user) {
@@ -180,7 +179,7 @@ export default function App() {
             </div>
 
             <button type="submit" style={{ backgroundColor: '#e11d48', color: '#fff', border: 'none', padding: '12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', marginTop: '10px' }}>
-              প্রবেশ করুন 🚀
+              প্রবেশ করুন
             </button>
           </form>
         </div>
@@ -194,13 +193,13 @@ export default function App() {
       <div style={{ backgroundColor: '#e11d48', color: '#fff', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 20 }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>বরিশাল সুপার শপ</h2>
-          <small style={{ fontSize: '11px', opacity: 0.9 }}>👤 {user.name} ({user.phone})</small>
+          <small style={{ fontSize: '11px', opacity: 0.9 }}>{user.name} ({user.phone})</small>
         </div>
         <button 
           onClick={() => setActiveTab('admin')}
           style={{ backgroundColor: '#fff', color: '#e11d48', border: 'none', padding: '6px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
         >
-          ⚙️ এডমিন প্যানেল
+          এডমিন প্যানেল
         </button>
       </div>
 
@@ -214,7 +213,7 @@ export default function App() {
           </div>
 
           <div style={{ padding: '12px' }}>
-            <h3 style={{ fontSize: '15px', color: '#27272a', marginBottom: '10px' }}>সর্বশেষ পণ্যসমূহ 🛍️</h3>
+            <h3 style={{ fontSize: '15px', color: '#27272a', marginBottom: '10px' }}>সর্বশেষ পণ্যসমূহ</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
               {products.map((p) => (
                 <div key={p.id} style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '8px', border: '1px solid #e4e4e7', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -233,7 +232,7 @@ export default function App() {
                       onClick={() => { setCart([...cart, p]); alert('কার্টে যোগ করা হয়েছে!'); }}
                       style={{ width: '100%', backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
                     >
-                      🛒 কার্টে যোগ করুন
+                      কার্টে যোগ করুন
                     </button>
                   </div>
                 </div>
@@ -246,7 +245,7 @@ export default function App() {
       {activeTab === 'post' && (
         <div style={{ padding: '12px' }}>
           <div style={{ backgroundColor: '#fff', padding: '16px', borderRadius: '10px', border: '1px solid #e4e4e7' }}>
-            <h3 style={{ margin: '0 0 12px 0', color: '#18181b', fontSize: '16px' }}>➕ পণ্য বিক্রির জন্য পোস্ট করুন</h3>
+            <h3 style={{ margin: '0 0 12px 0', color: '#18181b', fontSize: '16px' }}>পণ্য বিক্রির জন্য পোস্ট করুন</h3>
             <form onSubmit={handlePostSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
                 <label style={{ fontSize: '12px', fontWeight: 'bold' }}>পণ্যের ছবি আপলোড</label>
@@ -278,7 +277,7 @@ export default function App() {
                 <input type="tel" required value={postPhone} onChange={(e) => setPostPhone(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
               </div>
               <button type="submit" style={{ backgroundColor: '#16a34a', color: '#fff', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
-                🚀 পাবলিশ করুন
+                পাবলিশ করুন
               </button>
             </form>
           </div>
@@ -287,7 +286,7 @@ export default function App() {
 
       {activeTab === 'cart' && (
         <div style={{ padding: '12px' }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>🛒 আপনার কার্ট ও অর্ডার ফর্ম</h3>
+          <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>আপনার কার্ট ও অর্ডার ফর্ম</h3>
           {cart.length === 0 ? (
             <p style={{ textAlign: 'center', color: '#71717a', margin: '40px 0' }}>আপনার কার্টে কোনো পণ্য নেই!</p>
           ) : (
@@ -303,14 +302,14 @@ export default function App() {
               ))}
 
               <div style={{ backgroundColor: '#fff', padding: '12px', borderRadius: '8px', border: '1px solid #e4e4e7', marginTop: '10px' }}>
-                <h4 style={{ margin: '0 0 8px 0', color: '#18181b', borderBottom: '1px solid #f4f4f5', paddingBottom: '4px' }}>📋 কাস্টমার ডেলিভারি তথ্য</h4>
+                <h4 style={{ margin: '0 0 8px 0', color: '#18181b', borderBottom: '1px solid #f4f4f5', paddingBottom: '4px' }}>কাস্টমার ডেলিভারি তথ্য</h4>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>নাম:</strong> {user.name}</p>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>ফোন:</strong> {user.phone}</p>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>ঠিকানা:</strong> {user.address || 'ঠিকানা দেওয়া হয়নি'}</p>
                 <hr style={{ border: 'none', borderTop: '1px dashed #e4e4e7', margin: '8px 0' }} />
                 <h3 style={{ margin: '0 0 10px 0', color: '#e11d48' }}>মোট প্রদেয়: ৳{cart.reduce((sum, item) => sum + item.price, 0)}</h3>
                 <button onClick={handlePlaceOrder} style={{ width: '100%', backgroundColor: '#16a34a', color: '#fff', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}>
-                  ✅ অর্ডার কনফার্ম করুন (ক্যাশ অন ডেলিভারি)
+                  অর্ডার কনফার্ম করুন (ক্যাশ অন ডেলিভারি)
                 </button>
               </div>
             </div>
@@ -321,7 +320,7 @@ export default function App() {
       {activeTab === 'admin' && (
         <div style={{ padding: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px' }}>⚙️ এডমিন প্যানেল - অর্ডারসমূহ</h3>
+            <h3 style={{ margin: 0, fontSize: '16px' }}>এডমিন প্যানেল - অর্ডারসমূহ</h3>
             <span style={{ fontSize: '12px', backgroundColor: '#e11d48', color: '#fff', padding: '2px 8px', borderRadius: '10px' }}>{orders.length} টি অর্ডার</span>
           </div>
 
@@ -356,17 +355,17 @@ export default function App() {
 
       <div style={{ position: 'fixed', bottom: 0, width: '100%', maxWidth: '480px', backgroundColor: '#fff', borderTop: '1px solid #e4e4e7', display: 'flex', justifyContent: 'space-around', padding: '8px 0', fontSize: '11px', color: '#71717a', zIndex: 30 }}>
         <div onClick={() => setActiveTab('shop')} style={{ textAlign: 'center', cursor: 'pointer', color: activeTab === 'shop' ? '#e11d48' : '#71717a', fontWeight: activeTab === 'shop' ? 'bold' : 'normal' }}>
-          🛍️<br />শপ
+          শপ
         </div>
-        <div onClick={() => setActiveTab('post')} style={{ textAlign: 'center', cursor: 'pointer', color: activeTab === 'post' ? '#e11d48' : '#71717a', fontWeight: activeTab === 'post' ? 'bold' : 'normal' }}>
-          ➕<br />বিক্রি করুন
+        <div onClick={() => setActiveTab('post')} style={{ textAlign: 'center', cursor: 'pointer', color: activeTab === 'post' ? '#e11d48' : '#71717a', fontWeight activeTab === 'post' ? 'bold' : 'normal' }}>
+          বিক্রি করুন
         </div>
         <div onClick={() => setActiveTab('cart')} style={{ textAlign: 'center', cursor: 'pointer', color: activeTab === 'cart' ? '#e11d48' : '#71717a', fontWeight: activeTab === 'cart' ? 'bold' : 'normal' }}>
-          🛒<br />কার্ট ({cart.length})
+          কার্ট ({cart.length})
         </div>
       </div>
 
     </div>
   );
-            }
-                  
+      }
+  
