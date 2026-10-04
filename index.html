@@ -23,14 +23,23 @@
   <body class="bg-[#F9F9F8] text-[#18101B] antialiased selection:bg-[#D94E28] selection:text-white">
     
     <!-- প্লে-স্টোর স্টাইলের ডাউনলোড বাটন সেকশন -->
-    <div style="background: linear-gradient(135deg, #28a745, #218838); color: white; padding: 25px 20px; text-align: center; border-bottom: 4px solid #1e7e34; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+    <div id="download-banner" style="background: linear-gradient(135deg, #28a745, #218838); color: white; padding: 25px 20px; text-align: center; border-bottom: 4px solid #1e7e34; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: none;">
       <h2 style="margin: 0 0 8px 0; font-size: 22px; font-weight: 700;">⚡ বরিশাল সুপার শপ অফিশিয়াল অ্যাপ</h2>
       <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.95;">এক ক্লিকে ডাউনলোড করুন এবং সহজে কেনাকাটা করুন!</p>
       <a href="https://raw.githubusercontent.com/sannysayy008-create/barishal-super-shop/main/%E0%A6%AC%E0%A6%B0%E0%A6%BF%E0%A6%B6%E0%A6%BE%E0%A6%B2%20%E0%A6%B6%E0%A6%AA.apk" 
+         onclick="localStorage.setItem('appDownloaded', 'true'); document.getElementById('download-banner').style.display='none';"
          style="background-color: white; color: #28a745; padding: 12px 28px; text-decoration: none; font-size: 16px; font-weight: bold; border-radius: 30px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
          📥 দ্রুত ইনস্টল করুন (15 সেকেন্ডে ডাউনলোড)
       </a>
     </div>
+
+    <script>
+      // যদি অ্যাপটি আগে ডাউনলোড করা না হয়ে থাকে, তবেই কেবল ব্রাউজারে ব্যানারটি দেখাবে
+      if (!window.matchMedia('(display-mode: standalone)').matches && localStorage.getItem('appDownloaded') !== 'true') {
+        var banner = document.getElementById('download-banner');
+        if (banner) { banner.style.display = 'block'; }
+      }
+    </script>
 
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
