@@ -1,26 +1,31 @@
 import React, { useState, useEffect } from 'react';
 
 export function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
-  const [userPhone, setUserPhone] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>('');
+  const [userPhone, setUserPhone] = useState<string>('');
   const [language, setLanguage] = useState<'bn' | 'en'>('bn');
-  const [showProfile, setShowProfile] = useState(false);
+  const [showProfile, setShowProfile] = useState<boolean>(false);
 
-  // চেক করা ইউজার আগে থেকেই লগইন করা আছে কিনা
   useEffect(() => {
     const savedUser = localStorage.getItem('barishal_shop_user');
     if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUserName(parsedUser.name);
-      setUserPhone(parsedUser.phone);
-      setIsLoggedIn(true);
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        if (parsedUser && parsedUser.name) {
+          setUserName(parsedUser.name);
+          setUserPhone(parsedUser.phone || '');
+          setIsLoggedIn(true);
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (userName && userPhone) {
+    if (userName.trim() && userPhone.trim()) {
       const userData = { name: userName, phone: userPhone };
       localStorage.setItem('barishal_shop_user', JSON.stringify(userData));
       setIsLoggedIn(true);
@@ -35,7 +40,6 @@ export function App() {
     setShowProfile(false);
   };
 
-  // ভাষা অনুযায়ী টেক্সট পরিবর্তন
   const t = {
     bn: {
       welcome: "বরিশাল সুপার শপে স্বাগতম!",
@@ -65,8 +69,6 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#F9F9F8] text-[#18101B]">
-      
-      {/* নতুন কাস্টমারদের জন্য লগইন ফর্ম */}
       {!isLoggedIn && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-orange-100">
@@ -108,18 +110,15 @@ export function App() {
         </div>
       )}
 
-      {/* বিজ্ঞাপন ব্যানার */}
       <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3 text-center shadow-md flex items-center justify-center space-x-2">
         <span className="animate-bounce">📢</span>
         <p className="text-sm font-semibold">{t[language].offer}</p>
       </div>
 
-      {/* হেডার: লোগো, ভাষা পরিবর্তন এবং প্রোফাইল বাটন */}
       <header className="p-4 bg-white shadow-sm flex justify-between items-center sticky top-0 z-40">
         <h1 className="text-xl font-bold text-[#D94E28]">{t[language].shopTitle}</h1>
         
         <div className="flex items-center space-x-3">
-          {/* বাংলা / ইংরেজি টগল বাটন */}
           <button 
             onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
             className="px-3 py-1.5 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full border border-gray-300 transition-all"
@@ -127,7 +126,6 @@ export function App() {
             {language === 'bn' ? 'English 🇬🇧' : 'বাংলা 🇧🇩'}
           </button>
 
-          {/* প্রোফাইল বাটন */}
           {isLoggedIn && (
             <button 
               onClick={() => setShowProfile(true)}
@@ -140,7 +138,6 @@ export function App() {
         </div>
       </header>
 
-      {/* প্রোফাইল মডাল */}
       {showProfile && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-4">
@@ -169,11 +166,9 @@ export function App() {
         </div>
       )}
 
-      {/* মূল অ্যাপের কন্টেন্ট */}
       <main className="p-4">
-        {/* আপনার শপের বাকি প্রোডাক্ট বা সেকশনগুলো এখানে থাকবে */}
+        {/* শপের অন্যান্য কন্টেন্ট */}
       </main>
-
     </div>
   );
-}
+            }
