@@ -91,7 +91,7 @@ export default function App() {
 
   const addToCart = (product: Product) => {
     setCart([...cart, product]);
-    alert('কার্টে পণ্য যোগ করা হয়েছে!');
+    alert('কার্টে পণ্য যোগ করা হয়েছে! এবার কার্ট ট্যাবে যান।');
   };
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
@@ -190,13 +190,20 @@ export default function App() {
           </div>
         )}
 
-        {/* 🛒 কার্ট ও অর্ডার ফর্ম */}
+        {/* 🛒 কার্ট ও অর্ডার ফর্ম ট্যাব */}
         {activeTab === 'cart' && (
           <div className="space-y-4">
             <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
               <h2 className="text-md font-semibold text-gray-800 border-b pb-2">আমার কার্ট ({cart.length})</h2>
               {cart.length === 0 ? (
-                <p className="text-gray-400 text-center py-6 text-sm">আপনার কার্ট খালি রয়েছে।</p>
+                <div className="text-center py-8 space-y-2">
+                  <p className="text-gray-400 text-sm">আপনার কার্ট খালি রয়েছে।</p>
+                  <button 
+                    onClick={() => setActiveTab('shop')} 
+                    className="text-xs bg-orange-500 text-white px-4 py-2 rounded-lg font-bold">
+                    পণ্য কিনতে হোম পেজে যান
+                  </button>
+                </div>
               ) : (
                 <div className="space-y-2">
                   {cart.map((item, idx) => (
@@ -224,7 +231,7 @@ export default function App() {
                       type="text" 
                       value={customerName} 
                       onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="পুরo নাম লিখুন" 
+                      placeholder="পুরো নাম লিখুন" 
                       className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
                       required 
                     />
@@ -443,14 +450,4 @@ export default function App() {
         <button onClick={() => setActiveTab('orders')} className={`text-xs ${activeTab === 'orders' ? 'text-orange-500 font-bold' : 'text-gray-500'}`}>
           📦 অর্ডার্স
         </button>
-        <button onClick={() => setActiveTab('admin')} className={`text-xs ${activeTab === 'admin' ? 'text-red-600 font-bold' : 'text-gray-500'}`}>
-          ⚙️ অ্যাডমিন
-        </button>
-        <button onClick={() => setActiveTab('account')} className={`text-xs ${activeTab === 'account' ? 'text-orange-500 font-bold' : 'text-gray-500'}`}>
-          👤 প্রোফাইল
-        </button>
-      </nav>
-    </div>
-  );
-                                                                             }
-          
+        <button onClick={() => setActiveTab('admin')} className={`text-xs ${activeTab === 'admin' ? 'text-red-600 font-bol
