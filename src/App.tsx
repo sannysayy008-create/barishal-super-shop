@@ -9,7 +9,6 @@ export default function App() {
   const [cart, setCart] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Checkout Modal State
   const [showCheckout, setShowCheckout] = useState(false);
   const [shippingName, setShippingName] = useState('');
   const [shippingPhone, setShippingPhone] = useState('');
@@ -60,6 +59,10 @@ export default function App() {
     setUserPhone('');
   };
 
+  const handleDownloadApp = () => {
+    alert(lang === 'bn' ? 'ডাউনলোড শুরু হচ্ছে... আপনার ব্রাউজারের মেনু থেকে "Add to Home Screen" সিলেক্ট করে অ্যাপটি ইনস্টল করুন।' : 'Download starting... Select "Add to Home Screen" from your browser menu to install the app.');
+  };
+
   const addToCart = (p: any) => {
     setCart(prev => {
       const exist = prev.find(i => i.id === p.id);
@@ -100,7 +103,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24 text-gray-800">
-      {/* Registration / Login Modal */}
       {!isLoggedIn && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
@@ -119,14 +121,13 @@ export default function App() {
               <input type="text" required placeholder={lang === 'bn' ? "আপনার নাম লিখুন" : "Enter your name"} value={userName} onChange={e => setUserName(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50" />
               <input type="tel" required placeholder={lang === 'bn' ? "মোবাইল নম্বর দিন" : "Enter phone number"} value={userPhone} onChange={e => setUserPhone(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50" />
               <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white p-3.5 rounded-2xl font-bold text-sm shadow-lg">
-                {lang === 'bn' ? 'প্রবেশ করুন (Login/Register)' : 'Enter Shop'}
+                {lang === 'bn' ? 'প্রবেশ করুন' : 'Enter Shop'}
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* Checkout Modal */}
       {showCheckout && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -163,7 +164,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Header */}
       <header className="bg-orange-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
         <div className="font-extrabold text-base tracking-wide">
           🛍️ {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
@@ -173,12 +173,11 @@ export default function App() {
             {lang === 'bn' ? 'EN' : 'বাং'}
           </button>
           <button onClick={() => setActiveTab('admin')} className="text-xs bg-orange-700 px-2.5 py-1 rounded-xl font-bold">
-            ⚙️ {lang === 'bn' ? 'অ্যাডমিন' : 'Admin'}
+            ⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট' : 'Account'}
           </button>
         </div>
       </header>
 
-      {/* Main Container */}
       <main className="p-4 max-w-md mx-auto space-y-4">
         {activeTab === 'home' && (
           <div className="space-y-3">
@@ -264,8 +263,8 @@ export default function App() {
         {activeTab === 'admin' && (
           <div className="bg-white p-5 rounded-3xl shadow-sm space-y-4 text-xs">
             <div className="border-b pb-3">
-              <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট ও রেজিস্ট্রেশন প্যানেল' : 'Account & Registration Panel'}</h3>
-              <p className="text-gray-400 text-[10px] mt-1">Logged in user session active</p>
+              <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট ও ডাউনলোড প্যানেল' : 'Account & Download Panel'}</h3>
+              <p className="text-gray-400 text-[10px] mt-1">Active User Session</p>
             </div>
             <div className="space-y-2 bg-gray-50 p-3 rounded-2xl">
               <p><strong className="text-gray-500">{lang === 'bn' ? 'নাম:' : 'Name:'}</strong> {userName || 'N/A'}</p>
@@ -275,15 +274,17 @@ export default function App() {
               <button onClick={() => setActiveTab('post')} className="w-full bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold py-3 rounded-xl border border-orange-200">
                 📢 {lang === 'bn' ? 'বিজ্ঞাপন দিন' : 'Post Ad'}
               </button>
+              <button onClick={handleDownloadApp} className="w-full bg-green-50 hover:bg-green-100 text-green-700 font-bold py-3 rounded-xl border border-green-200">
+                📥 {lang === 'bn' ? 'অ্যাপ ডাউনলোড / ইনস্টল করুন' : 'Download / Install App'}
+              </button>
               <button onClick={handleLogout} className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl border border-red-100">
-                🚪 {lang === 'bn' ? 'লগআউট / অ্যাকাউন্ট পরিবর্তন' : 'Logout / Switch Account'}
+                🚪 {lang === 'bn' ? 'লগআউট / অ্যাকাউন্ট পরিবর্তন' : 'Logout'}
               </button>
             </div>
           </div>
         )}
       </main>
 
-      {/* Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-3 z-40 text-xs shadow-2xl">
         <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center ${activeTab === 'home' ? 'text-orange-600 font-bold' : 'text-gray-400'}`}>
           <span className="text-base">🏠</span><span className="text-[10px]">{lang === 'bn' ? 'হোম' : 'Home'}</span>
@@ -301,5 +302,5 @@ export default function App() {
       </nav>
     </div>
   );
-  }
-        
+                  }
+                    
