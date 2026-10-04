@@ -11,6 +11,7 @@ interface Order {
   id: string;
   customerName: string;
   phone: string;
+  address: string;
   items: Product[];
   total: number;
   status: string;
@@ -26,10 +27,12 @@ export default function App() {
   // অ্যাডমিন সিকিউরিটি স্টেট
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [adminPin, setAdminPin] = useState('');
-  const CORRECT_PIN = '1234'; // আপনার গোপন পিন কোড (প্রয়োজনে এটি পরিবর্তন করতে পারেন)
+  const CORRECT_PIN = '1234';
 
-  const [customerName] = useState<string>('Fida Al Sani');
-  const [customerPhone] = useState<string>('01700000000');
+  // অর্ডার ফর্মের কাস্টমার ইনপুট স্টেট
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
 
   const [products, setProducts] = useState<Product[]>([
     {
@@ -51,6 +54,7 @@ export default function App() {
       id: 'ORD-1001',
       customerName: 'Fida Al Sani',
       phone: '01700000000',
+      address: 'Barishal Sadar',
       items: [{ id: 1, name: 'প্রিমিয়াম লেদার জ্যাকেট', price: 2500, img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500' }],
       total: 2500,
       status: 'Pending',
@@ -92,9 +96,14 @@ export default function App() {
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
-  const handleCheckout = () => {
+  const handleCheckout = (e: React.FormEvent) => {
+    e.preventDefault();
     if (cart.length === 0) {
       alert('আপনার কার্ট খালি!');
+      return;
+    }
+    if (!customerName || !customerPhone || !customerAddress) {
+      alert('দয়া করে নাম, মোবাইল নম্বর এবং ঠিকানা পূরণ করুন!');
       return;
     }
 
@@ -102,6 +111,7 @@ export default function App() {
       id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
       customerName: customerName,
       phone: customerPhone,
+      address: customerAddress,
       items: [...cart],
       total: totalPrice,
       status: 'Pending',
@@ -111,6 +121,9 @@ export default function App() {
 
     setOrders([newOrder, ...orders]);
     setCart([]);
+    setCustomerName('');
+    setCustomerPhone('');
+    setCustomerAddress('');
     alert('অর্ডার সফলভাবে সম্পন্ন হয়েছে!');
     setActiveTab('orders');
   };
@@ -144,7 +157,7 @@ export default function App() {
           <h1 className="text-base font-bold">Barishal Super Shop</h1>
         </div>
         <button 
-          onClick={() => { setActiveTab('admin'); }} 
+          onClick={() => setActiveTab('admin')} 
           className="text-xs bg-red-600 text-white px-2.5 py-1 rounded-md font-bold shadow">
           ⚙️ অ্যাডমিন প্যানেল
         </button>
@@ -177,48 +190,90 @@ export default function App() {
           </div>
         )}
 
+        {/* 🛒 কার্ট ও অর্ডার ফর্ম */}
         {activeTab === 'cart' && (
-          <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
-            <h2 className="text-md font-semibold text-gray-800">আমার কার্ট ({cart.length})</h2>
-            {cart.length === 0 ? (
-              <p className="text-gray-400 text-center py-10 text-sm">আপনার কার্ট খালি রয়েছে।</p>
-            ) : (
-              <>
-                <div className="space-y-3">
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
+              <h2 className="text-md font-semibold text-gray-800 border-b pb-2">আমার কার্ট ({cart.length})</h2>
+              {cart.length === 0 ? (
+                <p className="text-gray-400 text-center py-6 text-sm">আপনার কার্ট খালি রয়েছে।</p>
+              ) : (
+                <div className="space-y-2">
                   {cart.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center border-b pb-3">
-                      <h4 className="font-medium text-xs text-gray-800">{item.name}</h4>
-                      <p className="text-xs text-orange-600 font-bold">৳ {item.price}</p>
+                    <div key={idx} className="flex justify-between items-center text-xs border-b pb-2">
+                      <span className="font-medium text-gray-800">{item.name}</span>
+                      <span className="text-orange-600 font-bold">৳ {item.price}</span>
                     </div>
                   ))}
+                  <div className="pt-2 flex justify-between items-center text-sm font-bold">
+                    <span>মোট মূল্য:</span>
+                    <span className="text-orange-600">৳ {totalPrice}</span>
+                  </div>
                 </div>
+              )}
+            </div>
 
-                <div className="pt-2">
-                  <p className="text-xs font-semibold text-gray-700 mb-2">পেমেন্ট পদ্ধতি নির্বাচন করুন:</p>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    {['bKash', 'Nagad', 'Rocket', 'Cash On Delivery'].map((method) => (
-                      <button
-                        key={method}
-                        type="button"
-                        onClick={() => setSelectedPayment(method)}
-                        className={`p-2.5 rounded-lg border font-medium text-center ${selectedPayment === method ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-gray-200 text-gray-700'}`}>
-                        {method}
-                      </button>
-                    ))}
+            {cart.length > 0 && (
+              <form onSubmit={handleCheckout} className="bg-white rounded-xl shadow-sm p-4 space-y-3">
+                <h3 className="text-sm font-bold text-gray-800 border-b pb-2">📝 অর্ডারের তথ্য দিন (ফর্ম)</h3>
+                
+                <div className="text-xs space-y-3">
+                  <div>
+                    <label className="text-gray-600 font-medium">আপনার নাম</label>
+                    <input 
+                      type="text" 
+                      value={customerName} 
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="পুরo নাম লিখুন" 
+                      className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 font-medium">মোবাইল নম্বর</label>
+                    <input 
+                      type="tel" 
+                      value={customerPhone} 
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="যেমন: 01700000000" 
+                      className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 font-medium">ডেলিভারি ঠিকানা</label>
+                    <textarea 
+                      value={customerAddress} 
+                      onChange={(e) => setCustomerAddress(e.target.value)}
+                      placeholder="বাসা/রোড, এলাকা, থানা, জেলা" 
+                      className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
+                      rows={2}
+                      required 
+                    />
+                  </div>
+
+                  <div>
+                    <p className="font-semibold text-gray-700 mb-1.5">পেমেন্ট মাধ্যম:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['bKash', 'Nagad', 'Rocket', 'Cash On Delivery'].map((method) => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => setSelectedPayment(method)}
+                          className={`p-2 rounded-lg border font-medium text-center ${selectedPayment === method ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-gray-200 text-gray-700'}`}>
+                          {method}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t flex justify-between items-center text-sm font-bold">
-                  <span>মোট মূল্য:</span>
-                  <span className="text-orange-600">৳ {totalPrice}</span>
-                </div>
-
                 <button 
-                  onClick={handleCheckout}
-                  className="w-full bg-orange-500 text-white py-2.5 rounded-lg text-xs font-bold shadow">
+                  type="submit"
+                  className="w-full bg-orange-500 text-white py-2.5 rounded-lg text-xs font-bold shadow hover:bg-orange-600 mt-2">
                   অর্ডার কনফার্ম করুন ({selectedPayment})
                 </button>
-              </>
+              </form>
             )}
           </div>
         )}
@@ -227,18 +282,20 @@ export default function App() {
           <div className="space-y-3">
             <h2 className="text-md font-semibold text-gray-800 mb-2">আমার অর্ডারসমূহ</h2>
             {orders.map((ord) => (
-              <div key={ord.id} className="bg-white rounded-xl p-4 shadow-sm space-y-2 border border-gray-100">
-                <div className="flex justify-between items-center text-xs border-b pb-2">
+              <div key={ord.id} className="bg-white rounded-xl p-4 shadow-sm space-y-2 border border-gray-100 text-xs">
+                <div className="flex justify-between items-center border-b pb-2">
                   <span className="font-bold text-gray-700">{ord.id}</span>
                   <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-semibold">{ord.status}</span>
                 </div>
+                <p><strong>গ্রাহক:</strong> {ord.customerName} ({ord.phone})</p>
+                <p><strong>ঠিকানা:</strong> {ord.address}</p>
                 {ord.items.map((item, i) => (
-                  <div key={i} className="flex justify-between text-xs text-gray-600">
+                  <div key={i} className="flex justify-between text-gray-600">
                     <span>{item.name}</span>
                     <span className="font-bold">৳ {item.price}</span>
                   </div>
                 ))}
-                <div className="flex justify-between items-center pt-2 border-t text-xs">
+                <div className="flex justify-between items-center pt-2 border-t">
                   <span className="text-gray-500">পেমেন্ট: {ord.paymentMethod}</span>
                   <span className="font-bold text-orange-600">মোট: ৳ {ord.total}</span>
                 </div>
@@ -247,7 +304,7 @@ export default function App() {
           </div>
         )}
 
-        {/* 🔒 সুরক্ষিত অ্যাডমিন প্যানেল ট্যাব */}
+        {/* 🔒 অ্যাডমিন প্যানেল */}
         {activeTab === 'admin' && (
           <div>
             {!isAdminLoggedIn ? (
@@ -262,7 +319,7 @@ export default function App() {
                     type="password" 
                     value={adminPin} 
                     onChange={(e) => setAdminPin(e.target.value)}
-                    placeholder="পিন কোড দিন (যেমন: 1234)" 
+                    placeholder="পিন কোড দিন (1234)" 
                     className="w-full border p-2.5 rounded-lg text-xs text-center outline-none focus:border-red-500 font-bold tracking-widest" 
                     required 
                   />
@@ -276,7 +333,7 @@ export default function App() {
                 <div className="bg-red-500 text-white p-4 rounded-xl shadow flex justify-between items-center">
                   <div>
                     <h2 className="text-base font-bold">⚙ অ্যাডমিন কন্ট্রোল প্যানেল</h2>
-                    <p className="text-xs opacity-90 mt-1">সব অর্ডার ও পণ্য ম্যানেজ করুন।</p>
+                    <p className="text-xs opacity-90 mt-1">সব কাস্টমারের অর্ডার ও তথ্য দেখুন।</p>
                   </div>
                   <button 
                     onClick={() => setIsAdminLoggedIn(false)} 
@@ -293,8 +350,16 @@ export default function App() {
                         <span>{ord.id}</span>
                         <span className="text-red-600">৳ {ord.total}</span>
                       </div>
-                      <p className="text-gray-600"><strong>গ্রাহক:</strong> {ord.customerName} ({ord.phone})</p>
-                      <p className="text-gray-600"><strong>পেমেন্ট মাধ্যম:</strong> {ord.paymentMethod}</p>
+                      <p className="text-gray-700"><strong>নাম:</strong> {ord.customerName}</p>
+                      <p className="text-gray-700"><strong>ফোন:</strong> {ord.phone}</p>
+                      <p className="text-gray-700"><strong>ঠিকানা:</strong> {ord.address}</p>
+                      <p className="text-gray-700"><strong>পেমেন্ট:</strong> {ord.paymentMethod}</p>
+                      <div className="pt-1 border-t mt-1">
+                        <span className="font-semibold text-gray-700">পণ্য: </span>
+                        {ord.items.map((it, idx) => (
+                          <span key={idx} className="text-orange-600 font-medium">{it.name} (৳ {it.price}), </span>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -361,7 +426,7 @@ export default function App() {
               </div>
             </div>
             <div className="text-xs space-y-2 text-gray-700">
-              <p><strong>মোবাইল:</strong> {customerPhone}</p>
+              <p><strong>স্ট্যাটাস:</strong> শপ ওনার</p>
               <p><strong>ঠিকানা:</strong> Barishal Sadar</p>
             </div>
           </div>
@@ -387,4 +452,5 @@ export default function App() {
       </nav>
     </div>
   );
-                }
+                                                                             }
+          
