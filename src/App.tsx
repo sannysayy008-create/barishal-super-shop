@@ -26,24 +26,20 @@ export default function App() {
   const [cart, setCart] = useState<Product[]>([]);
   const [selectedPayment, setSelectedPayment] = useState<string>('bKash');
   
-  // অ্যাডমিন সিকিউরিটি স্টেট
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [adminPin, setAdminPin] = useState('');
   const CORRECT_PIN = '1234';
 
-  // অর্ডার ফর্মের কাস্টমার ইনপুট স্টেট
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
 
-  // বিক্রেতা (Seller) পণ্য আপলোড স্টেট
   const [sellerShopName, setSellerShopName] = useState('');
   const [sellerPhone, setSellerPhone] = useState('');
   const [sellerProdName, setSellerProdName] = useState('');
   const [sellerProdPrice, setSellerProdPrice] = useState('');
   const [sellerProdImg, setSellerProdImg] = useState('');
 
-  // পণ্যের তালিকা
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
@@ -483,4 +479,6 @@ export default function App() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="bg-red-500 text-wh
+                <div className="bg-red-500 text-white p-4 rounded-xl shadow flex justify-between items-center">
+                  <div>
+                    <h2 className="text-bas
