@@ -424,7 +424,7 @@ export default function App() {
         {/* TAB 5: ADMIN */}
         {activeTab === 'admin' && (
           <div className="bg-white rounded-2xl p-4 shadow-sm space-y-4">
-            <h2 className="text-sm font-bold text-gray-800 border-b pb-2">⚙️ অ্যাডমিন ও মডারেটর প্যানেল</h2>
+            <h2 className="text-sm font-bold text-gray-800 border-b pb-2">⚙️️ অ্যাডমিন ও মডারেটর প্যানেল</h2>
             <div className="space-y-3 text-xs">
               <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 flex justify-between items-center">
                 <span>মডারেটর স্ট্যাটাস: <b>সক্রিয় (Active)</b></span>
@@ -437,4 +437,4 @@ export default function App() {
               </div>
               <button 
                 onClick={handleLogout}
-                className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.
+                className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2
