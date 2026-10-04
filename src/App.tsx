@@ -1,252 +1,179 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  img: string;
-  sellerName: string;
-  status: 'Pending' | 'Approved';
-}
+export function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userPhone, setUserPhone] = useState('');
+  const [language, setLanguage] = useState<'bn' | 'en'>('bn');
+  const [showProfile, setShowProfile] = useState(false);
 
-interface Order {
-  id: string;
-  customerName: string;
-  phone: string;
-  address: string;
-  items: Product[];
-  total: number;
-  status: string;
-  paymentMethod: string;
-}
+  // চেক করা ইউজার আগে থেকেই লগইন করা আছে কিনা
+  useEffect(() => {
+    const savedUser = localStorage.getItem('barishal_shop_user');
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      setUserName(parsedUser.name);
+      setUserPhone(parsedUser.phone);
+      setIsLoggedIn(true);
+    }
+  }, []);
 
-export default function App() {
-  const [tab, setTab] = useState<'shop' | 'seller' | 'cart' | 'orders' | 'admin'>('shop');
-  const [cart, setCart] = useState<Product[]>([]);
-  const [payment, setPayment] = useState('bKash');
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [pin, setPin] = useState('');
-
-  // Form states
-  const [cName, setCName] = useState('');
-  const [cPhone, setCPhone] = useState('');
-  const [cAddress, setCAddress] = useState('');
-
-  const [sShop, setSShop] = useState('');
-  const [sPhone, setSPhone] = useState('');
-  const [sName, setSName] = useState('');
-  const [sPrice, setSPrice] = useState('');
-  const [sImg, setSImg] = useState('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500');
-
-  const [products, setProducts] = useState<Product[]>([
-    { id: 1, name: 'লেদার জ্যাকেট', price: 2500, img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500', sellerName: 'Admin', status: 'Approved' },
-    { id: 2, name: 'স্মার্ট ওয়াচ', price: 1850, img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500', sellerName: 'Admin', status: 'Approved' }
-  ]);
-
-  const [orders, setOrders] = useState<Order[]>([]);
-
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setSImg(reader.result as string);
-      reader.readAsDataURL(file);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (userName && userPhone) {
+      const userData = { name: userName, phone: userPhone };
+      localStorage.setItem('barishal_shop_user', JSON.stringify(userData));
+      setIsLoggedIn(true);
     }
   };
 
-  const handleSellerPost = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!sShop || !sPhone || !sName || !sPrice) {
-      alert('সব তথ্য পূরণ করুন!');
-      return;
-    }
-    const newP: Product = {
-      id: Date.now(),
-      name: sName,
-      price: Number(sPrice),
-      img: sImg,
-      sellerName: `${sShop} (${sPhone})`,
-      status: 'Pending'
-    };
-    setProducts([newP, ...products]);
-    setSName(''); setSPrice('');
-    alert('বিজ্ঞাপন সাবমিট হয়েছে! অ্যাডমিন অ্যাপ্রুভ করলে শপে দেখাবে।');
-    setTab('shop');
+  const handleLogout = () => {
+    localStorage.removeItem('barishal_shop_user');
+    setIsLoggedIn(false);
+    setUserName('');
+    setUserPhone('');
+    setShowProfile(false);
   };
 
-  const handleCheckout = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (cart.length === 0 || !cName || !cPhone || !cAddress) {
-      alert('কার্ট খালি অথবা তথ্য অসম্পূর্ণ!');
-      return;
+  // ভাষা অনুযায়ী টেক্সট পরিবর্তন
+  const t = {
+    bn: {
+      welcome: "বরিশাল সুপার শপে স্বাগতম!",
+      subtitle: "কেনাকাটা করতে আপনার নাম ও মোবাইল নম্বর দিয়ে প্রবেশ করুন",
+      nameLabel: "আপনার নাম",
+      phoneLabel: "মোবাইল নম্বর",
+      loginBtn: "প্রবেশ করুন 🚀",
+      shopTitle: "বরিশাল সুপার শপ",
+      offer: "বিশেষ অফার: যেকোনো অর্ডারে পাচ্ছেন আকর্ষণীয় ছাড় ও দ্রুত হোম ডেলিভারি!",
+      profile: "প্রোফাইল",
+      logout: "লগআউট",
+      close: "বন্ধ করুন"
+    },
+    en: {
+      welcome: "Welcome to Barishal Super Shop!",
+      subtitle: "Enter your name and mobile number to start shopping",
+      nameLabel: "Your Name",
+      phoneLabel: "Mobile Number",
+      loginBtn: "Login 🚀",
+      shopTitle: "Barishal Super Shop",
+      offer: "Special Offer: Get exciting discounts and fast home delivery on any order!",
+      profile: "Profile",
+      logout: "Logout",
+      close: "Close"
     }
-    const newOrd: Order = {
-      id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-      customerName: cName,
-      phone: cPhone,
-      address: cAddress,
-      items: [...cart],
-      total: cart.reduce((sum, i) => sum + i.price, 0),
-      status: 'Pending',
-      paymentMethod: payment
-    };
-    setOrders([newOrd, ...orders]);
-    setCart([]);
-    setCName(''); setCPhone(''); setCAddress('');
-    alert('অর্ডার সফল হয়েছে!');
-    setTab('orders');
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20">
-      <header className="bg-orange-500 text-white p-4 sticky top-0 z-50 flex justify-between items-center shadow">
-        <h1 className="font-bold text-sm">Barishal Super Shop</h1>
-        <div className="flex gap-2">
-          <button onClick={() => setTab('seller')} className="bg-amber-600 text-xs px-2 py-1 rounded font-bold">📢 বিক্রেতা পোস্ট</button>
-          <button onClick={() => setTab('admin')} className="bg-red-600 text-xs px-2 py-1 rounded font-bold">⚙️ অ্যাডমিন</button>
+    <div className="min-h-screen bg-[#F9F9F8] text-[#18101B]">
+      
+      {/* নতুন কাস্টমারদের জন্য লগইন ফর্ম */}
+      {!isLoggedIn && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-orange-100">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-[#D94E28]">{t[language].welcome}</h2>
+              <p className="text-sm text-gray-600 mt-1">{t[language].subtitle}</p>
+            </div>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{t[language].nameLabel}</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder={language === 'bn' ? "যেমন: রাহিম আহমেদ" : "e.g. Rahim Ahmed"} 
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#D94E28]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{t[language].phoneLabel}</label>
+                <input 
+                  type="tel" 
+                  required
+                  placeholder="01712345678" 
+                  value={userPhone}
+                  onChange={(e) => setUserPhone(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#D94E28]"
+                />
+              </div>
+              <button 
+                type="submit"
+                className="w-full bg-[#D94E28] hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
+              >
+                {t[language].loginBtn}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* বিজ্ঞাপন ব্যানার */}
+      <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3 text-center shadow-md flex items-center justify-center space-x-2">
+        <span className="animate-bounce">📢</span>
+        <p className="text-sm font-semibold">{t[language].offer}</p>
+      </div>
+
+      {/* হেডার: লোগো, ভাষা পরিবর্তন এবং প্রোফাইল বাটন */}
+      <header className="p-4 bg-white shadow-sm flex justify-between items-center sticky top-0 z-40">
+        <h1 className="text-xl font-bold text-[#D94E28]">{t[language].shopTitle}</h1>
+        
+        <div className="flex items-center space-x-3">
+          {/* বাংলা / ইংরেজি টগল বাটন */}
+          <button 
+            onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
+            className="px-3 py-1.5 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full border border-gray-300 transition-all"
+          >
+            {language === 'bn' ? 'English 🇬🇧' : 'বাংলা 🇧🇩'}
+          </button>
+
+          {/* প্রোফাইল বাটন */}
+          {isLoggedIn && (
+            <button 
+              onClick={() => setShowProfile(true)}
+              className="flex items-center space-x-1.5 bg-orange-100 text-[#D94E28] px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm hover:bg-orange-200 transition-all"
+            >
+              <span>👤</span>
+              <span>{userName.split(' ')[0]}</span>
+            </button>
+          )}
         </div>
       </header>
 
-      <main className="p-4 max-w-md mx-auto">
-        {tab === 'shop' && (
-          <div>
-            <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white p-4 rounded-xl mb-4 shadow">
-              <h2 className="font-bold text-sm">শনিবার স্পেশাল অফার! ⚡</h2>
-              <p className="text-xs opacity-90">ফ্ল্যাট ২০% ছাড় ও ফ্রি ডেলিভারি।</p>
+      {/* প্রোফাইল মডাল */}
+      {showProfile && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-4">
+            <div className="w-16 h-16 bg-orange-100 text-[#D94E28] rounded-full flex items-center justify-center text-2xl font-bold mx-auto">
+              {userName.charAt(0)}
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {products.filter(p => p.status === 'Approved').map(p => (
-                <div key={p.id} className="bg-white p-3 rounded-xl shadow-sm flex flex-col justify-between">
-                  <div>
-                    <img src={p.img} alt={p.name} className="h-28 w-full object-cover rounded mb-2" />
-                    <h3 className="text-xs font-bold truncate">{p.name}</h3>
-                    <p className="text-[10px] text-gray-500">বিক্রেতা: {p.sellerName}</p>
-                  </div>
-                  <div>
-                    <p className="text-orange-600 font-bold text-xs mt-1">৳ {p.price}</p>
-                    <button onClick={() => { setCart([...cart, p]); alert('কার্টে যোগ হয়েছে!'); }} className="w-full bg-orange-500 text-white text-xs py-1 rounded mt-2 font-medium">কার্টে নিন</button>
-                  </div>
-                </div>
-              ))}
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">{userName}</h3>
+              <p className="text-sm text-gray-500">{userPhone}</p>
+            </div>
+            <div className="pt-2 space-y-2">
+              <button 
+                onClick={handleLogout}
+                className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl transition-all text-sm"
+              >
+                {t[language].logout}
+              </button>
+              <button 
+                onClick={() => setShowProfile(false)}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl transition-all text-sm"
+              >
+                {t[language].close}
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {tab === 'seller' && (
-          <form onSubmit={handleSellerPost} className="bg-white p-4 rounded-xl shadow space-y-3 text-xs">
-            <h2 className="font-bold text-sm text-amber-600 border-b pb-2">📢 বিক্রেতা বিজ্ঞাপন ফর্ম</h2>
-            <div>
-              <label>দোকান বা আপনার নাম</label>
-              <input type="text" value={sShop} onChange={e => setSShop(e.target.value)} className="w-full border p-2 rounded mt-1" placeholder="যেমন: ফ্যাশন হাউজ" required />
-            </div>
-            <div>
-              <label>মোবাইল নম্বর</label>
-              <input type="tel" value={sPhone} onChange={e => setSPhone(e.target.value)} className="w-full border p-2 rounded mt-1" placeholder="01700000000" required />
-            </div>
-            <div>
-              <label>পণ্যের নাম</label>
-              <input type="text" value={sName} onChange={e => setSName(e.target.value)} className="w-full border p-2 rounded mt-1" placeholder="পণ্যের নাম" required />
-            </div>
-            <div>
-              <label>দাম (টাকা)</label>
-              <input type="number" value={sPrice} onChange={e => setSPrice(e.target.value)} className="w-full border p-2 rounded mt-1" placeholder="দাম" required />
-            </div>
-            <div>
-              <label>পণ্যের ছবি</label>
-              <input type="file" accept="image/*" onChange={handleImage} className="w-full border p-2 rounded mt-1 text-xs" />
-            </div>
-            <button type="submit" className="w-full bg-amber-600 text-white py-2 rounded font-bold">পোস্ট সাবমিট করুন</button>
-          </form>
-        )}
-
-        {tab === 'cart' && (
-          <div className="space-y-4">
-            <div className="bg-white p-4 rounded-xl shadow space-y-2 text-xs">
-              <h2 className="font-bold text-sm border-b pb-2">আমার কার্ট ({cart.length})</h2>
-              {cart.map((item, idx) => (
-                <div key={idx} className="flex justify-between border-b pb-1">
-                  <span>{item.name}</span>
-                  <span className="font-bold text-orange-600">৳ {item.price}</span>
-                </div>
-              ))}
-              <div className="font-bold text-sm flex justify-between pt-2">
-                <span>মোট:</span>
-                <span className="text-orange-600">৳ {cart.reduce((s, i) => s + i.price, 0)}</span>
-              </div>
-            </div>
-
-            {cart.length > 0 && (
-              <form onSubmit={handleCheckout} className="bg-white p-4 rounded-xl shadow space-y-3 text-xs">
-                <h3 className="font-bold text-sm border-b pb-2">ডেলিভারির তথ্য</h3>
-                <input type="text" value={cName} onChange={e => setCName(e.target.value)} placeholder="আপনার নাম" className="w-full border p-2 rounded" required />
-                <input type="tel" value={cPhone} onChange={e => setCPhone(e.target.value)} placeholder="মোবাইল নম্বর" className="w-full border p-2 rounded" required />
-                <textarea value={cAddress} onChange={e => setCAddress(e.target.value)} placeholder="ঠিকানা" className="w-full border p-2 rounded" rows={2} required />
-                <div className="grid grid-cols-2 gap-2">
-                  {['bKash', 'Nagad', 'Cash On Delivery'].map(m => (
-                    <button type="button" key={m} onClick={() => setPayment(m)} className={`p-2 border rounded font-medium ${payment === m ? 'bg-orange-50 border-orange-500 text-orange-600' : ''}`}>{m}</button>
-                  ))}
-                </div>
-                <button type="submit" className="w-full bg-orange-500 text-white py-2 rounded font-bold">অর্ডার কনফার্ম করুন</button>
-              </form>
-            )}
-          </div>
-        )}
-
-        {tab === 'orders' && (
-          <div className="space-y-3 text-xs">
-            <h2 className="font-bold text-sm">আমার অর্ডারসমূহ</h2>
-            {orders.map(o => (
-              <div key={o.id} className="bg-white p-3 rounded-xl shadow space-y-1">
-                <div className="flex justify-between font-bold border-b pb-1">
-                  <span>{o.id}</span>
-                  <span className="text-orange-600">{o.status}</span>
-                </div>
-                <p>নাম: {o.customerName} ({o.phone})</p>
-                <p>ঠিকানা: {o.address}</p>
-                <p className="font-bold text-orange-600 pt-1">মোট: ৳ {o.total} ({o.paymentMethod})</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {tab === 'admin' && (
-          <div className="bg-white p-4 rounded-xl shadow text-xs space-y-3">
-            {!isAdmin ? (
-              <div className="text-center space-y-3 py-6">
-                <h2 className="font-bold text-sm">অ্যাডমিন পিন দিন (1234)</h2>
-                <input type="password" value={pin} onChange={e => setPin(e.target.value)} className="border p-2 rounded text-center tracking-widest font-bold" placeholder="PIN" />
-                <br />
-                <button onClick={() => { if (pin === '1234') setIsAdmin(true); else alert('ভুল পিন!'); }} className="bg-red-600 text-white px-4 py-2 rounded font-bold">লগইন</button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center border-b pb-2">
-                  <h2 className="font-bold text-sm text-red-600">অ্যাডমিন কন্ট্রোল প্যানেল</h2>
-                  <button onClick={() => setIsAdmin(false)} className="text-red-600 font-bold">লগআউট</button>
-                </div>
-                <h3 className="font-bold">অপেক্ষমাণ বিজ্ঞাপন ({products.filter(p => p.status === 'Pending').length})</h3>
-                {products.filter(p => p.status === 'Pending').map(p => (
-                  <div key={p.id} className="bg-amber-50 p-2 rounded border flex justify-between items-center">
-                    <div>
-                      <p className="font-bold">{p.name} - ৳ {p.price}</p>
-                      <p className="text-[10px] text-gray-500">বিক্রেতা: {p.sellerName}</p>
-                    </div>
-                    <button onClick={() => setProducts(products.map(x => x.id === p.id ? { ...x, status: 'Approved' } : x))} className="bg-emerald-600 text-white px-3 py-1 rounded font-bold">অ্যাপ্রুভ</button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+      {/* মূল অ্যাপের কন্টেন্ট */}
+      <main className="p-4">
+        {/* আপনার শপের বাকি প্রোডাক্ট বা সেকশনগুলো এখানে থাকবে */}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-3 z-50 max-w-md mx-auto text-xs font-bold shadow-lg">
-        <button onClick={() => setTab('shop')} className={tab === 'shop' ? 'text-orange-500' : 'text-gray-500'}>🏠 হোম</button>
-        <button onClick={() => setTab('seller')} className={tab === 'seller' ? 'text-amber-600' : 'text-gray-500'}>📢 বিক্রেতা পোস্ট</button>
-        <button onClick={() => setTab('cart')} className={tab === 'cart' ? 'text-orange-500' : 'text-gray-500'}>🛒 কার্ট ({cart.length})</button>
-        <button onClick={() => setTab('orders')} className={tab === 'orders' ? 'text-orange-500' : 'text-gray-500'}>📦 অর্ডার্স</button>
-        <button onClick={() => setTab('admin')} className={tab === 'admin' ? 'text-red-600' : 'text-gray-500'}>⚙️ অ্যাডমিন</button>
-      </nav>
     </div>
   );
-          }
+}
