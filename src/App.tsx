@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState } from 'interface' in window ? {} : useState;
 
 interface Product {
   id: number;
   name: string;
   price: number;
   img: string;
+  sellerName: string;
+  status: 'Pending' | 'Approved';
 }
 
 interface Order {
@@ -20,7 +22,7 @@ interface Order {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'shop' | 'cart' | 'orders' | 'admin' | 'account'>('shop');
+  const [activeTab, setActiveTab] = useState<'shop' | 'cart' | 'orders' | 'seller' | 'admin' | 'account'>('shop');
   const [cart, setCart] = useState<Product[]>([]);
   const [selectedPayment, setSelectedPayment] = useState<string>('bKash');
   
@@ -34,18 +36,30 @@ export default function App() {
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
 
+  // বিক্রেতা (Seller) পণ্য আপলোড স্টেট
+  const [sellerShopName, setSellerShopName] = useState('');
+  const [sellerPhone, setSellerPhone] = useState('');
+  const [sellerProdName, setSellerProdName] = useState('');
+  const [sellerProdPrice, setSellerProdPrice] = useState('');
+  const [sellerProdImg, setSellerProdImg] = useState('');
+
+  // পণ্যের তালিকা (শুধুমাত্র Approved পণ্যগুলো শপে দেখাবে)
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
       name: 'প্রিমিয়াম লেদার জ্যাকেট',
       price: 2500,
-      img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500'
+      img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500',
+      sellerName: 'Barishal Official',
+      status: 'Approved'
     },
     {
       id: 2,
       name: 'স্মার্ট ওয়াচ সিরিজ ৮',
       price: 1850,
-      img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500'
+      img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
+      sellerName: 'Barishal Official',
+      status: 'Approved'
     }
   ]);
 
@@ -55,7 +69,7 @@ export default function App() {
       customerName: 'Fida Al Sani',
       phone: '01700000000',
       address: 'Barishal Sadar',
-      items: [{ id: 1, name: 'প্রিমিয়াম লেদার জ্যাকেট', price: 2500, img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500' }],
+      items: [{ id: 1, name: 'প্রিমিয়াম লেদার জ্যাকেট', price: 2500, img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500', sellerName: 'Barishal Official', status: 'Approved' }],
       total: 2500,
       status: 'Pending',
       paymentMethod: 'bKash',
@@ -63,6 +77,7 @@ export default function App() {
     }
   ]);
 
+  // অ্যাডমিন প্যানেলের নতুন পণ্য আপলোড স্টেট
   const [newProdName, setNewProdName] = useState('');
   const [newProdPrice, setNewProdPrice] = useState('');
   const [newProdImg, setNewProdImg] = useState('');
@@ -78,20 +93,61 @@ export default function App() {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isSeller: boolean) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewProdImg(reader.result as string);
+        if (isSeller) {
+          setSellerProdImg(reader.result as string);
+        } else {
+          setNewProdImg(reader.result as string);
+        }
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // বিক্রেতার পণ্য জমা দেওয়ার ফাংশন (যা Pending থাকবে)
+  const handleSellerSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sellerShopName || !sellerPhone || !sellerProdName || !sellerProdPrice) {
+      alert('দয়া করে সব তথ্য সঠিকভাবে পূরণ করুন!');
+      return;
+    }
+
+    const newProduct: Product = {
+      id: Date.now(),
+      name: sellerProdName,
+      price: Number(sellerProdPrice),
+      img: sellerProdImg || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
+      sellerName: `${sellerShopName} (${sellerPhone})`,
+      status: 'Pending' // অ্যাডমিন অ্যাপ্রুভ না করা পর্যন্ত Pending থাকবে
+    };
+
+    setProducts([newProduct, ...products]);
+    setSellerProdName('');
+    setSellerProdPrice('');
+    setSellerProdImg('');
+    alert('আপনার বিজ্ঞাপন সফলভাবে সাবমিট হয়েছে! অ্যাডমিন অনুমোদন করার পর এটি শপে দেখা যাবে।');
+    setActiveTab('shop');
+  };
+
+  // অ্যাডমিন কর্তৃক পণ্য অ্যাপ্রুভ করার ফাংশন
+  const handleApproveProduct = (id: number) => {
+    setProducts(products.map(p => p.id === id ? { ...p, status: 'Approved' } : p));
+    alert('পণ্যটি সফলভাবে অ্যাপ্রুভ করা হয়েছে এবং এখন শপে লাইভ আছে!');
+  };
+
+  // অ্যাডমিন কর্তৃক পণ্য ডিলিট করার ফাংশন
+  const handleDeleteProduct = (id: number) => {
+    setProducts(products.filter(p => p.id !== id));
+    alert('পণ্যটি মুছে ফেলা হয়েছে!');
+  };
+
   const addToCart = (product: Product) => {
     setCart([...cart, product]);
-    alert('কার্টে পণ্য যোগ করা হয়েছে! এবার কার্ট ট্যাবে যান।');
+    alert('কার্টে পণ্য যোগ করা হয়েছে!');
   };
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
@@ -136,7 +192,9 @@ export default function App() {
       id: Date.now(),
       name: newProdName,
       price: Number(newProdPrice),
-      img: newProdImg || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500'
+      img: newProdImg || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
+      sellerName: 'Barishal Official (Admin)',
+      status: 'Approved'
     };
 
     setProducts([product, ...products]);
@@ -156,14 +214,22 @@ export default function App() {
           </div>
           <h1 className="text-base font-bold">Barishal Super Shop</h1>
         </div>
-        <button 
-          onClick={() => setActiveTab('admin')} 
-          className="text-xs bg-red-600 text-white px-2.5 py-1 rounded-md font-bold shadow">
-          ⚙️ অ্যাডমিন প্যানেল
-        </button>
+        <div className="flex space-x-2">
+          <button 
+            onClick={() => setActiveTab('seller')} 
+            className="text-xs bg-amber-600 text-white px-2 py-1 rounded-md font-bold shadow">
+            📢 বিক্রেতা পোস্ট
+          </button>
+          <button 
+            onClick={() => setActiveTab('admin')} 
+            className="text-xs bg-red-600 text-white px-2 py-1 rounded-md font-bold shadow">
+            ⚙️ অ্যাডমিন
+          </button>
+        </div>
       </header>
 
       <main className="p-4 max-w-lg mx-auto">
+        {/* হোম শপ: শুধুমাত্র Approved পণ্য দেখাবে */}
         {activeTab === 'shop' && (
           <div>
             <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-4 text-white shadow mb-4">
@@ -172,25 +238,113 @@ export default function App() {
               <p className="text-xs opacity-90 mt-0.5">সব পণ্যে ফ্ল্যাট ২০% ছাড় এবং ফ্রি ডেলিভারি।</p>
             </div>
 
-            <h3 className="text-sm font-semibold mb-3 text-gray-800">সকল পণ্যসমূহ</h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-sm font-semibold text-gray-800">সকল পণ্যসমূহ</h3>
+              <button 
+                onClick={() => setActiveTab('seller')}
+                className="text-xs text-orange-600 font-bold underline">
+                + আপনিও পণ্য বিক্রি করতে চান?
+              </button>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
-              {products.map((p) => (
+              {products.filter(p => p.status === 'Approved').map((p) => (
                 <div key={p.id} className="bg-white rounded-xl shadow-sm p-3 flex flex-col justify-between">
-                  <img src={p.img} alt={p.name} className="h-32 w-full object-cover rounded-lg mb-2" />
-                  <h4 className="font-medium text-xs text-gray-800 truncate">{p.name}</h4>
-                  <p className="text-orange-600 font-bold text-sm mt-1">৳ {p.price}</p>
-                  <button 
-                    onClick={() => addToCart(p)} 
-                    className="mt-2 bg-orange-500 text-white text-xs py-1.5 rounded-lg font-medium">
-                    কার্টে যোগ করুন
-                  </button>
+                  <div>
+                    <img src={p.img} alt={p.name} className="h-32 w-full object-cover rounded-lg mb-2" />
+                    <h4 className="font-medium text-xs text-gray-800 truncate">{p.name}</h4>
+                    <p className="text-[10px] text-gray-500 mt-0.5">বিক্রেতা: {p.sellerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-orange-600 font-bold text-sm mt-1">৳ {p.price}</p>
+                    <button 
+                      onClick={() => addToCart(p)} 
+                      className="mt-2 w-full bg-orange-500 text-white text-xs py-1.5 rounded-lg font-medium">
+                      কার্টে যোগ করুন
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* 🛒 কার্ট ও অর্ডার ফর্ম ট্যাব */}
+        {/* 📢 বিক্রেতা বিজ্ঞাপন পোস্ট করার ফর্ম */}
+        {activeTab === 'seller' && (
+          <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
+            <div className="bg-amber-500 text-white p-3 rounded-xl shadow-sm text-center">
+              <h2 className="text-sm font-bold">📢 বিক্রেতা পোর্টাল (বিজ্ঞাপন পোস্ট)</h2>
+              <p className="text-[11px] opacity-90 mt-0.5">আপনার পণ্য পোস্ট করুন। অ্যাডমিন অ্যাপ্রুভ করার পর তা শপে দেখাবে।</p>
+            </div>
+
+            <form onSubmit={handleSellerSubmit} className="space-y-3 text-xs">
+              <div>
+                <label className="text-gray-600 font-medium">দোকান বা আপনার নাম</label>
+                <input 
+                  type="text" 
+                  value={sellerShopName} 
+                  onChange={(e) => setSellerShopName(e.target.value)}
+                  placeholder="যেমন: ভাই ভাই ফ্যাশন" 
+                  className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-amber-500" 
+                  required 
+                />
+              </div>
+              <div>
+                <label className="text-gray-600 font-medium">আপনার মোবাইল নম্বর</label>
+                <input 
+                  type="tel" 
+                  value={sellerPhone} 
+                  onChange={(e) => setSellerPhone(e.target.value)}
+                  placeholder="01700000000" 
+                  className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-amber-500" 
+                  required 
+                />
+              </div>
+              <div>
+                <label className="text-gray-600 font-medium">পণ্যের নাম</label>
+                <input 
+                  type="text" 
+                  value={sellerProdName} 
+                  onChange={(e) => setSellerProdName(e.target.value)}
+                  placeholder="পণ্যের নাম লিখুন" 
+                  className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-amber-500" 
+                  required 
+                />
+              </div>
+              <div>
+                <label className="text-gray-600 font-medium">দাম (টাকা)</label>
+                <input 
+                  type="number" 
+                  value={sellerProdPrice} 
+                  onChange={(e) => setSellerProdPrice(e.target.value)}
+                  placeholder="মূল্য দিন" 
+                  className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-amber-500" 
+                  required 
+                />
+              </div>
+              <div>
+                <label className="text-gray-600 font-medium">পণ্যের ছবি (গ্যালারি থেকে)</label>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, true)}
+                  className="w-full border p-2 rounded-lg mt-1 text-xs bg-gray-50 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" 
+                />
+              </div>
+              {sellerProdImg && (
+                <div className="mt-2">
+                  <p className="text-[10px] text-emerald-600 font-bold">✓ ছবি সিলেক্ট হয়েছে</p>
+                  <img src={sellerProdImg} alt="Preview" className="h-16 w-16 object-cover rounded mt-1 border" />
+                </div>
+              )}
+              <button type="submit" className="w-full bg-amber-600 text-white py-2.5 rounded-lg font-bold hover:bg-amber-700 shadow">
+                অনুমোদনের জন্য পোস্ট সাবমিট করুন
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* 🛒 কার্ট ও অর্ডার ফর্ম */}
         {activeTab === 'cart' && (
           <div className="space-y-4">
             <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
@@ -311,7 +465,7 @@ export default function App() {
           </div>
         )}
 
-        {/* 🔒 অ্যাডমিন প্যানেল */}
+        {/* 🔒 সুরক্ষিত অ্যাডমিন প্যানেল (যেখানে বিক্রেতাদের পোস্ট অ্যাপ্রুভ করা যাবে) */}
         {activeTab === 'admin' && (
           <div>
             {!isAdminLoggedIn ? (
@@ -326,128 +480,4 @@ export default function App() {
                     type="password" 
                     value={adminPin} 
                     onChange={(e) => setAdminPin(e.target.value)}
-                    placeholder="পিন কোড দিন (1234)" 
-                    className="w-full border p-2.5 rounded-lg text-xs text-center outline-none focus:border-red-500 font-bold tracking-widest" 
-                    required 
-                  />
-                  <button type="submit" className="w-full bg-red-600 text-white py-2.5 rounded-lg text-xs font-bold shadow hover:bg-red-700">
-                    লগইন করুন
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="bg-red-500 text-white p-4 rounded-xl shadow flex justify-between items-center">
-                  <div>
-                    <h2 className="text-base font-bold">⚙ অ্যাডমিন কন্ট্রোল প্যানেল</h2>
-                    <p className="text-xs opacity-90 mt-1">সব কাস্টমারের অর্ডার ও তথ্য দেখুন।</p>
-                  </div>
-                  <button 
-                    onClick={() => setIsAdminLoggedIn(false)} 
-                    className="bg-white text-red-600 px-3 py-1 rounded text-xs font-bold">
-                    লগআউট
-                  </button>
-                </div>
-
-                <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
-                  <h3 className="text-sm font-bold text-gray-800 border-b pb-2">📦 কাস্টমারদের অর্ডার ({orders.length})</h3>
-                  {orders.map((ord) => (
-                    <div key={ord.id} className="bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs space-y-1">
-                      <div className="flex justify-between font-bold text-gray-800">
-                        <span>{ord.id}</span>
-                        <span className="text-red-600">৳ {ord.total}</span>
-                      </div>
-                      <p className="text-gray-700"><strong>নাম:</strong> {ord.customerName}</p>
-                      <p className="text-gray-700"><strong>ফোন:</strong> {ord.phone}</p>
-                      <p className="text-gray-700"><strong>ঠিকানা:</strong> {ord.address}</p>
-                      <p className="text-gray-700"><strong>পেমেন্ট:</strong> {ord.paymentMethod}</p>
-                      <div className="pt-1 border-t mt-1">
-                        <span className="font-semibold text-gray-700">পণ্য: </span>
-                        {ord.items.map((it, idx) => (
-                          <span key={idx} className="text-orange-600 font-medium">{it.name} (৳ {it.price}), </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <h3 className="text-sm font-bold text-gray-800 mb-3 border-b pb-2">➕ নতুন পণ্য যোগ করুন</h3>
-                  <form onSubmit={handleAddProduct} className="space-y-3 text-xs">
-                    <div>
-                      <label className="text-gray-600 font-medium">পণ্যের নাম</label>
-                      <input 
-                        type="text" 
-                        value={newProdName} 
-                        onChange={(e) => setNewProdName(e.target.value)}
-                        placeholder="পণ্যের নাম লিখুন" 
-                        className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
-                        required 
-                      />
-                    </div>
-                    <div>
-                      <label className="text-gray-600 font-medium">দাম (টাকা)</label>
-                      <input 
-                        type="number" 
-                        value={newProdPrice} 
-                        onChange={(e) => setNewProdPrice(e.target.value)}
-                        placeholder="মূল্য দিন" 
-                        className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
-                        required 
-                      />
-                    </div>
-                    <div>
-                      <label className="text-gray-600 font-medium">গ্যালারি থেকে ছবি সিলেক্ট করুন</label>
-                      <input 
-                        type="file" 
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="w-full border p-2 rounded-lg mt-1 text-xs bg-gray-50 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" 
-                      />
-                    </div>
-                    {newProdImg && (
-                      <div className="mt-2">
-                        <p className="text-[10px] text-emerald-600 font-bold">✓ ছবি সফলভাবে সিলেক্ট হয়েছে</p>
-                        <img src={newProdImg} alt="Preview" className="h-16 w-16 object-cover rounded mt-1 border" />
-                      </div>
-                    )}
-                    <button type="submit" className="w-full bg-red-600 text-white py-2.5 rounded-lg font-bold hover:bg-red-700">
-                      পণ্য পাবলিশ করুন
-                    </button>
-                  </form>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'account' && (
-          <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
-            <div className="flex items-center space-x-3 border-b pb-3">
-              <div className="w-12 h-12 bg-orange-500 text-white font-bold rounded-full flex items-center justify-center text-base">
-                F
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-gray-800">Fida Al Sani</h3>
-                <p className="text-xs text-gray-500">sannysayy008</p>
-              </div>
-            </div>
-            <div className="text-xs space-y-2 text-gray-700">
-              <p><strong>স্ট্যাটাস:</strong> শপ ওনার</p>
-              <p><strong>ঠিকানা:</strong> Barishal Sadar</p>
-            </div>
-          </div>
-        )}
-      </main>
-
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 shadow-lg z-50 max-w-lg mx-auto">
-        <button onClick={() => setActiveTab('shop')} className={`text-xs ${activeTab === 'shop' ? 'text-orange-500 font-bold' : 'text-gray-500'}`}>
-          🏠 হোম
-        </button>
-        <button onClick={() => setActiveTab('cart')} className={`text-xs ${activeTab === 'cart' ? 'text-orange-500 font-bold' : 'text-gray-500'}`}>
-          🛒 কার্ট ({cart.length})
-        </button>
-        <button onClick={() => setActiveTab('orders')} className={`text-xs ${activeTab === 'orders' ? 'text-orange-500 font-bold' : 'text-gray-500'}`}>
-          📦 অর্ডার্স
-        </button>
-        <button onClick={() => setActiveTab('admin')} className={`text-xs ${activeTab === 'admin' ? 'text-red-600 font-bol
+                    placeho
