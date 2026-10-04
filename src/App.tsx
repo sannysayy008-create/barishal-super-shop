@@ -60,7 +60,7 @@ export default function App() {
   };
 
   const handleDownloadApp = () => {
-    alert(lang === 'bn' ? 'ডাউনলোড শুরু হচ্ছে... আপনার ব্রাউজারের মেনু থেকে "Add to Home Screen" সিলেক্ট করে অ্যাপটি ইনস্টল করুন।' : 'Download starting... Select "Add to Home Screen" from your browser menu to install the app.');
+    alert(lang === 'bn' ? 'ব্রাউজারের মেনু (৩ ডট) থেকে "Add to Home Screen" বা "Install App" অপশন সিলেক্ট করে অ্যাপটি ইনস্টল করুন।' : 'Select "Add to Home Screen" or "Install App" from your browser menu.');
   };
 
   const addToCart = (p: any) => {
@@ -164,15 +164,19 @@ export default function App() {
         </div>
       )}
 
+      {/* Header with Download & Language & Account Buttons */}
       <header className="bg-orange-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
-        <div className="font-extrabold text-base tracking-wide">
+        <div className="font-extrabold text-sm tracking-wide flex items-center gap-2">
           🛍️ {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="text-xs bg-orange-700 px-2.5 py-1 rounded-xl font-bold">
+          <button onClick={handleDownloadApp} className="text-[11px] bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 shadow-xs">
+            📥 {lang === 'bn' ? 'ডাউনলোড' : 'Download'}
+          </button>
+          <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="text-[11px] bg-orange-700 px-2 py-1 rounded-xl font-bold">
             {lang === 'bn' ? 'EN' : 'বাং'}
           </button>
-          <button onClick={() => setActiveTab('admin')} className="text-xs bg-orange-700 px-2.5 py-1 rounded-xl font-bold">
+          <button onClick={() => setActiveTab('admin')} className="text-[11px] bg-orange-700 px-2 py-1 rounded-xl font-bold">
             ⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট' : 'Account'}
           </button>
         </div>
@@ -263,7 +267,7 @@ export default function App() {
         {activeTab === 'admin' && (
           <div className="bg-white p-5 rounded-3xl shadow-sm space-y-4 text-xs">
             <div className="border-b pb-3">
-              <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট ও ডাউনলোড প্যানেল' : 'Account & Download Panel'}</h3>
+              <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট প্যানেল' : 'Account Panel'}</h3>
               <p className="text-gray-400 text-[10px] mt-1">Active User Session</p>
             </div>
             <div className="space-y-2 bg-gray-50 p-3 rounded-2xl">
@@ -273,9 +277,6 @@ export default function App() {
             <div className="border-t pt-3 space-y-2">
               <button onClick={() => setActiveTab('post')} className="w-full bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold py-3 rounded-xl border border-orange-200">
                 📢 {lang === 'bn' ? 'বিজ্ঞাপন দিন' : 'Post Ad'}
-              </button>
-              <button onClick={handleDownloadApp} className="w-full bg-green-50 hover:bg-green-100 text-green-700 font-bold py-3 rounded-xl border border-green-200">
-                📥 {lang === 'bn' ? 'অ্যাপ ডাউনলোড / ইনস্টল করুন' : 'Download / Install App'}
               </button>
               <button onClick={handleLogout} className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl border border-red-100">
                 🚪 {lang === 'bn' ? 'লগআউট / অ্যাকাউন্ট পরিবর্তন' : 'Logout'}
@@ -302,5 +303,5 @@ export default function App() {
       </nav>
     </div>
   );
-                  }
-                    
+      }
+            
