@@ -9,7 +9,6 @@ export default function App() {
   const [cart, setCart] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Custom Ad Post State
   const [allProducts, setAllProducts] = useState([
     { id: 1, name: "বরিশালের গাওয়া ঘি", price: 1200, unit: "১ কেজি", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&q=80", seller: "সুপার শপ" },
     { id: 2, name: "সুন্দরবনের খাঁটি মধু", price: 750, unit: "৫০০ গ্রাম", image: "https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500&q=80", seller: "সুপার শপ" },
@@ -82,10 +81,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24 text-gray-800">
-      {/* Login Modal */}
       {!isLoggedIn && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-extrabold text-orange-600">
                 {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
@@ -98,9 +96,9 @@ export default function App() {
               {lang === 'bn' ? 'দয়া করে আপনার নাম ও মোবাইল নম্বর দিয়ে প্রবেশ করুন' : 'Please enter your name & phone number'}
             </p>
             <form onSubmit={handleLogin} className="space-y-3">
-              <input type="text" required placeholder={lang === 'bn' ? "আপনার নাম" : "Your Name"} value={userName} onChange={e => setUserName(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50 focus:outline-orange-500" />
-              <input type="tel" required placeholder={lang === 'bn' ? "মোবাইল নম্বর" : "Phone Number"} value={userPhone} onChange={e => setUserPhone(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50 focus:outline-orange-500" />
-              <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white p-3.5 rounded-2xl font-bold text-sm shadow-lg shadow-orange-200 transition-all">
+              <input type="text" required placeholder={lang === 'bn' ? "আপনার নাম" : "Your Name"} value={userName} onChange={e => setUserName(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50" />
+              <input type="tel" required placeholder={lang === 'bn' ? "মোবাইল নম্বর" : "Phone Number"} value={userPhone} onChange={e => setUserPhone(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50" />
+              <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white p-3.5 rounded-2xl font-bold text-sm shadow-lg">
                 {lang === 'bn' ? 'প্রবেশ করুন' : 'Login'}
               </button>
             </form>
@@ -108,24 +106,21 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Header */}
       <header className="bg-orange-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
         <div className="font-extrabold text-base tracking-wide">
           🛍️ {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="text-xs bg-orange-700 hover:bg-orange-800 px-2.5 py-1 rounded-xl font-bold">
+          <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="text-xs bg-orange-700 px-2.5 py-1 rounded-xl font-bold">
             {lang === 'bn' ? 'EN' : 'বাং'}
           </button>
-          <button onClick={() => setActiveTab('admin')} className="text-xs bg-orange-700 hover:bg-orange-800 px-2.5 py-1 rounded-xl font-bold">
+          <button onClick={() => setActiveTab('admin')} className="text-xs bg-orange-700 px-2.5 py-1 rounded-xl font-bold">
             ⚙️ {lang === 'bn' ? 'অ্যাডমিন' : 'Admin'}
           </button>
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main className="p-4 max-w-md mx-auto space-y-4">
-        {/* Home / Products Tab */}
         {activeTab === 'home' && (
           <div className="space-y-3">
             <input 
@@ -133,7 +128,7 @@ export default function App() {
               placeholder={lang === 'bn' ? "পণ্য খুঁজুন..." : "Search products..."} 
               value={searchQuery} 
               onChange={e => setSearchQuery(e.target.value)} 
-              className="w-full p-3.5 border border-gray-200 rounded-2xl text-xs bg-white shadow-xs focus:outline-orange-500" 
+              className="w-full p-3.5 border border-gray-200 rounded-2xl text-xs bg-white shadow-xs" 
             />
             <div className="grid grid-cols-2 gap-3">
               {allProducts.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).map(p => (
@@ -153,7 +148,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Post Ad Tab */}
         {activeTab === 'post' && (
           <div className="bg-white p-5 rounded-3xl shadow-sm space-y-4">
             <h3 className="font-extrabold text-sm border-b pb-2 text-orange-600">
@@ -183,7 +177,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Cart Tab */}
         {activeTab === 'cart' && (
           <div className="bg-white p-4 rounded-3xl shadow-sm space-y-3">
             <h3 className="font-extrabold text-sm border-b pb-2">🛒 {lang === 'bn' ? 'আপনার কার্ট' : 'Your Cart'}</h3>
@@ -203,12 +196,11 @@ export default function App() {
           </div>
         )}
 
-        {/* Admin / Account Tab */}
         {activeTab === 'admin' && (
           <div className="bg-white p-5 rounded-3xl shadow-sm space-y-4 text-xs">
             <div className="border-b pb-3">
               <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'এডমিন ও অ্যাকাউন্ট প্যানেল' : 'Admin & Account Panel'}</h3>
-              <p className="text-gray-400 text-[10px] mt-1">Role: Administrator / Seller</p>
+              <p className="text-gray-400 text-[10px] mt-1">Role: Administrator</p>
             </div>
             <div className="space-y-2 bg-gray-50 p-3 rounded-2xl">
               <p><strong className="text-gray-500">{lang === 'bn' ? 'নাম:' : 'Name:'}</strong> {userName || 'N/A'}</p>
@@ -226,7 +218,6 @@ export default function App() {
         )}
       </main>
 
-      {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-3 z-40 text-xs shadow-2xl">
         <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center ${activeTab === 'home' ? 'text-orange-600 font-bold' : 'text-gray-400'}`}>
           <span className="text-base">🏠</span><span className="text-[10px]">{lang === 'bn' ? 'হোম' : 'Home'}</span>
@@ -244,5 +235,4 @@ export default function App() {
       </nav>
     </div>
   );
-}
-  
+                  }
