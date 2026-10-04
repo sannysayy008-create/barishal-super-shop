@@ -164,7 +164,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Header with Download & Language & Account Buttons */}
+      {/* Header with Download Button */}
       <header className="bg-orange-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
         <div className="font-extrabold text-sm tracking-wide flex items-center gap-2">
           🛍️ {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
@@ -303,5 +303,5 @@ export default function App() {
       </nav>
     </div>
   );
-      }
-            
+            }
+              
