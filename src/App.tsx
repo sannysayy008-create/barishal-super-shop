@@ -60,7 +60,11 @@ export default function App() {
   };
 
   const handleDownloadApp = () => {
-    alert(lang === 'bn' ? 'ব্রাউজারের মেনু (৩ ডট) থেকে "Add to Home Screen" বা "Install App" অপশন সিলেক্ট করে অ্যাপটি ইনস্টল করুন।' : 'Select "Add to Home Screen" or "Install App" from your browser menu.');
+    alert(
+      lang === 'bn' 
+        ? 'আমাদের অ্যান্ড্রয়েড অ্যাপটি খুব শীঘ্রই আসছে এবং প্লে স্টোরে পাবলিশ হবে! ততক্ষণে আপনি এই ব্রাউজারের মাধ্যমেই সমস্ত কেনাকাটা ও ফিচার ব্যবহার করতে পারবেন।' 
+        : 'Our Android app is coming soon and will be published on Play Store! Meanwhile, you can use all features right here in the browser.'
+    );
   };
 
   const addToCart = (p: any) => {
@@ -303,5 +307,5 @@ export default function App() {
       </nav>
     </div>
   );
-            }
-              
+      }
+    
