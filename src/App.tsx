@@ -6,22 +6,19 @@ export default function App() {
   const [userPhone, setUserPhone] = useState('');
   const [language, setLanguage] = useState('bn');
   
-  // Tabs & Navigation State
-  const [activeTab, setActiveTab] = useState('home'); // home, messages, deals, cart, account
-  const [showProfile, setShowProfile] = useState(false);
+  // Navigation & Tabs
+  const [activeTab, setActiveTab] = useState('home'); // home, posts, cart, orders, admin
   
-  // Shop & Admin State
+  // Shop & Products State
   const [cart, setCart] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [showCartModal, setShowCartModal] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
   
-  // Admin / Posts State
+  // Admin & Posts State
   const [isAdmin, setIsAdmin] = useState(false);
   const [posts, setPosts] = useState<any[]>([
-    { id: 1, title: "ঈদ ধামাকা অফার - সব পণ্যে ২০% ছাড়!", date: "২০২৬-০৬-০৭", desc: "আমাদের শপের যেকোনো পণ্যে পাচ্ছেন আকর্ষনীয় ছাড়।" },
-    { id: 2, title: "নতুন খাঁটি মধু ও ঘি এসেছে", date: "২০২৬-০৬-০৫", desc: "সুন্দরবনের খাঁটি মধু ও বরগুনার গাওয়া ঘি এখন স্টকে আছে।" }
+    { id: 1, title: "শনিবার বিশেষ অফার! ⚡", desc: "ফ্ল্যাট ২০% ছাড় ও ফ্রি ডেলিভারি যেকোনো অর্ডারে।", date: "২০২৬-১০-০৪", seller: "Admin" },
+    { id: 2, title: "খাঁটি মধু ও গাওয়া ঘি স্টকে আছে", desc: "সুন্দরবনের খাঁটি মধু ও বরগুনার ঐতিহ্যবাহী ঘি এখন পাওয়া যাচ্ছে।", date: "২০২৬-১০-০৩", seller: "Admin" }
   ]);
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostDesc, setNewPostDesc] = useState('');
@@ -35,10 +32,6 @@ export default function App() {
           setUserName(parsedUser.name);
           setUserPhone(parsedUser.phone || '');
           setIsLoggedIn(true);
-          // যদি ইউজার sanny07077 বা admin হয় তবে অ্যাডমিন এক্সেস দিতে পারেন
-          if (parsedUser.name.toLowerCase().includes('admin') || parsedUser.phone === '01700000000') {
-            setIsAdmin(true);
-          }
         }
       } catch (e) {
         console.error(e);
@@ -52,9 +45,6 @@ export default function App() {
       const userData = { name: userName, phone: userPhone };
       localStorage.setItem('barishal_shop_user', JSON.stringify(userData));
       setIsLoggedIn(true);
-      if (userName.toLowerCase().includes('admin')) {
-        setIsAdmin(true);
-      }
     }
   };
 
@@ -64,23 +54,24 @@ export default function App() {
     setUserName('');
     setUserPhone('');
     setIsAdmin(false);
-    setShowProfile(false);
   };
 
+  // Combined Products (Grocery, Food & Gadgets)
   const products = [
-    { id: 1, nameBn: "বরিশালের বিখ্যাত গাওয়া ঘি", nameEn: "Barishal Special Ghee", price: 1200, category: "food", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&q=80", unit: "১ কেজি" },
-    { id: 2, nameBn: "সুন্দরবনের খাঁটি মধু", nameEn: "Sundarban Honey", price: 750, category: "food", image: "https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500&q=80", unit: "৫০০ গ্রাম" },
-    { id: 3, nameBn: "টাটকা দেশি মুগ ডাল", nameEn: "Deshi Moog Dal", price: 140, category: "grocery", image: "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=500&q=80", unit: "১ কেজি" },
-    { id: 4, nameBn: "অর্গানিক সরিষার তেল", nameEn: "Organic Mustard Oil", price: 220, category: "grocery", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&q=80", unit: "১ লিটার" },
-    { id: 5, nameBn: "হাতে ভাজা মুড়ি", nameEn: "Hand-roasted Muri", price: 90, category: "snacks", image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&q=80", unit: "১ কেজি" },
-    { id: 6, nameBn: "বরিশালের স্পেশাল নারিকেল নাড়ু", nameEn: "Coconut Naru", price: 300, category: "snacks", image: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&q=80", unit: "৫০০ গ্রাম" },
+    { id: 1, nameBn: "বরিশালের বিখ্যাত গাওয়া ঘি", nameEn: "Barishal Special Ghee", price: 1200, category: "food", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&q=80", unit: "১ কেজি", seller: "Admin" },
+    { id: 2, nameBn: "সুন্দরবনের খাঁটি মধু", nameEn: "Sundarban Honey", price: 750, category: "food", image: "https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500&q=80", unit: "৫০০ গ্রাম", seller: "Admin" },
+    { id: 3, nameBn: "টাটকা দেশি মুগ ডাল", nameEn: "Deshi Moog Dal", price: 140, category: "grocery", image: "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=500&q=80", unit: "১ কেজি", seller: "Admin" },
+    { id: 4, nameBn: "অর্গানিক সরিষার তেল", nameEn: "Organic Mustard Oil", price: 220, category: "grocery", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&q=80", unit: "১ লিটার", seller: "Admin" },
+    { id: 5, nameBn: "লেদার জ্যাকেট", nameEn: "Leather Jacket", price: 2500, category: "fashion", image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&q=80", unit: "১ পিস", seller: "Admin" },
+    { id: 6, nameBn: "স্মার্ট ওয়াচ", nameEn: "Smart Watch", price: 1850, category: "gadgets", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80", unit: "১ পিস", seller: "Admin" }
   ];
 
   const categories = [
     { id: 'all', nameBn: 'সব পণ্য', nameEn: 'All Products' },
     { id: 'food', nameBn: 'খাঁটি খাবার', nameEn: 'Pure Foods' },
     { id: 'grocery', nameBn: 'মুদি বাজার', nameEn: 'Grocery' },
-    { id: 'snacks', nameBn: 'নাস্তা ও মিষ্টি', nameEn: 'Snacks & Sweets' },
+    { id: 'fashion', nameBn: 'ফ্যাশন', nameEn: 'Fashion' },
+    { id: 'gadgets', nameBn: 'গ্যাজেট', nameEn: 'Gadgets' },
   ];
 
   const addToCart = (product: any) => {
@@ -91,6 +82,7 @@ export default function App() {
       }
       return [...prev, { ...product, qty: 1 }];
     });
+    alert('পণ্যটি কার્টে যোগ করা হয়েছে!');
   };
 
   const updateQty = (id: number, delta: number) => {
@@ -112,12 +104,13 @@ export default function App() {
         id: Date.now(),
         title: newPostTitle,
         desc: newPostDesc,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        seller: userName || "Admin"
       };
       setPosts([newPost, ...posts]);
       setNewPostTitle('');
       setNewPostDesc('');
-      alert('বিজ্ঞাপন বা পোস্ট সফলভাবে পাবলিশ হয়েছে!');
+      alert('বিজ্ঞাপন সফলভাবে পোস্ট করা হয়েছে!');
     }
   };
 
@@ -128,35 +121,23 @@ export default function App() {
       nameLabel: "আপনার নাম",
       phoneLabel: "মোবাইল নম্বর",
       loginBtn: "প্রবেশ করুন 🚀",
-      shopTitle: "বরিশাল সুপার শপ",
-      offer: "বিশেষ অফার: যেকোনো অর্ডারে পাচ্ছেন আকর্ষণীয় ছাড় ও দ্রুত হোম ডেলিভারি!",
-      profile: "প্রোফাইল",
-      logout: "লগআউট",
-      close: "বন্ধ করুন",
-      searchPlaceholder: "পণ্য বা অফার খুঁজুন...",
-      addToCart: "কার্টে যোগ করুন",
-      cart: "কার্ট",
+      shopTitle: "Barishal Super Shop",
+      bannerTitle: "বরিশাল সুপার শপ অফিসিয়াল অ্যাপ",
+      bannerSub: "এক ক্লিকে ডাউনলোড করুন এবং সহজে কেনাকাটা করুন!",
+      installBtn: "⚡ দ্রুত ইনস্টল করুন (১৫ সেকেন্ডে ডাউনলোড)",
+      sellerPost: "বিক্রেতা পোস্ট",
+      adminBtn: "অ্যাডমিন",
+      searchPlaceholder: "পণ্য খুঁজুন...",
+      addToCart: "কার্টে নিন",
+      cartTitle: "কার্ট",
       total: "মোট",
       checkout: "অর্ডার কনফার্ম করুন",
       emptyCart: "আপনার কার্ট খালি!",
-      orderSuccessMsg: "আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!",
-      myOrders: "আমার অর্ডারসমূহ",
-      toPay: "পেমেন্ট বাকি",
-      toShip: "প্রস্তুত হচ্ছে",
-      toReceive: "পথে আছে",
-      toReview: "রিভিউ",
-      returns: "রিটার্ন",
-      adminPanel: "অ্যাডমিন ও মডারেটর প্যানেল",
-      createPost: "নতুন পোস্ট বা বিজ্ঞাপন তৈরি করুন",
-      postTitle: "বিজ্ঞাপনের শিরোনাম",
-      postDesc: "বিস্তারিত বিবরণ",
-      publishBtn: "পাবলিশ করুন",
-      coins: "শপ কয়েন",
-      vouchers: "ভাউচার",
       home: "হোম",
-      messages: "মেসেজ",
-      deals: "অফার",
-      account: "একাউন্ট"
+      postsTab: "বিক্রেতা পোস্ট",
+      cartTab: "কার্ট",
+      ordersTab: "অর্ডারস",
+      adminTab: "অ্যাডমিন"
     },
     en: {
       welcome: "Welcome to Barishal Super Shop!",
@@ -165,34 +146,22 @@ export default function App() {
       phoneLabel: "Mobile Number",
       loginBtn: "Login 🚀",
       shopTitle: "Barishal Super Shop",
-      offer: "Special Offer: Get exciting discounts and fast home delivery on any order!",
-      profile: "Profile",
-      logout: "Logout",
-      close: "Close",
-      searchPlaceholder: "Search products or posts...",
+      bannerTitle: "Barishal Super Shop Official App",
+      bannerSub: "Download in one click and shop easily!",
+      installBtn: "⚡ Quick Install (15s Download)",
+      sellerPost: "Seller Post",
+      adminBtn: "Admin",
+      searchPlaceholder: "Search products...",
       addToCart: "Add to Cart",
-      cart: "Cart",
+      cartTitle: "Cart",
       total: "Total",
       checkout: "Confirm Order",
       emptyCart: "Your cart is empty!",
-      orderSuccessMsg: "Your order has been placed successfully!",
-      myOrders: "My Orders",
-      toPay: "To Pay",
-      toShip: "To Ship",
-      toReceive: "To Receive",
-      toReview: "To Review",
-      returns: "Returns",
-      adminPanel: "Admin & Moderator Panel",
-      createPost: "Create New Post or Ad",
-      postTitle: "Post Title",
-      postDesc: "Description",
-      publishBtn: "Publish",
-      coins: "Shop Coins",
-      vouchers: "Vouchers",
       home: "Home",
-      messages: "Messages",
-      deals: "Deals",
-      account: "Account"
+      postsTab: "Posts",
+      cartTab: "Cart",
+      ordersTab: "Orders",
+      adminTab: "Admin"
     }
   };
 
@@ -223,7 +192,7 @@ export default function App() {
                 <input 
                   type="text" 
                   required
-                  placeholder={language === 'bn' ? "যেমন: Fida Al Sani" : "e.g. Fida Al Sani"} 
+                  placeholder="Fida Al Sani" 
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#D94E28] text-sm"
@@ -251,40 +220,46 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Banner */}
-      <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 text-center shadow-md flex items-center justify-center space-x-2">
-        <span className="animate-bounce">📢</span>
-        <p className="text-[11px] font-semibold">{currentT.offer}</p>
+      {/* Top Banner (App Download Style) */}
+      <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white px-4 py-4 text-center shadow-md space-y-2">
+        <h2 className="text-sm font-bold flex items-center justify-center space-x-1">
+          <span>⚡</span>
+          <span>{currentT.bannerTitle}</span>
+        </h2>
+        <p className="text-[11px] opacity-90">{currentT.bannerSub}</p>
+        <button 
+          onClick={() => alert('অ্যাপ ডাউনলোড শুরু হয়েছে!')}
+          className="bg-white text-emerald-700 px-4 py-2 rounded-full text-xs font-bold shadow hover:bg-emerald-50 transition-all inline-block"
+        >
+          {currentT.installBtn}
+        </button>
       </div>
 
-      {/* Header */}
-      <header className="p-4 bg-white shadow-sm flex justify-between items-center sticky top-0 z-40">
-        <h1 className="text-base font-bold text-[#D94E28]">{currentT.shopTitle}</h1>
-        
+      {/* Header bar */}
+      <header className="p-3 bg-[#D94E28] text-white shadow-sm flex justify-between items-center">
+        <h1 className="text-sm font-bold">{currentT.shopTitle}</h1>
         <div className="flex items-center space-x-2">
           <button 
-            onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
-            className="px-2.5 py-1 text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full border border-gray-300 transition-all"
+            onClick={() => setActiveTab('posts')}
+            className="bg-white/20 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1"
           >
-            {language === 'bn' ? 'English 🇬🇧' : 'বাংলা 🇧🇩'}
+            <span>📢</span>
+            <span>{currentT.sellerPost}</span>
           </button>
-
-          {isLoggedIn && (
-            <button 
-              onClick={() => setActiveTab('account')}
-              className="flex items-center space-x-1 bg-orange-50 text-[#D94E28] px-2.5 py-1 rounded-full font-bold text-xs shadow-xs border border-orange-200"
-            >
-              <span>👤</span>
-              <span className="max-w-[80px] truncate">{userName}</span>
-            </button>
-          )}
+          <button 
+            onClick={() => setActiveTab('admin')}
+            className="bg-black/30 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1"
+          >
+            <span>⚙️</span>
+            <span>{currentT.adminBtn}</span>
+          </button>
         </div>
       </header>
 
-      {/* Main Container based on Tab */}
+      {/* Main Container */}
       <main className="p-4 max-w-4xl mx-auto space-y-4">
         
-        {/* ================= TAB 1: HOME ================= */}
+        {/* TAB 1: HOME */}
         {activeTab === 'home' && (
           <div className="space-y-4">
             {/* Search bar */}
@@ -299,22 +274,10 @@ export default function App() {
               <span className="absolute left-3.5 top-3 text-gray-400">🔍</span>
             </div>
 
-            {/* Daraz Style Coins & Vouchers Widget */}
-            <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 grid grid-cols-2 gap-2">
-              <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-3 rounded-xl border border-orange-100 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] text-gray-500 font-bold">🪙 {currentT.coins}</p>
-                  <h4 className="text-sm font-extrabold text-[#D94E28]">৯৯% Off Coins</h4>
-                </div>
-                <span className="text-xs bg-[#D94E28] text-white px-2 py-1 rounded-lg font-bold">Use</span>
-              </div>
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-xl border border-purple-100 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] text-gray-500 font-bold">🎟️ {currentT.vouchers}</p>
-                  <h4 className="text-sm font-extrabold text-purple-600">Free Delivery</h4>
-                </div>
-                <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded-lg font-bold">Get</span>
-              </div>
+            {/* Special Offer Alert Box */}
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white p-3 rounded-2xl shadow-sm space-y-1">
+              <h3 className="text-xs font-bold">শনিবার বিশেষ অফার! ⚡</h3>
+              <p className="text-[11px] opacity-90">ফ্ল্যাট ২০% ছাড় ও ফ্রি ডেলিভারি যেকোনো অর্ডারে।</p>
             </div>
 
             {/* Categories */}
@@ -348,6 +311,7 @@ export default function App() {
                     <h3 className="font-bold text-gray-800 text-xs line-clamp-1">
                       {language === 'bn' ? product.nameBn : product.nameEn}
                     </h3>
+                    <p className="text-[10px] text-gray-400 mt-0.5">বিক্রেতা: {product.seller}</p>
                     <p className="text-[#D94E28] font-extrabold text-xs mt-1">৳ {product.price}</p>
                   </div>
                   <button 
@@ -362,39 +326,37 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= TAB 2: MESSAGES & POSTS ================= */}
-        {activeTab === 'messages' && (
+        {/* TAB 2: POSTS */}
+        {activeTab === 'posts' && (
           <div className="space-y-4">
-            <h2 className="text-base font-bold text-gray-800 border-b pb-2">📢 শপের পোস্ট ও বিজ্ঞাপন (Announcements)</h2>
+            <h2 className="text-sm font-bold text-gray-800 border-b pb-2">📢 বিক্রেতা ও অ্যাডমিন পোস্টসমূহ</h2>
             
-            {/* Admin Post Creator Box */}
-            {isAdmin && (
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-orange-200 space-y-3">
-                <h3 className="text-xs font-bold text-[#D94E28]">{currentT.createPost}</h3>
-                <form onSubmit={handleAddPost} className="space-y-2">
-                  <input 
-                    type="text" 
-                    placeholder={currentT.postTitle}
-                    value={newPostTitle}
-                    onChange={(e) => setNewPostTitle(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-xl text-xs"
-                    required
-                  />
-                  <textarea 
-                    placeholder={currentT.postDesc}
-                    value={newPostDesc}
-                    onChange={(e) => setNewPostDesc(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-xl text-xs h-20"
-                    required
-                  ></textarea>
-                  <button type="submit" className="bg-[#D94E28] text-white px-4 py-2 rounded-xl text-xs font-bold">
-                    {currentT.publishBtn}
-                  </button>
-                </form>
-              </div>
-            )}
+            {/* Create Post Form */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-orange-200 space-y-3">
+              <h3 className="text-xs font-bold text-[#D94E28]">নতুন বিজ্ঞাপন বা পোস্ট দিন</h3>
+              <form onSubmit={handleAddPost} className="space-y-2">
+                <input 
+                  type="text" 
+                  placeholder="বিজ্ঞাপনের শিরোনাম" 
+                  value={newPostTitle}
+                  onChange={(e) => setNewPostTitle(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl text-xs"
+                  required
+                />
+                <textarea 
+                  placeholder="বিস্তারিত বিবরণ..." 
+                  value={newPostDesc}
+                  onChange={(e) => setNewPostDesc(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl text-xs h-20"
+                  required
+                ></textarea>
+                <button type="submit" className="bg-[#D94E28] text-white px-4 py-2 rounded-xl text-xs font-bold">
+                  পোস্ট পাবলিশ করুন
+                </button>
+              </form>
+            </div>
 
-            {/* Posts List */}
+            {/* Post Feed */}
             <div className="space-y-3">
               {posts.map(post => (
                 <div key={post.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-1">
@@ -403,28 +365,17 @@ export default function App() {
                     <span className="text-[10px] text-gray-400">{post.date}</span>
                   </div>
                   <p className="text-xs text-gray-600">{post.desc}</p>
+                  <p className="text-[10px] text-gray-400 pt-1">পোস্টকারী: {post.seller}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* ================= TAB 3: DEALS & OFFERS ================= */}
-        {activeTab === 'deals' && (
-          <div className="space-y-4 text-center py-10">
-            <div className="text-5xl">🔥</div>
-            <h2 className="text-lg font-bold text-gray-800">ফ্ল্যাশ সেল ও হট ডিলস</h2>
-            <p className="text-xs text-gray-500">প্রতিদিন দুপুর ১২টায় থাকছে আকর্ষনীয় ডিসকাউন্ট অফার!</p>
-            <div className="bg-orange-100 text-[#D94E28] p-4 rounded-2xl font-bold text-xs inline-block">
-              ⏳ ডিল শুরু হতে বাকী: ০৩ ঘণ্টা ১২ মিনিট
-            </div>
-          </div>
-        )}
-
-        {/* ================= TAB 4: CART ================= */}
+        {/* TAB 3: CART */}
         {activeTab === 'cart' && (
           <div className="bg-white rounded-2xl p-4 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-gray-800 border-b pb-2">{currentT.cart}</h3>
+            <h3 className="text-sm font-bold text-gray-800 border-b pb-2">{currentT.cartTitle}</h3>
             
             {cart.length === 0 ? (
               <p className="text-center text-gray-400 py-10 text-xs">{currentT.emptyCart}</p>
@@ -439,4 +390,51 @@ export default function App() {
                     <div className="flex items-center space-x-2 bg-white px-2 py-1 rounded-lg border">
                       <button onClick={() => updateQty(item.id, -1)} className="text-gray-500 font-bold px-1">-</button>
                       <span className="text-xs font-bold">{item.qty}</span>
-      
+                      <button onClick={() => updateQty(item.id, 1)} className="text-[#D94E28] font-bold px-1">+</button>
+                    </div>
+                  </div>
+                ))}
+                
+                <div className="pt-4 border-t space-y-3">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span>{currentT.total}:</span>
+                    <span className="text-[#D94E28]">৳ {totalPrice}</span>
+                  </div>
+                  <button 
+                    onClick={() => { alert('অর্ডার সফলভাবে কনফার্ম হয়েছে!'); setCart([]); }}
+                    className="w-full bg-[#D94E28] hover:bg-orange-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all text-xs"
+                  >
+                    {currentT.checkout}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: ORDERS */}
+        {activeTab === 'orders' && (
+          <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3 text-center py-10">
+            <div className="text-4xl">📦</div>
+            <h3 className="text-sm font-bold text-gray-800">আপনার কোনো অর্ডার নেই</h3>
+            <p className="text-xs text-gray-500">হোম থেকে আপনার পছন্দের পণ্য অর্ডার করুন।</p>
+          </div>
+        )}
+
+        {/* TAB 5: ADMIN */}
+        {activeTab === 'admin' && (
+          <div className="bg-white rounded-2xl p-4 shadow-sm space-y-4">
+            <h2 className="text-sm font-bold text-gray-800 border-b pb-2">⚙️ অ্যাডমিন ও মডারেটর প্যানেল</h2>
+            <div className="space-y-3 text-xs">
+              <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 flex justify-between items-center">
+                <span>মডারেটর স্ট্যাটাস: <b>সক্রিয় (Active)</b></span>
+                <span className="text-green-600 font-bold">Online</span>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-xl border">
+                <p className="font-bold mb-1">ব্যবহারকারী তথ্য:</p>
+                <p className="text-gray-600">নাম: {userName || "N/A"}</p>
+                <p className="text-gray-600">ফোন: {userPhone || "N/A"}</p>
+              </div>
+              <button 
+                onClick={handleLogout}
+                className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.
