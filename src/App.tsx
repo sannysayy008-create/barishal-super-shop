@@ -23,11 +23,14 @@ export default function App() {
   const [cart, setCart] = useState<Product[]>([]);
   const [selectedPayment, setSelectedPayment] = useState<string>('bKash');
   
-  // কাস্টমার তথ্য
-  const [customerName, setCustomerName] = useState<string>('Fida Al Sani');
-  const [customerPhone, setCustomerPhone] = useState<string>('01700000000');
+  // অ্যাডমিন সিকিউরিটি স্টেট
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [adminPin, setAdminPin] = useState('');
+  const CORRECT_PIN = '1234'; // আপনার গোপন পিন কোড (প্রয়োজনে এটি পরিবর্তন করতে পারেন)
 
-  // পণ্যের তালিকা
+  const [customerName] = useState<string>('Fida Al Sani');
+  const [customerPhone] = useState<string>('01700000000');
+
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
@@ -43,7 +46,6 @@ export default function App() {
     }
   ]);
 
-  // অর্ডার তালিকা (অ্যাডমিন প্যানেলে দেখার জন্য)
   const [orders, setOrders] = useState<Order[]>([
     {
       id: 'ORD-1001',
@@ -57,10 +59,31 @@ export default function App() {
     }
   ]);
 
-  // নতুন পণ্য যোগ করার স্টেট (অ্যাডমিন প্যানেলের জন্য)
   const [newProdName, setNewProdName] = useState('');
   const [newProdPrice, setNewProdPrice] = useState('');
   const [newProdImg, setNewProdImg] = useState('');
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminPin === CORRECT_PIN) {
+      setIsAdminLoggedIn(true);
+      alert('অ্যাডমিন প্যানেলে সফলভাবে প্রবেশ করেছেন!');
+    } else {
+      alert('ভুল পিন কোড! আবার চেষ্টা করুন।');
+      setAdminPin('');
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewProdImg(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const addToCart = (product: Product) => {
     setCart([...cart, product]);
@@ -88,7 +111,7 @@ export default function App() {
 
     setOrders([newOrder, ...orders]);
     setCart([]);
-    alert('অর্ডার সফলভাবে সম্পন্ন হয়েছে! অ্যাডমিন প্যানেলে চেক করুন।');
+    alert('অর্ডার সফলভাবে সম্পন্ন হয়েছে!');
     setActiveTab('orders');
   };
 
@@ -108,11 +131,11 @@ export default function App() {
     setNewProdPrice('');
     setNewProdImg('');
     alert('নতুন পণ্য সফলভাবে যুক্ত করা হয়েছে!');
+    setActiveTab('shop');
   };
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24">
-      {/* হেডার ও লোগো */}
       <header className="bg-orange-500 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-white text-orange-600 font-bold rounded-full flex items-center justify-center text-sm shadow">
@@ -121,17 +144,15 @@ export default function App() {
           <h1 className="text-base font-bold">Barishal Super Shop</h1>
         </div>
         <button 
-          onClick={() => setActiveTab('admin')} 
-          className="text-xs bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md font-bold shadow">
+          onClick={() => { setActiveTab('admin'); }} 
+          className="text-xs bg-red-600 text-white px-2.5 py-1 rounded-md font-bold shadow">
           ⚙️ অ্যাডমিন প্যানেল
         </button>
       </header>
 
       <main className="p-4 max-w-lg mx-auto">
-        {/* হোম / শপ ট্যাব */}
         {activeTab === 'shop' && (
           <div>
-            {/* বিজ্ঞাপন ব্যানার */}
             <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-4 text-white shadow mb-4">
               <span className="bg-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">মেগা অফার</span>
               <h2 className="text-md font-bold mt-2">শনিবার স্পেশাল ডিসকাউন্ট! ⚡</h2>
@@ -147,7 +168,7 @@ export default function App() {
                   <p className="text-orange-600 font-bold text-sm mt-1">৳ {p.price}</p>
                   <button 
                     onClick={() => addToCart(p)} 
-                    className="mt-2 bg-orange-500 text-white text-xs py-1.5 rounded-lg font-medium hover:bg-orange-600">
+                    className="mt-2 bg-orange-500 text-white text-xs py-1.5 rounded-lg font-medium">
                     কার্টে যোগ করুন
                   </button>
                 </div>
@@ -156,7 +177,6 @@ export default function App() {
           </div>
         )}
 
-        {/* কার্ট ট্যাব */}
         {activeTab === 'cart' && (
           <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
             <h2 className="text-md font-semibold text-gray-800">আমার কার্ট ({cart.length})</h2>
@@ -173,7 +193,6 @@ export default function App() {
                   ))}
                 </div>
 
-                {/* পেমেন্ট পদ্ধতি */}
                 <div className="pt-2">
                   <p className="text-xs font-semibold text-gray-700 mb-2">পেমেন্ট পদ্ধতি নির্বাচন করুন:</p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
@@ -196,7 +215,7 @@ export default function App() {
 
                 <button 
                   onClick={handleCheckout}
-                  className="w-full bg-orange-500 text-white py-2.5 rounded-lg text-xs font-bold hover:bg-orange-600 shadow">
+                  className="w-full bg-orange-500 text-white py-2.5 rounded-lg text-xs font-bold shadow">
                   অর্ডার কনফার্ম করুন ({selectedPayment})
                 </button>
               </>
@@ -204,110 +223,132 @@ export default function App() {
           </div>
         )}
 
-        {/* অর্ডার হিস্ট্রি ট্যাব */}
         {activeTab === 'orders' && (
           <div className="space-y-3">
             <h2 className="text-md font-semibold text-gray-800 mb-2">আমার অর্ডারসমূহ</h2>
-            {orders.length === 0 ? (
-              <p className="text-gray-400 text-center py-10 text-sm bg-white rounded-xl">কোনো অর্ডার পাওয়া যায়নি।</p>
-            ) : (
-              orders.map((ord) => (
-                <div key={ord.id} className="bg-white rounded-xl p-4 shadow-sm space-y-2 border border-gray-100">
-                  <div className="flex justify-between items-center text-xs border-b pb-2">
-                    <span className="font-bold text-gray-700">{ord.id}</span>
-                    <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-semibold">{ord.status}</span>
+            {orders.map((ord) => (
+              <div key={ord.id} className="bg-white rounded-xl p-4 shadow-sm space-y-2 border border-gray-100">
+                <div className="flex justify-between items-center text-xs border-b pb-2">
+                  <span className="font-bold text-gray-700">{ord.id}</span>
+                  <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-semibold">{ord.status}</span>
+                </div>
+                {ord.items.map((item, i) => (
+                  <div key={i} className="flex justify-between text-xs text-gray-600">
+                    <span>{item.name}</span>
+                    <span className="font-bold">৳ {item.price}</span>
                   </div>
-                  {ord.items.map((item, i) => (
-                    <div key={i} className="flex justify-between text-xs text-gray-600">
-                      <span>{item.name}</span>
-                      <span className="font-bold">৳ {item.price}</span>
+                ))}
+                <div className="flex justify-between items-center pt-2 border-t text-xs">
+                  <span className="text-gray-500">পেমেন্ট: {ord.paymentMethod}</span>
+                  <span className="font-bold text-orange-600">মোট: ৳ {ord.total}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 🔒 সুরক্ষিত অ্যাডমিন প্যানেল ট্যাব */}
+        {activeTab === 'admin' && (
+          <div>
+            {!isAdminLoggedIn ? (
+              <div className="bg-white rounded-xl p-6 shadow-sm max-w-sm mx-auto text-center space-y-4 mt-10">
+                <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-lg font-bold">
+                  🔒
+                </div>
+                <h2 className="text-sm font-bold text-gray-800">অ্যাডমিন সিক্রেট পিন দিন</h2>
+                <p className="text-xs text-gray-500">অনুমোদিত ব্যক্তি ছাড়া কেউ এখানে প্রবেশ করতে পারবে না।</p>
+                <form onSubmit={handleAdminLogin} className="space-y-3">
+                  <input 
+                    type="password" 
+                    value={adminPin} 
+                    onChange={(e) => setAdminPin(e.target.value)}
+                    placeholder="পিন কোড দিন (যেমন: 1234)" 
+                    className="w-full border p-2.5 rounded-lg text-xs text-center outline-none focus:border-red-500 font-bold tracking-widest" 
+                    required 
+                  />
+                  <button type="submit" className="w-full bg-red-600 text-white py-2.5 rounded-lg text-xs font-bold shadow hover:bg-red-700">
+                    লগইন করুন
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-red-500 text-white p-4 rounded-xl shadow flex justify-between items-center">
+                  <div>
+                    <h2 className="text-base font-bold">⚙ অ্যাডমিন কন্ট্রোল প্যানেল</h2>
+                    <p className="text-xs opacity-90 mt-1">সব অর্ডার ও পণ্য ম্যানেজ করুন।</p>
+                  </div>
+                  <button 
+                    onClick={() => setIsAdminLoggedIn(false)} 
+                    className="bg-white text-red-600 px-3 py-1 rounded text-xs font-bold">
+                    লগআউট
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
+                  <h3 className="text-sm font-bold text-gray-800 border-b pb-2">📦 কাস্টমারদের অর্ডার ({orders.length})</h3>
+                  {orders.map((ord) => (
+                    <div key={ord.id} className="bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs space-y-1">
+                      <div className="flex justify-between font-bold text-gray-800">
+                        <span>{ord.id}</span>
+                        <span className="text-red-600">৳ {ord.total}</span>
+                      </div>
+                      <p className="text-gray-600"><strong>গ্রাহক:</strong> {ord.customerName} ({ord.phone})</p>
+                      <p className="text-gray-600"><strong>পেমেন্ট মাধ্যম:</strong> {ord.paymentMethod}</p>
                     </div>
                   ))}
-                  <div className="flex justify-between items-center pt-2 border-t text-xs">
-                    <span className="text-gray-500">পেমেন্ট: {ord.paymentMethod}</span>
-                    <span className="font-bold text-orange-600">মোট: ৳ {ord.total}</span>
-                  </div>
                 </div>
-              ))
+
+                <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <h3 className="text-sm font-bold text-gray-800 mb-3 border-b pb-2">➕ নতুন পণ্য যোগ করুন</h3>
+                  <form onSubmit={handleAddProduct} className="space-y-3 text-xs">
+                    <div>
+                      <label className="text-gray-600 font-medium">পণ্যের নাম</label>
+                      <input 
+                        type="text" 
+                        value={newProdName} 
+                        onChange={(e) => setNewProdName(e.target.value)}
+                        placeholder="পণ্যের নাম লিখুন" 
+                        className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
+                        required 
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-600 font-medium">দাম (টাকা)</label>
+                      <input 
+                        type="number" 
+                        value={newProdPrice} 
+                        onChange={(e) => setNewProdPrice(e.target.value)}
+                        placeholder="মূল্য দিন" 
+                        className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
+                        required 
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-600 font-medium">গ্যালারি থেকে ছবি সিলেক্ট করুন</label>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="w-full border p-2 rounded-lg mt-1 text-xs bg-gray-50 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" 
+                      />
+                    </div>
+                    {newProdImg && (
+                      <div className="mt-2">
+                        <p className="text-[10px] text-emerald-600 font-bold">✓ ছবি সফলভাবে সিলেক্ট হয়েছে</p>
+                        <img src={newProdImg} alt="Preview" className="h-16 w-16 object-cover rounded mt-1 border" />
+                      </div>
+                    )}
+                    <button type="submit" className="w-full bg-red-600 text-white py-2.5 rounded-lg font-bold hover:bg-red-700">
+                      পণ্য পাবলিশ করুন
+                    </button>
+                  </form>
+                </div>
+              </div>
             )}
           </div>
         )}
 
-        {/* ⚙️ আসল অ্যাডমিন প্যানেল ট্যাব */}
-        {activeTab === 'admin' && (
-          <div className="space-y-4">
-            <div className="bg-red-500 text-white p-4 rounded-xl shadow">
-              <h2 className="text-base font-bold">⚙️ অ্যাডমিন কন্ট্রোল প্যানেল</h2>
-              <p className="text-xs opacity-90 mt-1">এখান থেকে আপনি কাস্টমারদের সব অর্ডার দেখতে পারবেন এবং নতুন পণ্য যোগ করতে পারবেন।</p>
-            </div>
-
-            {/* কাস্টমারদের অর্ডার তালিকা */}
-            <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
-              <h3 className="text-sm font-bold text-gray-800 border-b pb-2">📦 কাস্টমারদের সমস্ত অর্ডার ({orders.length})</h3>
-              {orders.map((ord) => (
-                <div key={ord.id} className="bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs space-y-1">
-                  <div className="flex justify-between font-bold text-gray-800">
-                    <span>{ord.id}</span>
-                    <span className="text-red-600">৳ {ord.total}</span>
-                  </div>
-                  <p className="text-gray-600"><strong>গ্রাহক:</strong> {ord.customerName} ({ord.phone})</p>
-                  <p className="text-gray-600"><strong>পেমেন্ট মাধ্যম:</strong> {ord.paymentMethod}</p>
-                  <p className="text-gray-600"><strong>তারিখ:</strong> {ord.date}</p>
-                  <div className="pt-1 border-t mt-1">
-                    <span className="font-semibold text-gray-700">পণ্য: </span>
-                    {ord.items.map((it, idx) => (
-                      <span key={idx} className="text-orange-600 font-medium">{it.name}, </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* নতুন পণ্য যোগ করার ফর্ম */}
-            <div className="bg-white rounded-xl p-4 shadow-sm">
-              <h3 className="text-sm font-bold text-gray-800 mb-3 border-b pb-2">➕ নতুন পণ্য যোগ করুন</h3>
-              <form onSubmit={handleAddProduct} className="space-y-3 text-xs">
-                <div>
-                  <label className="text-gray-600 font-medium">পণ্যের নাম</label>
-                  <input 
-                    type="text" 
-                    value={newProdName} 
-                    onChange={(e) => setNewProdName(e.target.value)}
-                    placeholder="পণ্যের নাম লিখুন" 
-                    className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 font-medium">দাম (টাকা)</label>
-                  <input 
-                    type="number" 
-                    value={newProdPrice} 
-                    onChange={(e) => setNewProdPrice(e.target.value)}
-                    placeholder="মূল্য দিন" 
-                    className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 font-medium">ছবির লিংক (Image URL)</label>
-                  <input 
-                    type="text" 
-                    value={newProdImg} 
-                    onChange={(e) => setNewProdImg(e.target.value)}
-                    placeholder="https://... ছবির লিংক দিন" 
-                    className="w-full border p-2 rounded-lg mt-1 outline-none focus:border-orange-500" 
-                  />
-                </div>
-                <button type="submit" className="w-full bg-red-600 text-white py-2.5 rounded-lg font-bold hover:bg-red-700">
-                  পণ্য পাবলিশ করুন
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* প্রোফাইল ট্যাব */}
         {activeTab === 'account' && (
           <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
             <div className="flex items-center space-x-3 border-b pb-3">
@@ -316,7 +357,7 @@ export default function App() {
               </div>
               <div>
                 <h3 className="font-bold text-sm text-gray-800">Fida Al Sani</h3>
-                <p className="text-xs text-gray-500">sannysayy008 (Admin)</p>
+                <p className="text-xs text-gray-500">sannysayy008</p>
               </div>
             </div>
             <div className="text-xs space-y-2 text-gray-700">
@@ -327,7 +368,6 @@ export default function App() {
         )}
       </main>
 
-      {/* নেভিগেশন বার */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 shadow-lg z-50 max-w-lg mx-auto">
         <button onClick={() => setActiveTab('shop')} className={`text-xs ${activeTab === 'shop' ? 'text-orange-500 font-bold' : 'text-gray-500'}`}>
           🏠 হোম
@@ -347,5 +387,4 @@ export default function App() {
       </nav>
     </div>
   );
-              }
-              
+                }
