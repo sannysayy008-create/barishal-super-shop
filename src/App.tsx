@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export function App() {
+export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
   const [userPhone, setUserPhone] = useState('');
