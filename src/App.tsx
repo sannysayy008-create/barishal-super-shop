@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 export function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>('');
-  const [userPhone, setUserPhone] = useState<string>('');
-  const [language, setLanguage] = useState<'bn' | 'en'>('bn');
-  const [showProfile, setShowProfile] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userPhone, setUserPhone] = useState('');
+  const [language, setLanguage] = useState('bn');
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('barishal_shop_user');
@@ -23,7 +23,7 @@ export function App() {
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e: any) => {
     e.preventDefault();
     if (userName.trim() && userPhone.trim()) {
       const userData = { name: userName, phone: userPhone };
@@ -40,7 +40,7 @@ export function App() {
     setShowProfile(false);
   };
 
-  const t = {
+  const t: any = {
     bn: {
       welcome: "বরিশাল সুপার শপে স্বাগতম!",
       subtitle: "কেনাকাটা করতে আপনার নাম ও মোবাইল নম্বর দিয়ে প্রবেশ করুন",
@@ -67,18 +67,20 @@ export function App() {
     }
   };
 
+  const currentT = t[language];
+
   return (
     <div className="min-h-screen bg-[#F9F9F8] text-[#18101B]">
       {!isLoggedIn && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-orange-100">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-[#D94E28]">{t[language].welcome}</h2>
-              <p className="text-sm text-gray-600 mt-1">{t[language].subtitle}</p>
+              <h2 className="text-2xl font-bold text-[#D94E28]">{currentT.welcome}</h2>
+              <p className="text-sm text-gray-600 mt-1">{currentT.subtitle}</p>
             </div>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">{t[language].nameLabel}</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{currentT.nameLabel}</label>
                 <input 
                   type="text" 
                   required
@@ -89,7 +91,7 @@ export function App() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">{t[language].phoneLabel}</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{currentT.phoneLabel}</label>
                 <input 
                   type="tel" 
                   required
@@ -103,7 +105,7 @@ export function App() {
                 type="submit"
                 className="w-full bg-[#D94E28] hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
               >
-                {t[language].loginBtn}
+                {currentT.loginBtn}
               </button>
             </form>
           </div>
@@ -112,11 +114,11 @@ export function App() {
 
       <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3 text-center shadow-md flex items-center justify-center space-x-2">
         <span className="animate-bounce">📢</span>
-        <p className="text-sm font-semibold">{t[language].offer}</p>
+        <p className="text-sm font-semibold">{currentT.offer}</p>
       </div>
 
       <header className="p-4 bg-white shadow-sm flex justify-between items-center sticky top-0 z-40">
-        <h1 className="text-xl font-bold text-[#D94E28]">{t[language].shopTitle}</h1>
+        <h1 className="text-xl font-bold text-[#D94E28]">{currentT.shopTitle}</h1>
         
         <div className="flex items-center space-x-3">
           <button 
@@ -153,13 +155,13 @@ export function App() {
                 onClick={handleLogout}
                 className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl transition-all text-sm"
               >
-                {t[language].logout}
+                {currentT.logout}
               </button>
               <button 
                 onClick={() => setShowProfile(false)}
                 className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl transition-all text-sm"
               >
-                {t[language].close}
+                {currentT.close}
               </button>
             </div>
           </div>
@@ -171,4 +173,4 @@ export function App() {
       </main>
     </div>
   );
-            }
+}
