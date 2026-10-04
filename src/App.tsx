@@ -9,6 +9,12 @@ export default function App() {
   const [cart, setCart] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Checkout Modal State
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [shippingName, setShippingName] = useState('');
+  const [shippingPhone, setShippingPhone] = useState('');
+  const [shippingAddress, setShippingAddress] = useState('');
+  
   const [allProducts, setAllProducts] = useState([
     { id: 1, name: "বরিশালের গাওয়া ঘি", price: 1200, unit: "১ কেজি", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&q=80", seller: "সুপার শপ" },
     { id: 2, name: "সুন্দরবনের খাঁটি মধু", price: 750, unit: "৫০০ গ্রাম", image: "https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500&q=80", seller: "সুপার শপ" },
@@ -29,6 +35,8 @@ export default function App() {
         if (u?.name) {
           setUserName(u.name);
           setUserPhone(u.phone || '');
+          setShippingName(u.name);
+          setShippingPhone(u.phone || '');
           setIsLoggedIn(true);
         }
       } catch (e) { console.error(e); }
@@ -39,6 +47,8 @@ export default function App() {
     e.preventDefault();
     if (userName.trim() && userPhone.trim()) {
       localStorage.setItem('barishal_shop_user', JSON.stringify({ name: userName, phone: userPhone }));
+      setShippingName(userName);
+      setShippingPhone(userPhone);
       setIsLoggedIn(true);
     }
   };
@@ -79,33 +89,81 @@ export default function App() {
     setActiveTab('home');
   };
 
+  const handleFinalOrder = (e: any) => {
+    e.preventDefault();
+    alert(lang === 'bn' ? 'ধন্যবাদ! আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে।' : 'Thank you! Your order has been placed successfully.');
+    setCart([]);
+    setShowCheckout(false);
+  };
+
+  const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
   return (
     <div className="min-h-screen bg-gray-100 pb-24 text-gray-800">
+      {/* Registration / Login Modal */}
       {!isLoggedIn && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-extrabold text-orange-600">
-                {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
+                {lang === 'bn' ? 'বরিশাল সুপার শপ - রেজিস্ট্রেশন' : 'Barishal Super Shop - Register'}
               </h2>
               <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-600">
                 {lang === 'bn' ? 'English 🌐' : 'বাংলা 🌐'}
               </button>
             </div>
-            <p className="text-xs text-gray-500 mb-4">
-              {lang === 'bn' ? 'দয়া করে আপনার নাম ও মোবাইল নম্বর দিয়ে প্রবেশ করুন' : 'Please enter your name & phone number'}
+            <p className="text-xs text-gray-500">
+              {lang === 'bn' ? 'অ্যাপ ব্যবহার করতে আপনার নাম ও মোবাইল নম্বর দিয়ে রেজিস্টার বা লগইন করুন:' : 'Please register/login with your name and phone number:'}
             </p>
             <form onSubmit={handleLogin} className="space-y-3">
-              <input type="text" required placeholder={lang === 'bn' ? "আপনার নাম" : "Your Name"} value={userName} onChange={e => setUserName(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50" />
-              <input type="tel" required placeholder={lang === 'bn' ? "মোবাইল নম্বর" : "Phone Number"} value={userPhone} onChange={e => setUserPhone(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50" />
+              <input type="text" required placeholder={lang === 'bn' ? "আপনার নাম লিখুন" : "Enter your name"} value={userName} onChange={e => setUserName(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50" />
+              <input type="tel" required placeholder={lang === 'bn' ? "মোবাইল নম্বর দিন" : "Enter phone number"} value={userPhone} onChange={e => setUserPhone(e.target.value)} className="w-full p-3.5 border rounded-2xl text-sm bg-gray-50" />
               <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white p-3.5 rounded-2xl font-bold text-sm shadow-lg">
-                {lang === 'bn' ? 'প্রবেশ করুন' : 'Login'}
+                {lang === 'bn' ? 'প্রবেশ করুন (Login/Register)' : 'Enter Shop'}
               </button>
             </form>
           </div>
         </div>
       )}
 
+      {/* Checkout Modal */}
+      {showCheckout && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b pb-3">
+              <h3 className="font-extrabold text-sm text-orange-600">
+                📝 {lang === 'bn' ? 'অর্ডার ফরম (Checkout)' : 'Order Checkout'}
+              </h3>
+              <button onClick={() => setShowCheckout(false)} className="text-gray-400 font-bold text-base">✕</button>
+            </div>
+
+            <div className="bg-orange-50 p-3 rounded-2xl text-xs space-y-1">
+              <p className="font-bold text-orange-800">মোট প্রদেয় টাকা: ৳ {totalPrice}</p>
+              <p className="text-gray-500">পণ্যের সংখ্যা: {cart.reduce((a, c) => a + c.qty, 0)} টি</p>
+            </div>
+
+            <form onSubmit={handleFinalOrder} className="space-y-3 text-xs">
+              <div>
+                <label className="text-gray-500 font-bold">{lang === 'bn' ? 'গ্রাহকের নাম' : 'Customer Name'}</label>
+                <input type="text" required value={shippingName} onChange={e => setShippingName(e.target.value)} className="w-full p-3 mt-1 border rounded-xl bg-gray-50" />
+              </div>
+              <div>
+                <label className="text-gray-500 font-bold">{lang === 'bn' ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
+                <input type="tel" required value={shippingPhone} onChange={e => setUserPhone(e.target.value)} className="w-full p-3 mt-1 border rounded-xl bg-gray-50" />
+              </div>
+              <div>
+                <label className="text-gray-500 font-bold">{lang === 'bn' ? 'ডেলিভারি ঠিকানা' : 'Delivery Address'}</label>
+                <textarea required rows={3} placeholder={lang === 'bn' ? "যেমন: সদর রোড, বরিশাল" : "e.g., Sadar Road, Barishal"} value={shippingAddress} onChange={e => setShippingAddress(e.target.value)} className="w-full p-3 mt-1 border rounded-xl bg-gray-50" />
+              </div>
+              <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 rounded-2xl font-bold shadow-md">
+                {lang === 'bn' ? 'অর্ডার কনফার্ম করুন' : 'Confirm Order Now'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
       <header className="bg-orange-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
         <div className="font-extrabold text-base tracking-wide">
           🛍️ {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
@@ -120,6 +178,7 @@ export default function App() {
         </div>
       </header>
 
+      {/* Main Container */}
       <main className="p-4 max-w-md mx-auto space-y-4">
         {activeTab === 'home' && (
           <div className="space-y-3">
@@ -181,16 +240,22 @@ export default function App() {
           <div className="bg-white p-4 rounded-3xl shadow-sm space-y-3">
             <h3 className="font-extrabold text-sm border-b pb-2">🛒 {lang === 'bn' ? 'আপনার কার্ট' : 'Your Cart'}</h3>
             {cart.length === 0 ? <p className="text-xs text-gray-400 text-center py-10">{lang === 'bn' ? 'আপনার কার্ট খালি!' : 'Cart is empty!'}</p> : (
-              cart.map(i => (
-                <div key={i.id} className="flex justify-between items-center text-xs border-b pb-2">
-                  <span>{i.name} (x{i.qty})</span>
-                  <span className="font-bold text-orange-600">৳ {i.price * i.qty}</span>
+              <>
+                {cart.map(i => (
+                  <div key={i.id} className="flex justify-between items-center text-xs border-b pb-2">
+                    <span>{i.name} (x{i.qty})</span>
+                    <span className="font-bold text-orange-600">৳ {i.price * i.qty}</span>
+                  </div>
+                ))}
+                <div className="pt-2 flex justify-between font-bold text-xs">
+                  <span>মোট:</span>
+                  <span className="text-orange-600">৳ {totalPrice}</span>
                 </div>
-              ))
+              </>
             )}
             {cart.length > 0 && (
-              <button onClick={() => { alert(lang === 'bn' ? 'অর্ডার সফলভাবে কনফার্ম হয়েছে!' : 'Order confirmed successfully!'); setCart([]); }} className="w-full bg-orange-600 text-white py-3 rounded-2xl font-bold text-xs shadow-md">
-                {lang === 'bn' ? 'অর্ডার কনফার্ম করুন' : 'Confirm Order'}
+              <button onClick={() => setShowCheckout(true)} className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-2xl font-bold text-xs shadow-md">
+                {lang === 'bn' ? 'অর্ডার ফরম পূরণ করুন' : 'Proceed to Checkout'}
               </button>
             )}
           </div>
@@ -199,8 +264,8 @@ export default function App() {
         {activeTab === 'admin' && (
           <div className="bg-white p-5 rounded-3xl shadow-sm space-y-4 text-xs">
             <div className="border-b pb-3">
-              <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'এডমিন ও অ্যাকাউন্ট প্যানেল' : 'Admin & Account Panel'}</h3>
-              <p className="text-gray-400 text-[10px] mt-1">Role: Administrator</p>
+              <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট ও রেজিস্ট্রেশন প্যানেল' : 'Account & Registration Panel'}</h3>
+              <p className="text-gray-400 text-[10px] mt-1">Logged in user session active</p>
             </div>
             <div className="space-y-2 bg-gray-50 p-3 rounded-2xl">
               <p><strong className="text-gray-500">{lang === 'bn' ? 'নাম:' : 'Name:'}</strong> {userName || 'N/A'}</p>
@@ -211,13 +276,14 @@ export default function App() {
                 📢 {lang === 'bn' ? 'বিজ্ঞাপন দিন' : 'Post Ad'}
               </button>
               <button onClick={handleLogout} className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl border border-red-100">
-                🚪 {lang === 'bn' ? 'লগআউট করুন' : 'Logout'}
+                🚪 {lang === 'bn' ? 'লগআউট / অ্যাকাউন্ট পরিবর্তন' : 'Logout / Switch Account'}
               </button>
             </div>
           </div>
         )}
       </main>
 
+      {/* Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-3 z-40 text-xs shadow-2xl">
         <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center ${activeTab === 'home' ? 'text-orange-600 font-bold' : 'text-gray-400'}`}>
           <span className="text-base">🏠</span><span className="text-[10px]">{lang === 'bn' ? 'হোম' : 'Home'}</span>
@@ -230,9 +296,10 @@ export default function App() {
           <span className="text-[10px]">{lang === 'bn' ? 'কার্ট' : 'Cart'} ({cart.reduce((a, c) => a + c.qty, 0)})</span>
         </button>
         <button onClick={() => setActiveTab('admin')} className={`flex flex-col items-center ${activeTab === 'admin' ? 'text-orange-600 font-bold' : 'text-gray-400'}`}>
-          <span className="text-base">⚙️</span><span className="text-[10px]">{lang === 'bn' ? 'এডমিন' : 'Admin'}</span>
+          <span className="text-base">⚙️</span><span className="text-[10px]">{lang === 'bn' ? 'অ্যাকাউন্ট' : 'Account'}</span>
         </button>
       </nav>
     </div>
   );
-                  }
+  }
+        
