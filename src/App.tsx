@@ -1,4 +1,4 @@
-import React, { useState } from 'interface' in window ? {} : useState;
+import React, { useState } from 'react';
 
 interface Product {
   id: number;
@@ -43,7 +43,7 @@ export default function App() {
   const [sellerProdPrice, setSellerProdPrice] = useState('');
   const [sellerProdImg, setSellerProdImg] = useState('');
 
-  // পণ্যের তালিকা (শুধুমাত্র Approved পণ্যগুলো শপে দেখাবে)
+  // পণ্যের তালিকা
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
@@ -77,7 +77,6 @@ export default function App() {
     }
   ]);
 
-  // অ্যাডমিন প্যানেলের নতুন পণ্য আপলোড স্টেট
   const [newProdName, setNewProdName] = useState('');
   const [newProdPrice, setNewProdPrice] = useState('');
   const [newProdImg, setNewProdImg] = useState('');
@@ -108,7 +107,6 @@ export default function App() {
     }
   };
 
-  // বিক্রেতার পণ্য জমা দেওয়ার ফাংশন (যা Pending থাকবে)
   const handleSellerSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!sellerShopName || !sellerPhone || !sellerProdName || !sellerProdPrice) {
@@ -122,24 +120,22 @@ export default function App() {
       price: Number(sellerProdPrice),
       img: sellerProdImg || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
       sellerName: `${sellerShopName} (${sellerPhone})`,
-      status: 'Pending' // অ্যাডমিন অ্যাপ্রুভ না করা পর্যন্ত Pending থাকবে
+      status: 'Pending'
     };
 
     setProducts([newProduct, ...products]);
     setSellerProdName('');
     setSellerProdPrice('');
     setSellerProdImg('');
-    alert('আপনার বিজ্ঞাপন সফলভাবে সাবমিট হয়েছে! অ্যাডমিন অনুমোদন করার পর এটি শপে দেখা যাবে।');
+    alert('বিজ্ঞাপন সফলভাবে সাবমিট হয়েছে! অ্যাডমিন অনুমোদন করার পর এটি শপে দেখা যাবে।');
     setActiveTab('shop');
   };
 
-  // অ্যাডমিন কর্তৃক পণ্য অ্যাপ্রুভ করার ফাংশন
   const handleApproveProduct = (id: number) => {
     setProducts(products.map(p => p.id === id ? { ...p, status: 'Approved' } : p));
-    alert('পণ্যটি সফলভাবে অ্যাপ্রুভ করা হয়েছে এবং এখন শপে লাইভ আছে!');
+    alert('পণ্যটি সফলভাবে অ্যাপ্রুভ করা হয়েছে!');
   };
 
-  // অ্যাডমিন কর্তৃক পণ্য ডিলিট করার ফাংশন
   const handleDeleteProduct = (id: number) => {
     setProducts(products.filter(p => p.id !== id));
     alert('পণ্যটি মুছে ফেলা হয়েছে!');
@@ -214,7 +210,7 @@ export default function App() {
           </div>
           <h1 className="text-base font-bold">Barishal Super Shop</h1>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-1.5">
           <button 
             onClick={() => setActiveTab('seller')} 
             className="text-xs bg-amber-600 text-white px-2 py-1 rounded-md font-bold shadow">
@@ -229,7 +225,6 @@ export default function App() {
       </header>
 
       <main className="p-4 max-w-lg mx-auto">
-        {/* হোম শপ: শুধুমাত্র Approved পণ্য দেখাবে */}
         {activeTab === 'shop' && (
           <div>
             <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-4 text-white shadow mb-4">
@@ -269,7 +264,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 📢 বিক্রেতা বিজ্ঞাপন পোস্ট করার ফর্ম */}
         {activeTab === 'seller' && (
           <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
             <div className="bg-amber-500 text-white p-3 rounded-xl shadow-sm text-center">
@@ -344,7 +338,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 🛒 কার্ট ও অর্ডার ফর্ম */}
         {activeTab === 'cart' && (
           <div className="space-y-4">
             <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
@@ -465,7 +458,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 🔒 সুরক্ষিত অ্যাডমিন প্যানেল (যেখানে বিক্রেতাদের পোস্ট অ্যাপ্রুভ করা যাবে) */}
         {activeTab === 'admin' && (
           <div>
             {!isAdminLoggedIn ? (
@@ -480,4 +472,15 @@ export default function App() {
                     type="password" 
                     value={adminPin} 
                     onChange={(e) => setAdminPin(e.target.value)}
-                    placeho
+                    placeholder="পিন কোড দিন (1234)" 
+                    className="w-full border p-2.5 rounded-lg text-xs text-center outline-none focus:border-red-500 font-bold tracking-widest" 
+                    required 
+                  />
+                  <button type="submit" className="w-full bg-red-600 text-white py-2.5 rounded-lg text-xs font-bold shadow hover:bg-red-700">
+                    লগইন করুন
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-red-500 text-wh
