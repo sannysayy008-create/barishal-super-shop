@@ -82,7 +82,7 @@ export default function App() {
       }
       return [...prev, { ...product, qty: 1 }];
     });
-    alert('পণ্যটি কার્টে যোগ করা হয়েছে!');
+    alert('পণ্যটি কার্টে যোগ করা হয়েছে!');
   };
 
   const updateQty = (id: number, delta: number) => {
