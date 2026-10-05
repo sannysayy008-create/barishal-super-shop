@@ -60,15 +60,23 @@ export default function App() {
   };
 
   const handleDownloadApp = () => {
-    // এখানে আপনার APK ফাইলের ডাইরেক্ট ডাউনলোড লিংক বসিয়ে দিন
-    const apkUrl = 'https://your-domain.com/path-to-your-app.apk'; 
-    
+    // সরাসরি ডাউনলোড ট্রিগার করার জন্য একটি টেক্সট ফাইল বা শর্টকাট ফাইল জেনারেট করে ডাউনলোড শুরু হবে
+    const appInfo = `Barishal Super Shop App\nURL: ${window.location.href}\nInstall this web app on your phone for easy access!`;
+    const blob = new Blob([appInfo], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = apkUrl;
-    link.download = 'BarishalSuperShop.apk';
+    link.href = url;
+    link.download = 'Barishal_Super_Shop.txt';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    alert(
+      lang === 'bn' 
+        ? '📥 ডাউনলোড শুরু হয়েছে! ফাইলটি ওপেন করে বা আপনার ব্রাউজার থেকে সরাসরি অ্যাপটি ইনস্টল করে নিন।' 
+        : '📥 Download started! Open the file or install the app directly from your browser.'
+    );
   };
 
   const addToCart = (p: any) => {
@@ -158,7 +166,7 @@ export default function App() {
               </div>
               <div>
                 <label className="text-gray-500 font-bold">{lang === 'bn' ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
-                <input type="tel" required value={shippingPhone} onChange={e => setShippingPhone(e.target.value)} className="w-full p-3 mt-1 border rounded-xl bg-gray-50" />
+                <input type="tel" required value={shippingPhone} onChange={e => setUserPhone(e.target.value)} className="w-full p-3 mt-1 border rounded-xl bg-gray-50" />
               </div>
               <div>
                 <label className="text-gray-500 font-bold">{lang === 'bn' ? 'ডেলিভারি ঠিকানা' : 'Delivery Address'}</label>
@@ -310,5 +318,5 @@ export default function App() {
       </nav>
     </div>
   );
-          }
-            
+    }
+                                  
