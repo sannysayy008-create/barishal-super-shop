@@ -59,10 +59,12 @@ export default function App() {
     setUserPhone('');
   };
 
-  // সরাসরি APK ফাইল ডাউনলোডের লিংক
   const handleDownloadApp = () => {
-    const apkUrl = "https://yourdomain.com/barishal-super-shop.apk"; // এখানে আপনার আসল এপিকে ফাইলের ডাইরেক্ট লিংক বসিয়ে দেবেন
-    window.location.href = apkUrl;
+    alert(
+      lang === 'bn' 
+        ? 'আমাদের অ্যান্ড্রয়েড অ্যাপটি খুব শীঘ্রই আসছে এবং প্লে স্টোরে পাবলিশ হবে! ততক্ষণে আপনি এই ব্রাউজারের মাধ্যমেই সমস্ত কেনাকাটা ও ফিচার ব্যবহার করতে পারবেন।' 
+        : 'Our Android app is coming soon and will be published on Play Store! Meanwhile, you can use all features right here in the browser.'
+    );
   };
 
   const addToCart = (p: any) => {
@@ -269,7 +271,7 @@ export default function App() {
         {activeTab === 'admin' && (
           <div className="bg-white p-5 rounded-3xl shadow-sm space-y-4 text-xs">
             <div className="border-b pb-3">
-              <h3 className="font-extrabold text-sm text-orange-600">⚙️️ {lang === 'bn' ? 'অ্যাকাউন্ট প্যানেল' : 'Account Panel'}</h3>
+              <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট প্যানেল' : 'Account Panel'}</h3>
               <p className="text-gray-400 text-[10px] mt-1">Active User Session</p>
             </div>
             <div className="space-y-2 bg-gray-50 p-3 rounded-2xl">
@@ -305,5 +307,5 @@ export default function App() {
       </nav>
     </div>
   );
-          }
-              
+                  }
+      
