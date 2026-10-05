@@ -60,11 +60,15 @@ export default function App() {
   };
 
   const handleDownloadApp = () => {
-    alert(
-      lang === 'bn' 
-        ? 'আমাদের অ্যান্ড্রয়েড অ্যাপটি খুব শীঘ্রই আসছে এবং প্লে স্টোরে পাবলিশ হবে! ততক্ষণে আপনি এই ব্রাউজারের মাধ্যমেই সমস্ত কেনাকাটা ও ফিচার ব্যবহার করতে পারবেন।' 
-        : 'Our Android app is coming soon and will be published on Play Store! Meanwhile, you can use all features right here in the browser.'
-    );
+    // এখানে আপনার APK ফাইলের ডাইরেক্ট ডাউনলোড লিংক বসিয়ে দিন
+    const apkUrl = 'https://your-domain.com/path-to-your-app.apk'; 
+    
+    const link = document.createElement('a');
+    link.href = apkUrl;
+    link.download = 'BarishalSuperShop.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const addToCart = (p: any) => {
@@ -154,7 +158,7 @@ export default function App() {
               </div>
               <div>
                 <label className="text-gray-500 font-bold">{lang === 'bn' ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
-                <input type="tel" required value={shippingPhone} onChange={e => setUserPhone(e.target.value)} className="w-full p-3 mt-1 border rounded-xl bg-gray-50" />
+                <input type="tel" required value={shippingPhone} onChange={e => setShippingPhone(e.target.value)} className="w-full p-3 mt-1 border rounded-xl bg-gray-50" />
               </div>
               <div>
                 <label className="text-gray-500 font-bold">{lang === 'bn' ? 'ডেলিভারি ঠিকানা' : 'Delivery Address'}</label>
@@ -168,7 +172,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Header with Download Button */}
       <header className="bg-orange-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
         <div className="font-extrabold text-sm tracking-wide flex items-center gap-2">
           🛍️ {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
@@ -307,5 +310,5 @@ export default function App() {
       </nav>
     </div>
   );
-                    }
-          
+          }
+            
