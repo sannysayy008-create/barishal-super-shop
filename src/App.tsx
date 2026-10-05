@@ -60,23 +60,14 @@ export default function App() {
   };
 
   const handleDownloadApp = () => {
-    // সরাসরি ডাউনলোড ট্রিগার করার জন্য একটি টেক্সট ফাইল বা শর্টকাট ফাইল জেনারেট করে ডাউনলোড শুরু হবে
-    const appInfo = `Barishal Super Shop App\nURL: ${window.location.href}\nInstall this web app on your phone for easy access!`;
-    const blob = new Blob([appInfo], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
+    // আপনার ক্লাউডফ্লেয়ার ডোমেইনের সাথে APK ডাউনলোড লিংক যুক্ত করা হয়েছে
+    const apkUrl = "https://barishal-super-shop-v2.sannysayy008.workers.dev/barishal-shop.apk"; 
     const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Barishal_Super_Shop.txt';
+    link.href = apkUrl;
+    link.download = "Barishal_Shop.apk";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    alert(
-      lang === 'bn' 
-        ? '📥 ডাউনলোড শুরু হয়েছে! ফাইলটি ওপেন করে বা আপনার ব্রাউজার থেকে সরাসরি অ্যাপটি ইনস্টল করে নিন।' 
-        : '📥 Download started! Open the file or install the app directly from your browser.'
-    );
   };
 
   const addToCart = (p: any) => {
@@ -185,8 +176,8 @@ export default function App() {
           🛍️ {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleDownloadApp} className="text-[11px] bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 shadow-xs">
-            📥 {lang === 'bn' ? 'ডাউনলোড' : 'Download'}
+          <button onClick={handleDownloadApp} className="text-[11px] bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 shadow-xs animate-pulse">
+            📥 {lang === 'bn' ? 'অ্যাপ ডাউনলোড' : 'Download App'}
           </button>
           <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="text-[11px] bg-orange-700 px-2 py-1 rounded-xl font-bold">
             {lang === 'bn' ? 'EN' : 'বাং'}
@@ -293,6 +284,9 @@ export default function App() {
               <button onClick={() => setActiveTab('post')} className="w-full bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold py-3 rounded-xl border border-orange-200">
                 📢 {lang === 'bn' ? 'বিজ্ঞাপন দিন' : 'Post Ad'}
               </button>
+              <button onClick={handleDownloadApp} className="w-full bg-green-50 hover:bg-green-100 text-green-600 font-bold py-3 rounded-xl border border-green-200">
+                📥 {lang === 'bn' ? 'অ্যাপ ডাউনলোড করুন' : 'Download APK'}
+              </button>
               <button onClick={handleLogout} className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl border border-red-100">
                 🚪 {lang === 'bn' ? 'লগআউট / অ্যাকাউন্ট পরিবর্তন' : 'Logout'}
               </button>
@@ -318,5 +312,5 @@ export default function App() {
       </nav>
     </div>
   );
-    }
-                                  
+                      }
+            
