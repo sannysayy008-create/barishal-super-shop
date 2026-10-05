@@ -8,6 +8,7 @@ export default function App() {
   const [lang, setLang] = useState<'bn' | 'en'>('bn');
   const [cart, setCart] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
   const [showCheckout, setShowCheckout] = useState(false);
   const [shippingName, setShippingName] = useState('');
@@ -40,6 +41,12 @@ export default function App() {
         }
       } catch (e) { console.error(e); }
     }
+
+    // ব্রাউজারের নিজস্ব অ্যাপ ইনস্টল ইভেন্ট ক্যাপচার করা
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    });
   }, []);
 
   const handleLogin = (e: any) => {
@@ -59,15 +66,20 @@ export default function App() {
     setUserPhone('');
   };
 
-  const handleDownloadApp = () => {
-    // আপনার ক্লাউডফ্লেয়ার ডোমেইনের সাথে APK ডাউনলোড লিংক যুক্ত করা হয়েছে
-    const apkUrl = "https://barishal-super-shop-v2.sannysayy008.workers.dev/barishal-shop.apk"; 
-    const link = document.createElement('a');
-    link.href = apkUrl;
-    link.download = "Barishal_Shop.apk";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      alert(
+        lang === 'bn' 
+          ? '📱 অ্যাপটি ইনস্টল করতে ব্রাউজারের ওপরের থ্রি-ডট (⋮) মেনু থেকে "Install app" বা "Add to Home screen" এ ক্লিক করুন।' 
+          : '📱 To install the app, click the three-dot (⋮) menu in your browser and select "Install app" or "Add to Home screen".'
+      );
+    }
   };
 
   const addToCart = (p: any) => {
@@ -177,7 +189,7 @@ export default function App() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={handleDownloadApp} className="text-[11px] bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 shadow-xs animate-pulse">
-            📥 {lang === 'bn' ? 'অ্যাপ ডাউনলোড' : 'Download App'}
+            📥 {lang === 'bn' ? 'অ্যাপ ইনস্টল' : 'Install App'}
           </button>
           <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="text-[11px] bg-orange-700 px-2 py-1 rounded-xl font-bold">
             {lang === 'bn' ? 'EN' : 'বাং'}
@@ -285,7 +297,7 @@ export default function App() {
                 📢 {lang === 'bn' ? 'বিজ্ঞাপন দিন' : 'Post Ad'}
               </button>
               <button onClick={handleDownloadApp} className="w-full bg-green-50 hover:bg-green-100 text-green-600 font-bold py-3 rounded-xl border border-green-200">
-                📥 {lang === 'bn' ? 'অ্যাপ ডাউনলোড করুন' : 'Download APK'}
+                📥 {lang === 'bn' ? 'অ্যাপ ইনস্টল করুন' : 'Install App'}
               </button>
               <button onClick={handleLogout} className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl border border-red-100">
                 🚪 {lang === 'bn' ? 'লগআউট / অ্যাকাউন্ট পরিবর্তন' : 'Logout'}
@@ -312,5 +324,5 @@ export default function App() {
       </nav>
     </div>
   );
-                      }
-            
+      }
+              
