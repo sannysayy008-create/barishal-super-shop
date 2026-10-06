@@ -28,7 +28,6 @@ export default function App() {
   const [newAdImage, setNewAdImage] = useState('');
 
   useEffect(() => {
-    // Check if app is installed in standalone mode
     if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
     }
@@ -65,17 +64,14 @@ export default function App() {
     setUserPhone('');
   };
 
+  // সরাসরি ডাউনলোড লিংক এখানে বসাতে পারেন (যেমন আপনার APK ফাইলের ডাইরেক্ট লিংক)
   const handleDownloadApp = () => {
-    // আপনার আসল APK ফাইল বা ডাউনলোডের লিংক এখানে বসাবেন
-    const apkUrl = ""; 
-    if (apkUrl) {
-      window.location.href = apkUrl;
+    const apkDownloadUrl = ""; // এখানে আপনার .apk ফাইলের লিংক দিতে পারেন, যেমন: 'https://example.com/app.apk'
+    if (apkDownloadUrl) {
+      window.location.href = apkDownloadUrl;
     } else {
-      alert(
-        lang === 'bn' 
-          ? 'আমাদের অ্যান্ড্রয়েড অ্যাপটি খুব শীঘ্রই আসছে এবং প্লে স্টোরে পাবলিশ হবে! ততক্ষণে আপনি এই ব্রাউজারের মাধ্যমেই সমস্ত কেনাকাটা ও ফিচার ব্যবহার করতে পারবেন।' 
-          : 'Our Android app is coming soon and will be published on Play Store! Meanwhile, you can use all features right here in the browser.'
-      );
+      // লিংক না থাকলে ব্রাউজার প্রম্পট বা পেজ রিলোড করবে
+      window.location.reload();
     }
   };
 
@@ -85,7 +81,6 @@ export default function App() {
       if (exist) return prev.map(i => i.id === p.id ? { ...i, qty: i.qty + 1 } : i);
       return [...prev, { ...p, qty: 1 }];
     });
-    alert(lang === 'bn' ? 'কার্টে যোগ করা হয়েছে!' : 'Added to cart!');
   };
 
   const handlePostAd = (e: any) => {
@@ -97,14 +92,13 @@ export default function App() {
       price: Number(newAdPrice),
       unit: newAdUnit || '১ পিস',
       image: newAdImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80',
-      seller: userName
+      seller: userName || 'সুপার শপ'
     };
     setAllProducts([newProduct, ...allProducts]);
     setNewAdTitle('');
     setNewAdPrice('');
     setNewAdUnit('');
     setNewAdImage('');
-    alert(lang === 'bn' ? 'বিজ্ঞাপন সফলভাবে পোস্ট হয়েছে!' : 'Ad posted successfully!');
     setActiveTab('home');
   };
 
@@ -119,7 +113,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24 text-gray-800">
-      {/* Login Modal: Shows if not logged in */}
+      {/* Login Modal */}
       {!isLoggedIn && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
@@ -145,6 +139,7 @@ export default function App() {
         </div>
       )}
 
+      {/* Checkout Modal */}
       {showCheckout && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -181,7 +176,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Header with Conditional Download Button */}
+      {/* Header */}
       <header className="bg-orange-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
         <div className="font-extrabold text-sm tracking-wide flex items-center gap-2">
           🛍️ {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
@@ -189,7 +184,7 @@ export default function App() {
         <div className="flex items-center gap-2">
           {!isInstalled && (
             <button onClick={handleDownloadApp} className="text-[11px] bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 shadow-xs">
-              📥 {lang === 'bn' ? 'অ্যাপ ইনস্টল' : 'Download'}
+              📥 {lang === 'bn' ? 'অ্যাপ ডাউনলোড' : 'Download'}
             </button>
           )}
           <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="text-[11px] bg-orange-700 px-2 py-1 rounded-xl font-bold">
@@ -201,6 +196,7 @@ export default function App() {
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="p-4 max-w-md mx-auto space-y-4">
         {activeTab === 'home' && (
           <div className="space-y-3">
@@ -305,6 +301,7 @@ export default function App() {
         )}
       </main>
 
+      {/* Bottom Nav */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-3 z-40 text-xs shadow-2xl">
         <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center ${activeTab === 'home' ? 'text-orange-600 font-bold' : 'text-gray-400'}`}>
           <span className="text-base">🏠</span><span className="text-[10px]">{lang === 'bn' ? 'হোম' : 'Home'}</span>
@@ -322,5 +319,5 @@ export default function App() {
       </nav>
     </div>
   );
-         }
-          
+}
+  
