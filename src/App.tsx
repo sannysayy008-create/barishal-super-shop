@@ -8,7 +8,7 @@ export default function App() {
   const [lang, setLang] = useState<'bn' | 'en'>('bn');
   const [cart, setCart] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
   
   const [showCheckout, setShowCheckout] = useState(false);
   const [shippingName, setShippingName] = useState('');
@@ -28,6 +28,11 @@ export default function App() {
   const [newAdImage, setNewAdImage] = useState('');
 
   useEffect(() => {
+    // Check if app is installed in standalone mode
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
+
     const saved = localStorage.getItem('barishal_shop_user');
     if (saved) {
       try {
@@ -41,12 +46,6 @@ export default function App() {
         }
       } catch (e) { console.error(e); }
     }
-
-    // ব্রাউজারের নিজস্ব অ্যাপ ইনস্টল ইভেন্ট ক্যাপচার করা
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    });
   }, []);
 
   const handleLogin = (e: any) => {
@@ -66,18 +65,16 @@ export default function App() {
     setUserPhone('');
   };
 
-  const handleDownloadApp = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
-      }
+  const handleDownloadApp = () => {
+    // আপনার আসল APK ফাইল বা ডাউনলোডের লিংক এখানে বসাবেন
+    const apkUrl = ""; 
+    if (apkUrl) {
+      window.location.href = apkUrl;
     } else {
       alert(
         lang === 'bn' 
-          ? '📱 অ্যাপটি ইনস্টল করতে ব্রাউজারের ওপরের থ্রি-ডট (⋮) মেনু থেকে "Install app" বা "Add to Home screen" এ ক্লিক করুন।' 
-          : '📱 To install the app, click the three-dot (⋮) menu in your browser and select "Install app" or "Add to Home screen".'
+          ? 'আমাদের অ্যান্ড্রয়েড অ্যাপটি খুব শীঘ্রই আসছে এবং প্লে স্টোরে পাবলিশ হবে! ততক্ষণে আপনি এই ব্রাউজারের মাধ্যমেই সমস্ত কেনাকাটা ও ফিচার ব্যবহার করতে পারবেন।' 
+          : 'Our Android app is coming soon and will be published on Play Store! Meanwhile, you can use all features right here in the browser.'
       );
     }
   };
@@ -122,6 +119,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24 text-gray-800">
+      {/* Login Modal: Shows if not logged in */}
       {!isLoggedIn && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
@@ -183,14 +181,17 @@ export default function App() {
         </div>
       )}
 
+      {/* Header with Conditional Download Button */}
       <header className="bg-orange-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
         <div className="font-extrabold text-sm tracking-wide flex items-center gap-2">
           🛍️ {lang === 'bn' ? 'বরিশাল সুপার শপ' : 'Barishal Super Shop'}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleDownloadApp} className="text-[11px] bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 shadow-xs animate-pulse">
-            📥 {lang === 'bn' ? 'অ্যাপ ইনস্টল' : 'Install App'}
-          </button>
+          {!isInstalled && (
+            <button onClick={handleDownloadApp} className="text-[11px] bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 shadow-xs">
+              📥 {lang === 'bn' ? 'অ্যাপ ইনস্টল' : 'Download'}
+            </button>
+          )}
           <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="text-[11px] bg-orange-700 px-2 py-1 rounded-xl font-bold">
             {lang === 'bn' ? 'EN' : 'বাং'}
           </button>
@@ -285,7 +286,7 @@ export default function App() {
         {activeTab === 'admin' && (
           <div className="bg-white p-5 rounded-3xl shadow-sm space-y-4 text-xs">
             <div className="border-b pb-3">
-              <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট প্যানেল' : 'Account Panel'}</h3>
+              <h3 className="font-extrabold text-sm text-orange-600">⚙️ {lang === 'bn' ? 'অ্যাকাউন্ট ও প্রোফাইল' : 'Account & Profile'}</h3>
               <p className="text-gray-400 text-[10px] mt-1">Active User Session</p>
             </div>
             <div className="space-y-2 bg-gray-50 p-3 rounded-2xl">
@@ -295,9 +296,6 @@ export default function App() {
             <div className="border-t pt-3 space-y-2">
               <button onClick={() => setActiveTab('post')} className="w-full bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold py-3 rounded-xl border border-orange-200">
                 📢 {lang === 'bn' ? 'বিজ্ঞাপন দিন' : 'Post Ad'}
-              </button>
-              <button onClick={handleDownloadApp} className="w-full bg-green-50 hover:bg-green-100 text-green-600 font-bold py-3 rounded-xl border border-green-200">
-                📥 {lang === 'bn' ? 'অ্যাপ ইনস্টল করুন' : 'Install App'}
               </button>
               <button onClick={handleLogout} className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl border border-red-100">
                 🚪 {lang === 'bn' ? 'লগআউট / অ্যাকাউন্ট পরিবর্তন' : 'Logout'}
@@ -324,5 +322,5 @@ export default function App() {
       </nav>
     </div>
   );
-      }
-              
+         }
+          
